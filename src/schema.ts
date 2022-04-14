@@ -1,14 +1,5 @@
-import { JsonRpcProvider } from "@ethersproject/providers";
-import { ethers } from "ethers";
-import { z } from "zod";
-import { ChainDefinitionSchema } from "./chains";
-import { PrincipalTokenAddress } from "./element-fi/schema";
-
-export const isAddress = (x: string): x is Address => ethers.utils.isAddress(x);
-
-export type Address = string & { readonly Address: unique symbol };
-
-export const AddressSchema = z.string().refine(isAddress);
+import { z } from 'zod'
+import { ChainDefinitionSchema } from './chains'
 
 // MACCCS MAX.eth.ts
 
@@ -17,28 +8,30 @@ export const AddressSchema = z.string().refine(isAddress);
 // Only assumes every chain is evm compat
 // For frontends to consume
 
-// {
-//     mainnet: {
-//         chainDef: { ... }
-//         element: {
-//             core: {
-//                 principalTokenAddresses: PrincipalTokenAddress[]
-//                 principalToken: {
-//                     [PrincipalTokenAddress]: {
-//                         symbol,
-//                         pool,
-//                         underlying,
-//                         isCurveBased,
-//                         use: (provider: JsonRpcProvider) => ...
-//                     }
-//                 }
-//             }
-//             gov: GovSchema
-//         },
-//     }
-// }
+const x = {
+    mainnet: {
+        chainDef: { ... },
+        element: {
+            core: {
+                principalTokenInfo: {
+                principalTokenAddresses: PrincipalTokenAddress[],
+                  basic: {
+                    addresses: BasicPrincipalTokenAddress[],
+                    [BasicPrincipalTokenAddress]: {
+                        symbol,
+                        underlying,
+                    }
+                  },
+                  curvePrincipalTokenAddress: CurvePrincipalTokenAddress[],
+                  curve: {}
+
+                }
+            }
+        },
+    }
+}
 
 export const CcmacSpecSchema = z.record(
   ChainNameSchema,
-  ChainDefinitionSchema.extend()
-);
+  ChainDefinitionSchema.extend(),
+)

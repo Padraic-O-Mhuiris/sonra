@@ -7,9 +7,9 @@
     "module": "commonjs",
     "rootDir": "./",
     "moduleResolution": "node",
-    "baseUrl": "./",
+    "baseUrl": "./src",
     "resolveJsonModule": true,
-    "allowJs": false,
+    "allowJs": true,
     "sourceMap": true,
     "noEmit": true,
     "isolatedModules": true,
@@ -26,10 +26,9 @@
     "noImplicitReturns": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
     "allowUnreachableCode": false,
     "skipLibCheck": true
   },
-  "include": ["**/*.ts"],
+  "include": ["src"],
   "exclude": ["node_modules"]
 }
