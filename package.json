@@ -1,0 +1,8 @@
+{
+  "name": "sonra",
+  "version": "0.0.1",
+  "main": "src/index.ts",
+  "repository": "git@github.com:Padraic-O-Mhuiris/sonra.git",
+  "author": "Pádraic Ó Mhuiris <patrick.morris.310@gmail.com>",
+  "license": "MIT"
+}
