@@ -4,5 +4,8 @@
   "main": "src/index.ts",
   "repository": "git@github.com:Padraic-O-Mhuiris/sonra.git",
   "author": "Pádraic Ó Mhuiris <patrick.morris.310@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^4.6.3"
+  }
 }
