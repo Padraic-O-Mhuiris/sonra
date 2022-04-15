@@ -1,6 +1,6 @@
 import { Tranche__factory } from './elf-contracts'
 import { ethers } from 'ethers'
-import { Address, AddressSchema } from '../schema'
+import { Address, AddressSchema } from '../address'
 import { z } from 'zod'
 
 export type PrincipalTokenAddresses = Address[] & {
@@ -13,7 +13,7 @@ export type PrincipalTokenAddress = Address & {
 
 export type TrancheAddress = PrincipalTokenAddress
 
-export const isPrincipalTokenAddress = async (
+export const isPrincipalTokenAddress = (
   x: Address,
 ): x is PrincipalTokenAddress => ethers.utils.isAddress(x)
 
