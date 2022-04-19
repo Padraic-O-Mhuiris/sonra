@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { NativeCurrencyDefinitionSchema } from './currency'
+import { NativeCurrencyDefinitionSchema } from 'currency'
 
 export const ChainNameSchema = z.nativeEnum({
   MAINNET: 'mainnet',

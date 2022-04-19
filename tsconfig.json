@@ -5,9 +5,7 @@
     "incremental": true,
     "composite": true,
     "module": "commonjs",
-    "rootDir": "./",
     "moduleResolution": "node",
-    "baseUrl": "./src",
     "resolveJsonModule": true,
     "allowJs": true,
     "sourceMap": true,
@@ -27,7 +25,9 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "allowUnreachableCode": false,
+    "exactOptionalPropertyTypes": true,
     "skipLibCheck": true
   },
-  "include": ["src"]
+  "include": ["**/*.ts", "**/*.js", "**/.*.js", "scripts/.common.ts"],
+  "exclude": ["**/node_modules"]
 }
