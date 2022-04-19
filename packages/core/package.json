@@ -2,10 +2,18 @@
   "name": "@sonra/core",
   "version": "0.0.1",
   "description": "",
-  "main": "src/index.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.d.ts",
+  "types": "./dist/index.d.ts",
+  "files": ["dist/**/*"],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint --ext .ts src test",
+    "clean": "rm -rf dist && rm -f tsconfig.build.tsbuildinfo",
+    "post-build": "echo \"Build Finished\""
   },
-  "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "ethers": "^5.6.4",
+    "zod": "^3.14.4"
+  }
 }

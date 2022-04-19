@@ -6,8 +6,11 @@
   "engines": {
     "pnpm": ">=6.14.0"
   },
+  "workspaces": ["packages/**"],
   "scripts": {
-    "build": "tsc --build --verbose ./tsconfig.prod.json && pnpm run --parallel --filter ./packages build",
+    "postinstall": "pnpm build",
+    "lint": "pnpm run --parallel --aggregate-output --reporter append-only --filter ./packages lint",
+    "build": "tsc --build --verbose ./tsconfig.prod.json && pnpm run --parallel --filter ./packages post-build",
     "watch": "tsc --build --verbose --watch ./tsconfig.prod.json",
     "clean": "pnpm --filter ./packages clean"
   },
