@@ -1,6 +1,7 @@
-import { Tranche__factory } from './elf-contracts'
+import { Tranche__factory } from 'element-fi/elf-contracts'
 import { ethers } from 'ethers'
-import { Address, AddressSchema } from '../address'
+import { Address, AddressSchema } from 'address'
+import { GenericProjectSchema } from "schema"
 import { z } from 'zod'
 
 export type PrincipalTokenAddresses = Address[] & {
@@ -21,17 +22,17 @@ export const PrincipalAddressSchema = AddressSchema.refine(
   isPrincipalTokenAddress,
 )
 
-const ElementCoreSchema = z.object({
+const ElementCoreSchema = GenericProjectSchema.merge(z.object({
   principalTokenAddresses: z.array(PrincipalAddressSchema),
   erc20Addresses: z.array(AddressSchema),
   erc20Symbols: z.array(AddressSchema),
   metadata: z.object({
-    principalToken: z.record(PrincipalAddressSchema, z.object({})),
+    principalTokens: z.record(PrincipalAddressSchema, z.object({})),
   }),
   factories: z.object({
     principalToken: z.instanceof(Tranche__factory),
   }),
-})
+}))
 
 const ElementSchema = z.object({
   core: ElementCoreSchema,

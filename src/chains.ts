@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { NativeCurrencyDefinitionSchema } from './currency'
 
-const ChainNameSchema = z.nativeEnum({
+export const ChainNameSchema = z.nativeEnum({
   MAINNET: 'mainnet',
   RINKEBY: 'rinkeby',
   GOERLI: 'goerli',
@@ -29,10 +29,3 @@ export const ChainDefinitionSchema = z.object({
 })
 
 export type ChainDefinition = z.infer<typeof ChainDefinitionSchema>
-
-export const ChainDefinitionsSchema = z.record(
-  ChainNameSchema,
-  ChainDefinitionSchema,
-)
-
-export type ChainDefinitions = z.infer<typeof ChainDefinitionsSchema>
