@@ -1,6 +1,7 @@
 import { z } from 'zod'
-import { ChainDefinitionSchema, ChainNameSchema } from './chains'
+
 import { AddressSchema } from './address'
+import { ChainDefinitionSchema, ChainNameSchema } from './chains'
 
 // MACCCS MAX.eth.ts
 
@@ -55,9 +56,7 @@ const createGenericProjectSchema = <T extends [string, ...string[]]>(
     })
     .strict()
 
-const x = createGenericProjectSchema(addressCategories)
-
-type Y = z.infer<typeof x>
+export const x = createGenericProjectSchema(addressCategories)
 
 export const GenericProjectSchema = z.object({
   /* Addresses contains only array lists of addresses of things */
