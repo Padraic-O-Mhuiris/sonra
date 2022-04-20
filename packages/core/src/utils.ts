@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const enumKeyedObject = <
+export const enumMap = <
   T extends [string, ...string[]],
   U extends z.ZodTypeAny,
 >(
@@ -16,7 +16,7 @@ export const enumKeyedObject = <
   return z.record(obj).refine(validateKeysInEnum)
 }
 
-const x = enumKeyedObject(
+const x = enumMap(
   z.enum(['aaa', 'bbb', 'ccc', 'dddd']),
   z.object({ hhh: z.literal('a') }),
 )

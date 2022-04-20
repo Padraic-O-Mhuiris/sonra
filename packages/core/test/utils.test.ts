@@ -1,12 +1,12 @@
 import { z } from 'zod'
 
-import { enumKeyedObject } from '../src/utils'
+import { enumMap } from '../src/utils'
 
 describe('utils', () => {
-  describe('enumKeyedObject', () => {
+  describe('enumMap', () => {
     const simpleEnum = z.enum(['aaa', 'bbb', 'ccc'])
     const simpleSchema = z.object({ kkk: z.literal('abcd') })
-    const simpleEnumKeyedSchema = enumKeyedObject(simpleEnum, simpleSchema)
+    const simpleEnumMapSchema = enumMap(simpleEnum, simpleSchema)
     const exampleObject = {
       [simpleEnum.enum.aaa]: { kkk: 'abcd' },
       [simpleEnum.enum.bbb]: { kkk: 'abcd' },
@@ -14,12 +14,12 @@ describe('utils', () => {
     }
 
     test('should validate true when object keys and values match schema', () => {
-      expect(simpleEnumKeyedSchema.safeParse(exampleObject).success).toBe(true)
+      expect(simpleEnumMapSchema.safeParse(exampleObject).success).toBe(true)
     })
 
     test('should validate false if object contains keys which do not exist in enum schema', () => {
       expect(
-        simpleEnumKeyedSchema.safeParse({
+        simpleEnumMapSchema.safeParse({
           ...exampleObject,
           ddd: { kkk: 'abcd' },
         }).success,
@@ -28,7 +28,7 @@ describe('utils', () => {
 
     test('should validate false if object contains values which does not match schema', () => {
       expect(
-        simpleEnumKeyedSchema.safeParse({
+        simpleEnumMapSchema.safeParse({
           ...exampleObject,
           [simpleEnum.enum.aaa]: { kkk: 'abcde' },
         }).success,
