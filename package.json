@@ -1,5 +1,5 @@
 {
-  "name": "sonra",
+  "name": "monorepo-base",
   "version": "0.0.1",
   "private": true,
   "license": "MIT",
@@ -16,6 +16,8 @@
     "typecheck": "pnpm --parallel --aggregate-output --reporter append-only --filter ./packages typecheck",
     "build": "tsc --build --verbose ./tsconfig.prod.json && pnpm run --parallel --filter ./packages post-build",
     "watch": "tsc --build --verbose --watch ./tsconfig.prod.json",
+    "test": "pnpm run --parallel --aggregate-output --reporter append-only --filter ./packages test",
+    "test:fix": "pnpm lint:fix && pnpm test && pnpm format:fix && pnpm typecheck",
     "clean": "pnpm --filter ./packages clean"
   },
   "devDependencies": {

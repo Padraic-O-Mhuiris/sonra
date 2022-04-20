@@ -40,40 +40,39 @@ export const Erc20Schema = z.object({
   decimals: z.number(),
 })
 
-const addressCategories = z.enum(['principalToken', 'erc20Token'])
-export type AddressCategories = z.infer<typeof addressCategories>
+// const createGenericProjectSchema = <
+//   T extends z.ZodEnum<I extends [string, ...string[]] ? infer W : never>,
+// >(
+//   k: T,
+// ) =>
+//   z
+//     .object({
+//       addresses: z.record(k, z.string().array().nonempty()),
+//       metadata: z.record(k, z.object({})),
+//       contracts: z.record(k, z.object({})),
+//     })
+//     .strict()
 
-// ts-morph - spit out files
+// export const x = createGenericProjectSchema(addressCategories)
 
-const createGenericProjectSchema = <T extends [string, ...string[]]>(
-  k: z.ZodEnum<T>,
-) =>
-  z
-    .object({
-      addresses: z.record(k, z.array(AddressSchema)),
-      metadata: z.record(k, z.object({})),
-      contracts: z.record(k, z.object({})),
-    })
-    .strict()
+// export type Y = z.infer<typeof x>
 
-export const x = createGenericProjectSchema(addressCategories)
+// export const GenericProjectSchema = z.object({
+//   /* Addresses contains only array lists of addresses of things */
+//   addresses: z.object({}),
+//   /* Metadata contains as top level keys a categorisation of addresses
+//    *
+//    * principalToken: {
+//    *  <principalTokenAddress>: PrincipalTokenDef
+//    * }
+//    * */
+//   metadata: z.object({}),
+//   /* Like metadata with the  */
+//   contracts: z.object({}),
+// })
 
-export const GenericProjectSchema = z.object({
-  /* Addresses contains only array lists of addresses of things */
-  addresses: z.object({}),
-  /* Metadata contains as top level keys a categorisation of addresses
-   *
-   * principalToken: {
-   *  <principalTokenAddress>: PrincipalTokenDef
-   * }
-   * */
-  metadata: z.object({}),
-  /* Like metadata with the  */
-  contracts: z.object({}),
-})
+// export type GenericProject = z.infer<typeof GenericProjectSchema>
 
-export type GenericProject = z.infer<typeof GenericProjectSchema>
+// export const CcmacSpecSchema = z.record(ChainNameSchema, ChainDefinitionSchema)
 
-export const CcmacSpecSchema = z.record(ChainNameSchema, ChainDefinitionSchema)
-
-export type CCMAC = z.infer<typeof CcmacSpecSchema>['rinkeby']
+// export type CCMAC = z.infer<typeof CcmacSpecSchema>['rinkeby']
