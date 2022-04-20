@@ -15,10 +15,3 @@ export const enumMap = <
   > => Object.keys(record).every((key) => enumeration.safeParse(key).success)
   return z.record(obj).refine(validateKeysInEnum)
 }
-
-const x = enumMap(
-  z.enum(['aaa', 'bbb', 'ccc', 'dddd']),
-  z.object({ hhh: z.literal('a') }),
-)
-
-type Y = z.infer<typeof x>
