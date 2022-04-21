@@ -6,14 +6,14 @@
   "engines": {
     "pnpm": ">=6.14.0"
   },
-  "workspaces": ["packages/**"],
+  "workspaces": ["packages/**", "contracts/**"],
   "scripts": {
     "format": "prettier --check \"./**/*.ts\" README.md",
     "format:fix": "prettier --write \"./**/*.ts\" README.md",
     "lint": "pnpm run --parallel --aggregate-output --reporter append-only --filter ./packages lint",
     "lint:fix": "pnpm --parallel --aggregate-output --reporter append-only --filter ./packages lint:fix",
     "typecheck": "pnpm --parallel --aggregate-output --reporter append-only --filter ./packages typecheck",
-    "build": "tsc --build --verbose ./tsconfig.prod.json && pnpm run --parallel --filter ./packages post-build",
+    "build": "pnpm run --parallel prebuild && tsc --build --verbose ./tsconfig.prod.json && pnpm run --parallel postbuild",
     "watch": "tsc --build --verbose --watch ./tsconfig.prod.json",
     "test": "pnpm run --parallel --aggregate-output --reporter append-only --filter ./packages test",
     "test:fix": "pnpm lint:fix && pnpm test && pnpm format:fix && pnpm typecheck",

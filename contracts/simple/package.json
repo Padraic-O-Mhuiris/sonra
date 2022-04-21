@@ -1,7 +1,6 @@
 {
-  "name": "@sonra/contracts",
+  "name": "@sonra.contracts/simple",
   "version": "0.0.1",
-  "description": "description",
   "author": "Patrick Morris <patrick.morris.310@gmail.com>",
   "license": "MIT",
   "main": "./dist/index.js",
@@ -9,7 +8,7 @@
   "types": "./dist/index.d.ts",
   "files": ["dist/**/*"],
   "scripts": {
-    "post-build": "npx hardhat compile",
+    "prebuild": "rm -rf dist && pnpm run clean && npx hardhat compile",
     "clean": "npx hardhat clean"
   },
   "devDependencies": {

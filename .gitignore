@@ -5,7 +5,9 @@ coverage
 *.tsbuildinfo
 build
 
-packages/target-truffle-v4-test/contracts
-packages/target-truffle-v5-test/contracts
-packages/typechain/README.md
+contracts/**/types
+contracts/**/artifacts
+contracts/**/cache
+contracts/**/dist
+
 pnpm-debug.log
