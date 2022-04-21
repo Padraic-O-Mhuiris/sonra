@@ -1,0 +1,28 @@
+{
+  "name": "@sonra/contracts",
+  "version": "0.0.1",
+  "description": "description",
+  "author": "Patrick Morris <patrick.morris.310@gmail.com>",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.d.ts",
+  "types": "./dist/index.d.ts",
+  "files": ["dist/**/*"],
+  "scripts": {
+    "post-build": "npx hardhat compile",
+    "clean": "npx hardhat clean"
+  },
+  "devDependencies": {
+    "@ethersproject/abi": ">=5.4.7 <6.0.0",
+    "@ethersproject/bytes": "^5.0.0",
+    "@ethersproject/providers": ">=5.4.7 <6.0.0",
+    "@typechain/ethers-v5": "^10.0.0",
+    "@typechain/hardhat": "^6.0.0",
+    "ethers": ">=5.4.7 <6.0.0",
+    "hardhat": "^2.9.3",
+    "typechain": "^8.0.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.5.0"
+  }
+}

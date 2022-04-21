@@ -8,7 +8,6 @@
   },
   "workspaces": ["packages/**"],
   "scripts": {
-    "postinstall": "pnpm build",
     "format": "prettier --check \"./**/*.ts\" README.md",
     "format:fix": "prettier --write \"./**/*.ts\" README.md",
     "lint": "pnpm run --parallel --aggregate-output --reporter append-only --filter ./packages lint",
