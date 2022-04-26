@@ -24,8 +24,11 @@
     "@ethersproject/abstract-provider": "^5.6.0",
     "@ethersproject/bytes": "^5.0.0",
     "@ethersproject/providers": "^5.0.0",
+    "@sonra.contracts/simple": "workspace:^0.0.1",
     "@typechain/ethers-v5": "^10.0.0",
+    "@types/lodash": "^4.14.182",
     "ethers": "^5.6.4",
+    "lodash": "^4.17.21",
     "typechain": "^8.0.0",
     "zod": "^3.14.4"
   },

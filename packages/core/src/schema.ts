@@ -1,151 +1,94 @@
-import { ContractFactory } from 'ethers'
+import { Provider } from '@ethersproject/abstract-provider'
+import { BaseContract, Signer } from 'ethers'
 import { z } from 'zod'
 
-import { AddressSchema } from './address'
+import {
+  CategorisedAddress,
+  CategorisedAddressSchema,
+  createCategorisedAddress,
+} from './address'
 
-// MACCCS MAX.eth.ts
+type ContractFactoryStatic<C extends BaseContract> = {
+  connect: (address: string, signerOrProvider: Signer | Provider) => C
+}
 
-// CCMAC Spec-  "Two C Mac" Specification
-// Chain, Contract, Metadata, Address Correspondance Specification
-// Only assumes every chain is evm compat
-// For frontends to consume
+type ZodTupleLiterals<T extends [...any[]]> = T extends [
+  infer Head,
+  ...infer Tail,
+]
+  ? [z.ZodLiteral<Head>, ...ZodTupleLiterals<Tail>]
+  : []
 
-// const x = {
-//     mainnet: {
-//         chainDef: { ... },
-//         element: {
-//             core: {
-//                 principalTokenInfo: {
-//                 principalTokenAddresses: PrincipalTokenAddress[],
-//                   basic: {
-//                     addresses: BasicPrincipalTokenAddress[],
-//                     [BasicPrincipalTokenAddress]: {
-//                         symbol,
-//                         underlying,
-//                     }
-//                   },
-//                   curvePrincipalTokenAddress: CurvePrincipalTokenAddress[],
-//                   curve: {}
+export const createSchema2 =
+  <Categories extends [string, ...string[]]>(...categories: Categories) =>
+  <
+    Contract extends BaseContract & {},
+    ContractFactory extends ContractFactoryStatic<Contract>,
+    Metadata extends z.AnyZodObject,
+    Model extends {
+      [k in Categories[number]]: [ContractFactory, Metadata]
+    },
+  >(
+    model: Model,
+  ) => {
+    const categoriesTuple = z.tuple(
+      categories.map((category) =>
+        z.literal(category),
+      ) as ZodTupleLiterals<Categories>,
+    )
 
-//                 }
-//             }
-//         },
-//     }
-// }
+    const addresses = z.object(
+      categories.reduce(
+        (acc, arg) => ({
+          ...acc,
+          [arg]: createCategorisedAddress(arg).array(),
+        }),
+        {} as {
+          [k in Categories[number]]: z.ZodArray<CategorisedAddressSchema<k>>
+        },
+      ),
+    )
 
-export const Erc20Schema = z.object({
-  name: z.string(),
-  symbol: z.string(),
-  address: AddressSchema,
-  decimals: z.number(),
-})
+    const contracts = z.object(
+      categories.reduce(
+        (acc, arg: Categories[number]) => {
+          const factoryName = model[arg][0].constructor.name
 
-// const createCategoriesSchema = <T extends [unknown, ...unknown[]]>(
-//   ...vals: T
-// ) => z.tuple([...vals.map((val: T[number]) => z.literal(val))])
+          return {
+            ...acc,
+            [arg]: z.custom<Model[Categories[number]][0]>(
+              (val) =>
+                z
+                  .object({ connect: z.function() })
+                  .refine(() => factoryName.includes('__factory'))
+                  .safeParse(val).success,
+            ),
+          }
+        },
+        {} as {
+          [k in Categories[number]]: z.ZodType<Model[k][0]>
+        },
+      ),
+    )
 
-// const categoriesSchema = z.tuple([
-//   z.literal('principalToken'),
-//   z.literal('erc20Token'),
-// ])
+    const metadata = z.object(
+      categories.reduce(
+        (acc, arg: Categories[number]) => ({
+          ...acc,
+          [arg]: z.record(createCategorisedAddress(arg), model[arg][1]),
+        }),
+        {} as {
+          [k in Categories[number]]: z.ZodObject<{
+            [r in CategorisedAddress<k>]: Model[k][1]
+          }>
+        },
+      ),
+    )
 
-type GenericProjectSchemaInput<C extends ContractFactory> = z.ZodObject<
-  Record<
-    string,
-    z.ZodObject<{
-      metadata: z.AnyZodObject
-      contract: z.ZodType<C, z.ZodTypeDef, C>
-    }>
-  >
->
-
-export const inputSchema: GenericProjectSchemaInput<ContractFactory> = z.object(
-  {
-    principalToken: z.object({
-      metadata: z.object({ xxx: z.literal('xxx') }),
-      contract: z.instanceof(ContractFactory),
-    }),
-  },
-)
-
-export type X = z.infer<typeof inputSchema>
-
-// interface GenericProjectSchema<T extends GenericProjectSchemaInput> {
-//   categories: keyof T['_shape']
-//   //addresses: Record<keyof T['_shape'], Address[]>
-//   metadata: T
-//   //contracts: Record<keyof T['_shape'], null>
-// }
-// const createGenericProjectSchema = <
-//   T extends z.ZodObject<Record<string, z.ZodTypeAny>>,
-// >(
-//   metadataSchema: T,
-// ) => {
-//   const shape: T['_shape'] = metadataSchema.shape
-//   const shapeKeys = Object.keys(shape)
-
-//   return z.custom<{
-//     categories: Array<keyof T['_shape']>
-//     addresses: {
-//       [k in keyof T['_shape']]: Address[]
-//     }
-//     metadata: {
-//       [k in keyof T['_shape']]: z.infer<T['_shape'][k]>
-//     }
-//     contracts: {
-//       [k in keyof T['_shape']]: <C extends Contract>(
-//         address: Address,
-//         signerOrProvider: Signer | Provider,
-//       ) => C //ContractFactory.connect(address, signerOrProvider)
-//     }
-//   }>(
-//     (val) =>
-//       z
-//         .object({
-//           addresses: AddressSchema.array(),
-//           metadata: metadataSchema,
-//         })
-//         .safeParse(val).success,
-//   )
-// }
-
-// const xx = z.object({ principalToken: z.literal('1'), erc20: Erc20Schema })
-// const proj = createGenericProjectSchema(xx)
-
-// type Proj = z.infer<typeof proj>
-
-// declare const x: Proj
-
-// <T extends z.ZodEnum<[string, ...string[]]>>(
-//   k: T,
-// ) =>
-//   z.object({
-//     categories: k.array(),
-//     addresses: z.record(k, AddressSchema.array()),
-//     metadata: z.record(k, z.object({})),
-//     contracts: z.record(k, z.object({})),
-//   })
-
-// export const x = createGenericProjectSchema(z.enum(['aaa', 'bbb']))
-
-// export type Y = z.infer<typeof x>
-
-// export const GenericProjectSchema = z.object({
-//   /* Addresses contains only array lists of addresses of things */
-//   addresses: z.object({}),
-//   /* Metadata contains as top level keys a categorisation of addresses
-//    *
-//    * principalToken: {
-//    *  <principalTokenAddress>: PrincipalTokenDef
-//    * }
-//    * */
-//   metadata: z.object({}),
-//   /* Like metadata with the  */
-//   contracts: z.object({}),
-// })
-
-// export type GenericProject = z.infer<typeof GenericProjectSchema>
-
-// export const CcmacSpecSchema = z.record(ChainNameSchema, ChainDefinitionSchema)
-
-// export type CCMAC = z.infer<typeof CcmacSpecSchema>['rinkeby']
+    return z.object({
+      categories: categoriesTuple,
+      addresses,
+      contracts,
+      metadata,
+    })
+  }

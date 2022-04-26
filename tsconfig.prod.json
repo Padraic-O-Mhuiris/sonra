@@ -12,6 +12,8 @@
     "stripInternal": true
   },
   "files": [],
-  "references": [{ "path": "./packages/core/tsconfig.build.json" }],
-  "references": [{ "path": "./contracts/simple/tsconfig.build.json" }]
+  "references": [
+    { "path": "./packages/core/tsconfig.build.json" },
+    { "path": "./contracts/simple/tsconfig.build.json" }
+  ]
 }
