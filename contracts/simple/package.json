@@ -8,7 +8,7 @@
   "types": "./dist/index.d.ts",
   "files": ["dist/**/*"],
   "scripts": {
-    "prebuild": "rm -rf dist && pnpm run clean && npx hardhat compile",
+    "prebuild": "scripts/prebuild.sh",
     "postbuild": "scripts/postbuild.sh",
     "clean": "npx hardhat clean"
   },

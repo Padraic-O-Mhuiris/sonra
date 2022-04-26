@@ -13,27 +13,38 @@ export const addressArraySchema = addressSchema.array()
 
 export type AddressArraySchema = typeof addressArraySchema
 
-export type CategorisedAddress<T extends string> = Address & {
-  readonly __category: T
+export type TagAddress<T extends string> = Address & {
+  readonly __tag: T
 }
 
-// custom address type of the structure <category>:<address>
-export const createCategorisedAddress = <C extends string>(category: C) =>
-  z.custom<CategorisedAddress<C>>(
+export const zeroAddress = addressSchema.parse(ethers.constants.AddressZero)
+
+// custom address type of the structure <tag>:<address>
+export const createTaggedAddressSchema = <T extends string>(_tag: T) =>
+  z.custom<TagAddress<T>>(
     (val) =>
       z
         .string()
         .refine((_val) => {
           if (!_val.includes(':')) return false
 
-          const [cat, address] = _val.split(':')
-          if (cat !== category) return false
+          const [tag, address] = _val.split(':')
+          if (tag !== _tag) return false
 
           return addressSchema.safeParse(address).success
         })
         .safeParse(val).success,
   )
 
-export type CategorisedAddressSchema<T extends string> = z.ZodType<
-  CategorisedAddress<T>
->
+export type TaggedAddressSchema<T extends string> = z.ZodType<TagAddress<T>>
+
+export const randomAddress = () =>
+  addressSchema.parse(ethers.Wallet.createRandom().address)
+
+export const createTagAddress = <T extends string, A extends Address>(
+  tag: T,
+  address: A,
+): TagAddress<T> => `${tag}:${address}` as unknown as TagAddress<T>
+
+export const randomTagAddress = <T extends string>(tag: T): TagAddress<T> =>
+  createTagAddress(tag, randomAddress())
