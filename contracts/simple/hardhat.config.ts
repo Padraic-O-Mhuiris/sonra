@@ -13,8 +13,6 @@ const config: HardhatUserConfig = {
   typechain: {
     outDir: './types',
     target: 'ethers-v5',
-    // @ts-ignore
-    discriminateTypes: true, // needed
   },
 }
 
