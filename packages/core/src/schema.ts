@@ -19,7 +19,7 @@ type ZodTupleLiterals<T extends [...any[]]> = T extends [
   ? [z.ZodLiteral<Head>, ...ZodTupleLiterals<Tail>]
   : []
 
-export const createSchema2 =
+export const createSchema =
   <Categories extends [string, ...string[]]>(...categories: Categories) =>
   <
     Contract extends BaseContract & {},

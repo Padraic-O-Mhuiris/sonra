@@ -9,7 +9,7 @@
   "files": ["dist/**/*"],
   "scripts": {
     "prebuild": "rm -rf dist && pnpm run clean && npx hardhat compile",
-    "postbuild": "pnpm run clean",
+    "postbuild": "scripts/postbuild.sh",
     "clean": "npx hardhat clean"
   },
   "devDependencies": {
