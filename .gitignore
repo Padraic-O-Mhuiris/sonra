@@ -10,4 +10,11 @@ contracts/**/artifacts
 contracts/**/cache
 contracts/**/dist
 
+examples/**/types
+examples/**/typechain
+examples/**/artifacts
+examples/**/cache
+example/**/dist
+
+
 pnpm-debug.log

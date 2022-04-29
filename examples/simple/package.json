@@ -10,7 +10,7 @@
     "lint:fix": "pnpm lint -- --fix",
     "typecheck": "tsc --noEmit --incremental false --composite false",
     "clean": "rm -rf dist && rm -f tsconfig.build.tsbuildinfo",
-    "start": "ts-node ./src/index.ts"
+    "start": "pnpm ts-node ./src/index.ts"
   },
   "author": "",
   "license": "MIT",

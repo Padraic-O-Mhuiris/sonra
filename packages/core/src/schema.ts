@@ -1,5 +1,3 @@
-import { Provider } from '@ethersproject/abstract-provider'
-import { BaseContract, Signer } from 'ethers'
 import { keys } from 'lodash'
 import { z } from 'zod'
 
@@ -9,10 +7,6 @@ import {
   TaggedAddressSchema,
 } from './address'
 
-type ContractFactoryStatic<C extends BaseContract> = {
-  connect: (address: string, signerOrProvider: Signer | Provider) => C
-}
-
 type ZodTupleLiterals<T extends readonly [...any[]]> = T extends [
   infer Head,
   ...infer Tail,
@@ -20,9 +14,11 @@ type ZodTupleLiterals<T extends readonly [...any[]]> = T extends [
   ? [z.ZodLiteral<Head>, ...ZodTupleLiterals<Tail>]
   : []
 
-export type IModel = {
-  [k in string]: [ContractFactoryStatic<BaseContract>, z.AnyZodObject]
+type ContractModel<C extends string> = {
+  [k in string]: [C, z.AnyZodObject]
 }
+
+export type IModel = ContractModel<string>
 
 type UnionToIntersection<U> = (
   U extends never ? never : (arg: U) => never
@@ -52,7 +48,7 @@ type AddressesSchema<Model extends IModel> = z.ZodObject<{
 }>
 
 type ContractsSchema<Model extends IModel> = z.ZodObject<{
-  [k in ObjectKeysToTuple<Model>[number]]: z.ZodType<Model[k][0]>
+  [k in ObjectKeysToTuple<Model>[number]]: z.ZodLiteral<Model[k][0]>
 }>
 
 type MetadataSchema<Model extends IModel> = z.ZodObject<{
@@ -67,6 +63,12 @@ export type Schema<Model extends IModel> = z.ZodObject<{
   contracts: ContractsSchema<Model>
   metadata: MetadataSchema<Model>
 }>
+
+export type InferredSchema<S extends Schema<IModel>> = z.infer<S>
+
+export type ModelResult<M extends IModel> = Schema<M> extends Schema<IModel>
+  ? InferredSchema<Schema<M>>
+  : never
 
 export const createSchema = <Model extends IModel>(
   model: Model,
@@ -95,22 +97,12 @@ export const createSchema = <Model extends IModel>(
 
   const contracts = z.object(
     modelKeys.reduce(
-      (acc, arg) => {
-        const factoryName = model[arg][0].constructor.name
-
-        return {
-          ...acc,
-          [arg]: z.custom<Model[ObjectKeysToTuple<Model>[number]][0]>(
-            (val) =>
-              z
-                .object({ connect: z.function() })
-                .refine(() => factoryName.includes('__factory'))
-                .safeParse(val).success,
-          ),
-        }
-      },
+      (acc, arg) => ({
+        ...acc,
+        [arg]: z.literal(model[arg][0]),
+      }),
       {} as {
-        [k in ObjectKeysToTuple<Model>[number]]: z.ZodType<Model[k][0]>
+        [k in ObjectKeysToTuple<Model>[number]]: z.ZodLiteral<Model[k][0]>
       },
     ),
   )
@@ -119,7 +111,7 @@ export const createSchema = <Model extends IModel>(
     modelKeys.reduce(
       (acc, arg) => ({
         ...acc,
-        [arg]: z.record(createTaggedAddressSchema(arg), model[arg][1]),
+        [arg]: z.record(createTaggedAddressSchema(arg), model[arg][1]), // change outcome type to partial
       }),
       {} as {
         [k in ObjectKeysToTuple<Model>[number]]: z.ZodObject<{
@@ -136,5 +128,3 @@ export const createSchema = <Model extends IModel>(
     metadata,
   })
 }
-
-export type InferredSchema<S extends Schema<IModel>> = z.infer<S>

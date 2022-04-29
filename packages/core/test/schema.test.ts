@@ -19,13 +19,26 @@ describe('schema', () => {
     })
 
     test('validates token1', () => {
+      const token1Address = randomTagAddress('token1')
       const data: InferredSchema<typeof schema> = {
         categories: ['token1'],
         addresses: {
-          token1: [randomTagAddress('token1')],
+          token1: [token1Address],
+        },
+        contracts: {
+          token1: ERC20__factory,
+        },
+        metadata: {
+          token1: {
+            [token1Address]: {
+              name: 'Token',
+              decimals: 18,
+              symbol: 'TKN',
+            },
+          },
         },
       }
-      expect(schema.safeParse(data).success).toBe(true)
+      expect(schema.parse(data)).not.toThrowError()
     })
   })
 })
