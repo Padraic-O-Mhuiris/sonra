@@ -81,8 +81,10 @@ importers:
       '@sonra/core': workspace:^0.0.1
       '@typechain/ethers-v5': ^10.0.0
       '@typechain/hardhat': ^6.0.0
+      ethers: 5.6.4
       hardhat: ^2.9.3
       typechain: ^8.0.0
+      zod: ^3.14.4
     devDependencies:
       '@ethersproject/bytes': 5.6.1
       '@nomiclabs/hardhat-ethers': 2.0.5_ethers@5.6.4+hardhat@2.9.3
@@ -90,8 +92,10 @@ importers:
       '@sonra/core': link:../../packages/core
       '@typechain/ethers-v5': 10.0.0_60874ad16d104daac915a187280dc22e
       '@typechain/hardhat': 6.0.0_ed447a861c5329f47137363311f606c6
+      ethers: 5.6.4
       hardhat: 2.9.3
       typechain: 8.0.0_typescript@4.6.3
+      zod: 3.14.4
 
   packages/core:
     specifiers:

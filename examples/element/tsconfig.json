@@ -1,6 +1,6 @@
 {
   "extends": "../../tsconfig.json",
-  "include": ["src"],
+  "include": ["src", "typechain"],
   "compilerOptions": {
     "esModuleInterop": true,
     "skipLibCheck": true
