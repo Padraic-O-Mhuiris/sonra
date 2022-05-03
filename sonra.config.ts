@@ -12,11 +12,11 @@ const elementModel = {
     name: z.string(),
     symbol: z.string(),
     decimals: z.number(),
-    underlying: addressSchema,
-    interestToken: addressSchema,
-    termStart: z.date(),
-    termEnd: z.date(),
-    position: addressSchema,
+    // underlying: addressSchema,
+    // interestToken: addressSchema,
+    // termStart: z.date(),
+    // termEnd: z.date(),
+    // position: addressSchema,
   }),
 } as const
 
@@ -57,31 +57,31 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
       name,
       symbol,
       decimals,
-      underlying,
-      termEnd,
-      interestToken,
-      position,
+      // underlying,
+      // termEnd,
+      // interestToken,
+      // position,
     ] = await Promise.all([
       principalToken.name(),
       principalToken.symbol(),
       principalToken.decimals(),
-      principalToken.underlying().then(addressSchema.parse),
-      principalToken
-        .unlockTimestamp()
-        .then((result) => new Date(result.toNumber() * 1000)),
-      principalToken.interestToken().then(addressSchema.parse),
-      principalToken.position().then(addressSchema.parse),
+      // principalToken.underlying().then(addressSchema.parse),
+      // principalToken
+      //   .unlockTimestamp()
+      //   .then((result) => new Date(result.toNumber() * 1000)),
+      // principalToken.interestToken().then(addressSchema.parse),
+      // principalToken.position().then(addressSchema.parse),
     ])
 
     principalTokenData[address] = {
       name,
       symbol,
       decimals,
-      underlying,
-      termStart,
-      termEnd,
-      interestToken,
-      position,
+      // underlying,
+      // termStart,
+      // termEnd,
+      // interestToken,
+      // position,
     }
   }
 
