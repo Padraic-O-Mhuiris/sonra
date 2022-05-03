@@ -1,13 +1,8 @@
 import { z } from 'zod'
 import { AddressSchema } from './address'
 
-interface CategoryModel<ContractName extends string> {
-  readonly contract: ContractName
-  readonly meta: z.AnyZodObject
-}
-
 export type SonraModel = {
-  readonly [k in string]: CategoryModel<string>
+  readonly [k in string]: z.AnyZodObject
 }
 
 export type SonraSchema<Model extends SonraModel> = z.ZodObject<{
@@ -15,10 +10,10 @@ export type SonraSchema<Model extends SonraModel> = z.ZodObject<{
     [k in keyof Model & string]: z.ZodArray<AddressSchema>
   }>
   contracts: z.ZodObject<{
-    [k in keyof Model & string]: z.ZodLiteral<Model[k]['contract']>
+    [k in keyof Model & string]: z.ZodString
   }>
   metadata: z.ZodObject<{
-    [k in keyof Model & string]: z.ZodRecord<AddressSchema, Model[k]['meta']>
+    [k in keyof Model & string]: z.ZodRecord<AddressSchema, Model[k]>
   }>
 }>
 

@@ -1,6 +1,6 @@
-import { addressSchema, Address, SonraConfig, SonraFetch } from './src'
 import { ethers } from 'ethers'
 import { z } from 'zod'
+import { Address, addressSchema, SonraConfig, SonraFetch } from './src'
 import { TrancheFactory__factory, Tranche__factory } from './typechain'
 
 const provider = new ethers.providers.JsonRpcProvider(
@@ -8,26 +8,24 @@ const provider = new ethers.providers.JsonRpcProvider(
 )
 
 const elementModel = {
-  principalToken: {
-    contract: 'Tranche.sol',
-    meta: z.object({
-      name: z.string(),
-      symbol: z.string(),
-      decimals: z.number(),
-      underlying: addressSchema,
-      interestToken: addressSchema,
-      termStart: z.date(),
-      termEnd: z.date(),
-      position: addressSchema,
-    }),
-  },
+  principalToken: z.object({
+    name: z.string(),
+    symbol: z.string(),
+    decimals: z.number(),
+    underlying: addressSchema,
+    interestToken: addressSchema,
+    termStart: z.date(),
+    termEnd: z.date(),
+    position: addressSchema,
+  }),
 } as const
 
 type ElementModel = typeof elementModel
 
 const elementFetch: SonraFetch<ElementModel> = async () => {
+  const trancheFactoryAddress = '0x62F161BF3692E4015BefB05A03a94A40f520d1c0'
   const trancheFactory = TrancheFactory__factory.connect(
-    '0x62F161BF3692E4015BefB05A03a94A40f520d1c0',
+    trancheFactoryAddress,
     provider,
   )
 
@@ -48,7 +46,7 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
   )
 
   const principalTokenData: {
-    [k in Address]: z.infer<ElementModel['principalToken']['meta']>
+    [k in Address]: z.infer<ElementModel['principalToken']>
   } = {}
 
   for (const [address, termStart] of addressAndCreatedDateInfo) {
@@ -87,21 +85,17 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
     }
   }
 
-  const dataModel = {
+  return {
     addresses: {
       principalToken: principalTokenAddresses,
     },
     contracts: {
-      principalToken: elementModel.principalToken.contract,
+      principalToken: 'Tranche.sol',
     },
     metadata: {
       principalToken: principalTokenData,
     },
   }
-
-  console.log('Finished sonra fetch!')
-  console.log(JSON.stringify(dataModel, null, 2))
-  return dataModel
 }
 
 const config: SonraConfig<ElementModel> = {

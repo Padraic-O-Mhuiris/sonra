@@ -24,10 +24,10 @@ export const createSonraSchema = <Model extends SonraModel>(
     modelKeys.reduce(
       (acc, arg) => ({
         ...acc,
-        [arg]: z.literal(model[arg].contract),
+        [arg]: z.string,
       }),
       {} as {
-        [k in keyof Model & string]: z.ZodLiteral<Model[k]['contract']>
+        [k in keyof Model & string]: z.ZodString
       },
     ),
   )
@@ -36,13 +36,10 @@ export const createSonraSchema = <Model extends SonraModel>(
     modelKeys.reduce(
       (acc, arg) => ({
         ...acc,
-        [arg]: z.record(addressSchema, model[arg].meta),
+        [arg]: z.record(addressSchema, model[arg]),
       }),
       {} as {
-        [k in keyof Model & string]: z.ZodRecord<
-          AddressSchema,
-          Model[k]['meta']
-        >
+        [k in keyof Model & string]: z.ZodRecord<AddressSchema, Model[k]>
       },
     ),
   )
