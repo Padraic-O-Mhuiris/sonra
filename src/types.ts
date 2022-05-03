@@ -1,13 +1,6 @@
 import { z } from 'zod'
 import { AddressSchema } from './address'
 
-export type TupleToZodTupleLiterals<T extends readonly [...any[]]> = T extends [
-  infer Head,
-  ...infer Tail,
-]
-  ? [z.ZodLiteral<Head>, ...TupleToZodTupleLiterals<Tail>]
-  : []
-
 interface CategoryModel<ContractName extends string> {
   readonly contract: ContractName
   readonly meta: z.AnyZodObject
@@ -30,3 +23,5 @@ export type SonraSchema<Model extends SonraModel> = z.ZodObject<{
 }>
 
 export type SonraDataModel<M extends SonraModel> = z.infer<SonraSchema<M>>
+
+export type SonraFetch<M extends SonraModel> = Promise<SonraDataModel<M>>
