@@ -11,8 +11,10 @@
     "incremental": true,
     "exactOptionalPropertyTypes": true,
     "noImplicitOverride": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "outDir": "dist"
   },
-  "include": ["src"],
+  "include": ["**/*.ts"],
   "exclude": ["**/node_modules"]
 }
