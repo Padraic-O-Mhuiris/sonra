@@ -1,4 +1,9 @@
-import { Address, addressSchema } from '@sonra/core'
+import {
+  Address,
+  addressSchema,
+  SonraConfig,
+  SonraDataModel,
+} from '@sonra/core'
 import { ethers } from 'ethers'
 import { z } from 'zod'
 import { TrancheFactory__factory, Tranche__factory } from './typechain'
@@ -20,10 +25,10 @@ const model = {
 } as const
 
 const provider = new ethers.providers.JsonRpcProvider(
-  'https://eth-mainnet.alchemyapi.io/v2/kwjMP-X-Vajdk1ItCfU-56Uaq1wwhamK',
+  'https://mainnet.infura.io/v3/7b2295eb2ca8443fba441bfd462cd93a',
 )
 
-async function fetch() {
+async function fetch(): Promise<SonraDataModel<typeof model>> {
   const trancheFactory = TrancheFactory__factory.connect(
     '0x62F161BF3692E4015BefB05A03a94A40f520d1c0',
     provider,
@@ -44,6 +49,9 @@ async function fetch() {
     ([address]) => address,
   )
 
+  const x = z.object({ x: z.literal(1), b: z.literal('111') })
+
+  type U = z.infer<typeof x>
   let principalTokenData: {
     [k in Address]: z.infer<typeof model.principalToken.meta>
   } = {}
@@ -98,7 +106,9 @@ async function fetch() {
   }
 }
 
-const config = {
+const config: SonraConfig<typeof model> = {
+  typechainDir: 'typechain',
+  dir: 'sonra',
   model,
   fetch,
 }

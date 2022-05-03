@@ -61,3 +61,6 @@ export const createSonraSchema = <Model extends SonraModel>(
     metadata,
   })
 }
+const x = z.object({ x: z.literal(1), b: z.literal('111') })
+
+type U = z.infer<typeof x>

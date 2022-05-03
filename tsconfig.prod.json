@@ -14,7 +14,6 @@
   "files": [],
   "references": [
     { "path": "./packages/core/tsconfig.build.json" },
-    { "path": "./contracts/simple/tsconfig.build.json" },
-    { "path": "./examples/simple/tsconfig.build.json" }
+    { "path": "./examples/element/tsconfig.build.json" }
   ]
 }

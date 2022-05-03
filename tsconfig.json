@@ -10,8 +10,16 @@
     "composite": true,
     "incremental": true,
     "exactOptionalPropertyTypes": true,
-    "noImplicitOverride": true
+    "noImplicitOverride": true,
+    "resolveJsonModule": true,
+    "strictNullChecks": true
   },
-  "include": ["**/*.ts", "**/*.js", "**/.*.js", "scripts/.common.ts"],
+  "include": [
+    "**/*.ts",
+    "**/*.js",
+    "**/.*.js",
+    "**/*.json",
+    "scripts/.common.ts"
+  ],
   "exclude": ["**/node_modules"]
 }

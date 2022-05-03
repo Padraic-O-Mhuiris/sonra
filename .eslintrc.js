@@ -49,7 +49,7 @@ module.exports = {
       },
     ],
     'no-control-regex': 'error',
-    'no-console': 'error',
+    'no-console': 'warn',
     'no-debugger': 'error',
     'no-delete-var': 'error',
     'no-dupe-args': 'error',

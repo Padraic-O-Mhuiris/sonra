@@ -1,8 +1,7 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["src"],
+  "include": ["typechain"],
   "compilerOptions": {
-    "outDir": "dist",
-    "rootDir": "src"
+    "outDir": "dist"
   }
 }

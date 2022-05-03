@@ -1,6 +1,5 @@
 packages:
   - 'packages/**'
-  - 'contracts/**'
   - 'examples/**'
   # exclude packages that are inside test directories
   - '!**/test/**'
