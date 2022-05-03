@@ -1,7 +1,0 @@
-{
-  "extends": "./tsconfig.json",
-  "include": ["typechain"],
-  "compilerOptions": {
-    "outDir": "dist"
-  }
-}
