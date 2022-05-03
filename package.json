@@ -10,9 +10,14 @@
     "watch": "tsc --noEmit --watch --project ./tsconfig.json",
     "clean": "rm -rf dist",
     "format": "prettier --check \"./**/*.ts\" README.md",
-    "format:fix": "prettier --write \"./**/*.ts\" README.md"
+    "format:fix": "prettier --write \"./**/*.ts\" README.md",
+    "typechain": "yarn hardhat compile"
   },
   "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.5",
+    "@openzeppelin/contracts": "4.3.2",
+    "@typechain/ethers-v5": "^10.0.0",
+    "@typechain/hardhat": "^6.0.0",
     "@types/lodash": "^4.14.182",
     "@types/rimraf": "^3.0.2",
     "@typescript-eslint/eslint-plugin": "^5.22.0",
@@ -24,13 +29,18 @@
     "eslint-plugin-sonarjs": "^0.13.0",
     "eslint-plugin-unused-imports": "^2.0.0",
     "ethers": "^5.6.5",
+    "hardhat": "^2.9.3",
     "jest": "^28.0.3",
     "lodash": "^4.17.21",
     "prettier": "^2.6.2",
     "rimraf": "^3.0.2",
     "ts-jest": "^28.0.0",
     "ts-node": "^10.7.0",
+    "typechain": "^8.0.0",
     "typescript": "^4.6.4",
     "zod": "^3.14.4"
+  },
+  "dependencies": {
+    "tsconfig-paths": "^4.0.0"
   }
 }
