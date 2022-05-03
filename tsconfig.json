@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
     "declaration": true,
-    "lib": ["ES2022"],
+    "target": "ESNEXT",
+    "lib": ["ESNEXT"],
     "module": "CommonJS",
     "moduleResolution": "node",
     "strict": true,
-    "target": "ES2022",
     "sourceMap": true,
     "composite": true,
     "incremental": true,
@@ -15,6 +15,6 @@
     "esModuleInterop": true,
     "outDir": "dist"
   },
-  "include": ["**/*.ts"],
+  "include": ["src/**/*.ts"],
   "exclude": ["**/node_modules"]
 }

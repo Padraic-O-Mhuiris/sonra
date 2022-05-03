@@ -1,7 +1,5 @@
 import { z } from 'zod'
-
 import { AddressSchema } from './address'
-import { ObjectKeysToTuple } from './utils'
 
 export type TupleToZodTupleLiterals<T extends readonly [...any[]]> = T extends [
   infer Head,
@@ -20,7 +18,6 @@ export type SonraModel = {
 }
 
 export type SonraSchema<Model extends SonraModel> = z.ZodObject<{
-  categories: z.ZodTuple<TupleToZodTupleLiterals<ObjectKeysToTuple<Model>>>
   addresses: z.ZodObject<{
     [k in keyof Model & string]: z.ZodArray<AddressSchema>
   }>

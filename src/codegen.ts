@@ -1,68 +1,77 @@
+import fs from 'fs'
+import path from 'path'
+import rimraf from 'rimraf'
 import { SonraConfig } from './config'
+import { createSonraSchema } from './schema'
 import { SonraModel } from './types'
 
+export async function run<M extends SonraModel>({
+  typechainDir,
+  dir,
+  model,
+  fetch,
+}: SonraConfig<M>) {
+  const dirPath = path.join(process.cwd(), dir)
+  const typechainDirPath = path.join(process.cwd(), typechainDir)
 
-export async function run<M extends SonraModel>(c: SonraConfig<M>) {
-  console.log(c)
-  // const dirPath = path.join(process.cwd(), dir)
-  // const typechainDirPath = path.join(process.cwd(), typechainDir)
+  if (!fs.existsSync(typechainDirPath)) {
+    console.log(
+      `Path: ${typechainDirPath} does not exist for typechain types, ...exiting`,
+    )
+    return
+  }
 
-  // if (!fs.existsSync(typechainDirPath)) {
-  //   console.log(
-  //     `Path: ${typechainDirPath} does not exist for typechain types, ...exiting`,
-  //   )
-  //   return
-  // }
+  const { factories, ...typechainTypes } = require(typechainDirPath)
 
-  // const { factories, ...typechainTypes } = require(typechainDirPath)
+  if (!fs.existsSync(dirPath)) {
+    await fs.promises.mkdir(dirPath, { recursive: true })
+  } else {
+    console.log(`Path: ${dirPath} already exists, ...overwriting`)
+    if (dirPath === process.cwd()) {
+      console.error('cannot delete top level directory')
+    }
+    await new Promise<void>((resolve) => rimraf(dirPath, {}, () => resolve()))
+    await fs.promises.mkdir(dirPath, { recursive: true })
+  }
 
-  // if (!fs.existsSync(dirPath)) {
-  //   await fs.promises.mkdir(dirPath, { recursive: true })
-  // } else {
-  //   console.log(`Path: ${dirPath} already exists, ...overwriting`)
-  //   if (dirPath === process.cwd()) {
-  //     console.error('cannot delete top level directory')
-  //   }
-  //   await new Promise<void>((resolve) => rimraf(dirPath, {}, () => resolve()))
-  //   await fs.promises.mkdir(dirPath, { recursive: true })
-  // }
+  const schema = createSonraSchema<SonraModel>(model)
+  console.log('Created schema from model, ...fetching data')
+  const fetchResult = await fetch()
 
-  // const schema = createSonraSchema(model)
-  // console.log('Created schema from model, ...fetching data')
-  // const fetchResult = await fetch()
+  console.log('Fetched data model, ...validating against schema')
+  const schemaResult = schema.safeParse(fetchResult)
 
-  // console.log('Fetched data model, ...validating against schema')
-  // const schemaResult = schema.safeParse(fetchResult)
+  if (!schemaResult.success) {
+    console.log('Schema parse failed')
+    console.error(schemaResult.error)
+    return
+  }
 
-  // if (!schemaResult.success) {
-  //   console.log('Schema parse failed')
-  //   console.error(schemaResult.error)
-  //   return
-  // }
-  // const contractTypeNames = Object.keys(typechainTypes)
-  // const data = schemaResult.data
-  // console.error('Schema parse success, ...checking named contracts')
+  const data = schemaResult.data
 
-  // const contractPaths = Object.fromEntries(
-  //   Object.entries(data.contracts).map(([category, contractName]) => {
-  //     contractName = contractName.includes('.')
-  //       ? contractName.slice(0, contractName.indexOf('.'))
-  //       : contractName
+  const contractTypeNames = Object.keys(typechainTypes)
+  console.error('Schema parse success, ...checking named contracts')
 
-  //     const contractTypeName = `${contractName}__factory`
-  //     if (!contractTypeNames.some((c) => c === contractTypeName)) {
-  //       throw new Error(`${contractName} not found in typechain types`)
-  //     }
+  const contractPaths = Object.fromEntries(
+    Object.entries(data.contracts).map(([category, contractName]) => {
+      contractName = contractName.includes('.')
+        ? contractName.slice(0, contractName.indexOf('.'))
+        : contractName
 
-  //     return [category, contractTypeName]
-  //   }),
-  // )
-  // console.log(contractPaths)
+      const contractTypeName = `${contractName}__factory`
+      if (!contractTypeNames.some((c) => c === contractTypeName)) {
+        throw new Error(`${contractName} not found in typechain types`)
+      }
 
-  // await fs.promises.writeFile(
-  //   path.join(dirPath, 'file.json'),
-  //   JSON.stringify(data, null, 2),
-  // )
+      return [category, contractTypeName]
+    }),
+  )
+  console.log(contractPaths)
+
+  await fs.promises.writeFile(
+    path.join(dirPath, 'file.json'),
+    JSON.stringify(data, null, 2),
+  )
   // eslint-disable-next-line
   // console.log(JSON.stringify(data, null, 2))
   // validate category contract names

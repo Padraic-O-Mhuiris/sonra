@@ -7,8 +7,10 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc --build --verbose ./tsconfig.json",
-    "watch": "tsc --build --verbose --watch ./tsconfig.json",
-    "clean": "rm -rf dist"
+    "watch": "tsc --noEmit --watch --project ./tsconfig.json",
+    "clean": "rm -rf dist",
+    "format": "prettier --check \"./**/*.ts\" README.md",
+    "format:fix": "prettier --write \"./**/*.ts\" README.md"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.182",
@@ -19,12 +21,12 @@
     "eslint-config-typestrict": "^1.0.2",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-no-only-tests": "^2.6.0",
-    "eslint-plugin-simple-import-sort": "^7.0.0",
     "eslint-plugin-sonarjs": "^0.13.0",
     "eslint-plugin-unused-imports": "^2.0.0",
     "ethers": "^5.6.5",
     "jest": "^28.0.3",
     "lodash": "^4.17.21",
+    "prettier": "^2.6.2",
     "rimraf": "^3.0.2",
     "ts-jest": "^28.0.0",
     "ts-node": "^10.7.0",
