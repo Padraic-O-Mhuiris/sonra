@@ -24,4 +24,4 @@ export type SonraSchema<Model extends SonraModel> = z.ZodObject<{
 
 export type SonraDataModel<M extends SonraModel> = z.infer<SonraSchema<M>>
 
-export type SonraFetch<M extends SonraModel> = Promise<SonraDataModel<M>>
+export type SonraFetch<M extends SonraModel> = () => Promise<SonraDataModel<M>>

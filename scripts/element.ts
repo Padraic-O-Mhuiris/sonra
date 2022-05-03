@@ -1,38 +1,13 @@
-import { z } from 'zod'
-import { randomTagAddress, SonraConfig, SonraFetch } from '../src'
+import config from '../sonra.config'
+import { run } from '../src/codegen'
 
-const elementModel = {
-  principalToken: {
-    contract: 'Tranche.sol',
-    meta: z.object({
-      name: z.string(),
-    }),
-  },
-} as const
-
-type ElementModel = typeof elementModel
-
-async function elementFetch(): SonraFetch<ElementModel> {
-  return {
-    addresses: {
-      principalToken: [randomTagAddress('principalToken')],
-    },
-    contracts: {
-      principalToken: 'Tranche.sol',
-    },
-    metadata: {
-      principalToken: {
-        [randomTagAddress('principalToken')]: {
-          name: 'PRin',
-        },
-      },
-    },
-  }
+async function main() {
+  await run(config)
 }
 
-export const config: SonraConfig<ElementModel> = {
-  typechainDir: 'typechain', // find from hardhat.config.ts
-  dir: 'sonra',
-  model: elementModel,
-  fetch: elementFetch,
-}
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error)
+    process.exit(1)
+  })

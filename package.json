@@ -11,7 +11,8 @@
     "clean": "rm -rf dist",
     "format": "prettier --check \"./**/*.ts\" README.md",
     "format:fix": "prettier --write \"./**/*.ts\" README.md",
-    "typechain": "yarn hardhat compile"
+    "typechain": "yarn hardhat compile",
+    "element": "yarn ts-node scripts/element.ts"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.5",
@@ -33,6 +34,7 @@
     "jest": "^28.0.3",
     "lodash": "^4.17.21",
     "prettier": "^2.6.2",
+    "recursive-copy": "^2.0.14",
     "rimraf": "^3.0.2",
     "ts-jest": "^28.0.0",
     "ts-node": "^10.7.0",
