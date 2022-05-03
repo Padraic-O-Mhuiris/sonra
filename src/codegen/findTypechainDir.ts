@@ -7,7 +7,7 @@ const HardhatConfigFileName = 'hardhat.config.ts'
  * Finds typechain directory from hardhat config, presumes hardhat config is
  * standard
  * */
-export function findTypechainDir(): string | null {
+export async function findTypechainDir(): Promise<string | null> {
   console.log('Looking for hardhat config')
   const hardhatConfigPath = path.join(process.cwd(), HardhatConfigFileName)
   if (!fs.existsSync(hardhatConfigPath)) {
@@ -15,15 +15,28 @@ export function findTypechainDir(): string | null {
     return null
   }
 
-  console.log('Found hardhat config, ...determining typechain path')
-  const hardhatConfig = require(hardhatConfigPath) as {
-    typechain?: { outDir?: string }
+  let hardhatConfigContents: string = ''
+  try {
+    console.log('Found hardhat config')
+    hardhatConfigContents = (
+      await fs.promises.readFile(hardhatConfigPath, 'utf8')
+    ).toString()
+  } catch {
+    console.log('Could not read contents of hardhat config')
+    return null
   }
 
-  let typechainOutDir = hardhatConfig.typechain?.outDir
-  if (!typechainOutDir) {
-    console.log('No typechain path specified, assuming default')
-    typechainOutDir = 'typechain-types'
+  const outDirStr = hardhatConfigContents
+    .split(/\r?\n/)
+    .find((s) => s.includes('outDir:'))
+
+  const typechainOutDir = outDirStr
+    ? outDirStr.replace(/\s/g, '').slice("outDir:'".length, -"',".length)
+    : 'typechain-types'
+
+  if (typechainOutDir === '') {
+    console.log('outDir could not be parsed')
+    return null
   }
 
   console.log(`Typechain path specified at: ${typechainOutDir}`)

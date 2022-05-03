@@ -16,3 +16,7 @@ type UnionToTuple<T> = UnionToIntersection<
 export type ObjectKeysToTuple<T extends { [k in string]: any }> = UnionToTuple<
   keyof T
 >
+
+export function capitalize(s: string) {
+  return s.charAt(0).toUpperCase() + s.slice(1)
+}

@@ -1,23 +1,23 @@
 import fs from 'fs'
-import { capitalize, keys } from 'lodash'
+import { keys } from 'lodash'
 import path from 'path'
 import { SonraConfig } from '../config'
 import { createSonraSchema } from '../schema'
 import { SonraModel } from '../types'
+import { bundleAddressFile } from './bundleAddressFile'
 import { bundleContractTypes } from './bundleContractTypes'
 import { createSonraDir } from './createSonraDir'
 import { findTypechainDir } from './findTypechainDir'
+import { generateFiles } from './generateFiles'
 import { validateCategories } from './validateCategories'
 import { validateContracts } from './validateContracts'
-import { generateFiles } from './generateFiles'
-import { bundleAddressFile } from './bundleAddressFile'
 
 export async function run<M extends SonraModel>({
   dir,
   model,
   fetch,
 }: SonraConfig<M>) {
-  const typechainDirPath = findTypechainDir()
+  const typechainDirPath = await findTypechainDir()
   if (!typechainDirPath) {
     console.log('Contract types must be generated, ...exiting')
     return

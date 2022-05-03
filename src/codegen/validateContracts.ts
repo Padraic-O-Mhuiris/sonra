@@ -1,5 +1,5 @@
-import { capitalize } from 'lodash'
 import { SonraDataModel, SonraModel } from '../types'
+import { capitalize } from '../utils'
 
 const normalizeContractName = (contractName: string): string => {
   if (contractName.endsWith('.sol')) {
