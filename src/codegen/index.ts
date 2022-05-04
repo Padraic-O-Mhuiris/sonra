@@ -3,7 +3,7 @@ import { keys } from 'lodash'
 import path from 'path'
 import { SonraConfig } from '../config'
 import { createSonraSchema } from '../schema'
-import { SonraModel } from '../types'
+import { SonraModel } from '../schema'
 import { bundleAddressFile } from './bundleAddressFile'
 import { bundleContractTypes } from './bundleContractTypes'
 import { createSonraDir } from './createSonraDir'
@@ -11,11 +11,13 @@ import { findTypechainDir } from './findTypechainDir'
 import { generateFiles } from './generateFiles'
 import { validateCategories } from './validateCategories'
 import { validateContracts } from './validateContracts'
+import result from '../result.json'
+
+import { z } from 'zod'
 
 export async function run<M extends SonraModel>({
   dir,
   model,
-  fetch,
 }: SonraConfig<M>) {
   const typechainDirPath = await findTypechainDir()
   if (!typechainDirPath) {
@@ -50,10 +52,10 @@ export async function run<M extends SonraModel>({
   const schema = createSonraSchema<SonraModel>(model)
 
   console.log('Fetching data...')
-  const fetchResult = await fetch()
+  //const fetchResult = await fetch()
 
   console.log('Fetched data model, ...validating against schema')
-  const schemaResult = schema.safeParse(fetchResult)
+  const schemaResult = schema.safeParse(result)
 
   if (!schemaResult.success) {
     console.error(schemaResult.error)

@@ -1,4 +1,4 @@
-import { SonraDataModel, SonraModel } from '../types'
+import { SonraDataModel, SonraModel } from '../schema'
 import { capitalize } from '../utils'
 
 const normalizeContractName = (contractName: string): string => {

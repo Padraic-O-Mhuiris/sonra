@@ -12,7 +12,7 @@
     "format": "prettier --check \"./**/*.ts\" README.md",
     "format:fix": "prettier --write \"./**/*.ts\" README.md",
     "typechain": "yarn hardhat compile",
-    "element": "yarn ts-node scripts/element.ts"
+    "element": "yarn ts-node --project ./tsconfig.json scripts/element.ts"
   },
   "devDependencies": {
     "@ethersproject/providers": "^5.6.5",

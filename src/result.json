@@ -1,0 +1,217 @@
+{
+  "addresses": {
+    "principalToken": [
+      "0x94BE72dc46fe8f7e9f40FBD2c31826f472F4036E",
+      "0xD44bF95Bf21C83B46049BF9E34633F3300B280F6",
+      "0x9b44Ed798a10Df31dee52C5256Dcb4754BCf097E",
+      "0xa2b3d083AA1eaa8453BfB477f062A208Ed85cBBF",
+      "0x237535Da7e2f0aBa1b68262ABCf7C4e60B42600C",
+      "0x26941C63F4587796aBE199348ecd3d7C44F9aE0C",
+      "0x46a6c6aa64c148386af77C76a4666da961f8c65c",
+      "0xaa34245B4A2254D1135b5c414176741C1dbaa314",
+      "0xb1cc77e701de60FE246607565CF7eDC9D9b6b963",
+      "0xf38c3E836Be9cD35072055Ff6a9Ba570e0B70797",
+      "0x9CF2AB51aC93711Ec2fa32Ec861349568A16c729",
+      "0x6BF924137E769C0A5c443dcE6eC885552d31D579",
+      "0x8a2228705ec979961F0e16df311dEbcf097A2766",
+      "0x720465A4AE6547348056885060EEB51F9CAdb571",
+      "0x449D7C2e096E9f867339078535b15440d42F78E8",
+      "0x55096A35Bf827919B3Bb0A5e6b5E2af8095F3D4d",
+      "0x418De6227499181B045CAdf554030722E460881a",
+      "0x2A8f5649DE50462fF9699Ccc75A2Fb0b53447503",
+      "0x2361102893CCabFb543bc55AC4cC8d6d0824A67E",
+      "0x76a34D72b9CF97d972fB0e390eB053A37F211c74",
+      "0x285328906D0D33cb757c1E471F5e2176683247c2",
+      "0xC63958D9D01eFA6B8266b1df3862c6323CbDb52B",
+      "0x7d807a71D005C22E4e5C598B2C51e8e75560D133",
+      "0x52C9886d5D87B0f06EbACBEff750B5Ffad5d17d9",
+      "0xEaa1cBA8CC3CF01a92E9E853E90277B5B8A23e07",
+      "0x49e9e169f0B661Ea0A883f490564F4CC275123Ed",
+      "0x0740A6CfB9468B8b53070C0B327099293DCCB82d",
+      "0x2c72692E94E757679289aC85d3556b2c0f717E0E",
+      "0xCFe60a1535ecc5B0bc628dC97111C8bb01637911",
+      "0x21Fb757C2d3a5C574e8721027C3d7a506d77b6b3",
+      "0xCCE00da653eB50133455D4075fE8BcA36750492c",
+      "0x83d392a7be901892a8c861c96Ea430B8d9c2BD51",
+      "0x097F9f108ee0Db2Cb266AA16Ccfb4831Ec4D770b",
+      "0xc9B88361C09eC184bdd32Cf52CFFc79a1452F79D"
+    ]
+  },
+  "contracts": {
+    "principalToken": "Tranche.sol"
+  },
+  "metadata": {
+    "principalToken": {
+      "0x94BE72dc46fe8f7e9f40FBD2c31826f472F4036E": {
+        "name": "Element Principal Token yvDAI-27JUN21",
+        "symbol": "ePyvDAI-27JUN21",
+        "decimals": 18
+      },
+      "0xD44bF95Bf21C83B46049BF9E34633F3300B280F6": {
+        "name": "Element Principal Token yvCurveLUSD-30JUN21",
+        "symbol": "ePyvCurveLUSD-30JUN21",
+        "decimals": 18
+      },
+      "0x9b44Ed798a10Df31dee52C5256Dcb4754BCf097E": {
+        "name": "Element Principal Token yvCurveLUSD-28SEP21",
+        "symbol": "ePyvCurveLUSD-28SEP21",
+        "decimals": 18
+      },
+      "0xa2b3d083AA1eaa8453BfB477f062A208Ed85cBBF": {
+        "name": "Element Principal Token yvCurveLUSD-27DEC21",
+        "symbol": "ePyvCurveLUSD-27DEC21",
+        "decimals": 18
+      },
+      "0x237535Da7e2f0aBa1b68262ABCf7C4e60B42600C": {
+        "name": "Element Principal Token yvCrvTriCrypto-15AUG21",
+        "symbol": "ePyvCrvTriCrypto-15AUG21",
+        "decimals": 18
+      },
+      "0x26941C63F4587796aBE199348ecd3d7C44F9aE0C": {
+        "name": "Element Principal Token yvcrvSTETH-15OCT21",
+        "symbol": "ePyvcrvSTETH-15OCT21",
+        "decimals": 18
+      },
+      "0x46a6c6aa64c148386af77C76a4666da961f8c65c": {
+        "name": "Element Principal Token yvDAI-08DEC23",
+        "symbol": "ePyvDAI-08DEC23",
+        "decimals": 18
+      },
+      "0xaa34245B4A2254D1135b5c414176741C1dbaa314": {
+        "name": "Element Principal Token yvDAI-16OCT21",
+        "symbol": "ePyvDAI-16OCT21",
+        "decimals": 18
+      },
+      "0xb1cc77e701de60FE246607565CF7eDC9D9b6b963": {
+        "name": "Element Principal Token yvDAI-16OCT21",
+        "symbol": "ePyvDAI-16OCT21",
+        "decimals": 18
+      },
+      "0xf38c3E836Be9cD35072055Ff6a9Ba570e0B70797": {
+        "name": "Element Principal Token yvUSDC-29OCT21",
+        "symbol": "ePyvUSDC-29OCT21",
+        "decimals": 6
+      },
+      "0x9CF2AB51aC93711Ec2fa32Ec861349568A16c729": {
+        "name": "Element Principal Token yvcrv3crypto-12NOV21",
+        "symbol": "ePyvcrv3crypto-12NOV21",
+        "decimals": 18
+      },
+      "0x6BF924137E769C0A5c443dcE6eC885552d31D579": {
+        "name": "Element Principal Token yvWBTC-26NOV21",
+        "symbol": "ePyvWBTC-26NOV21",
+        "decimals": 8
+      },
+      "0x8a2228705ec979961F0e16df311dEbcf097A2766": {
+        "name": "Element Principal Token yvUSDC-28JAN22",
+        "symbol": "ePyvUSDC-28JAN22",
+        "decimals": 6
+      },
+      "0x720465A4AE6547348056885060EEB51F9CAdb571": {
+        "name": "Element Principal Token yvcrvSTETH-28JAN22",
+        "symbol": "ePyvcrvSTETH-28JAN22",
+        "decimals": 18
+      },
+      "0x449D7C2e096E9f867339078535b15440d42F78E8": {
+        "name": "Element Principal Token yvDAI-28JAN22",
+        "symbol": "ePyvDAI-28JAN22",
+        "decimals": 18
+      },
+      "0x55096A35Bf827919B3Bb0A5e6b5E2af8095F3D4d": {
+        "name": "Element Principal Token yvCurve-alUSD-28JAN22",
+        "symbol": "ePyvCurve-alUSD-28JAN22",
+        "decimals": 18
+      },
+      "0x418De6227499181B045CAdf554030722E460881a": {
+        "name": "Element Principal Token yvCurve-MIM-11FEB22",
+        "symbol": "ePyvCurve-MIM-11FEB22",
+        "decimals": 18
+      },
+      "0x2A8f5649DE50462fF9699Ccc75A2Fb0b53447503": {
+        "name": "Element Principal Token yvCurve-EURS-11FEB22",
+        "symbol": "ePyvCurve-EURS-11FEB22",
+        "decimals": 18
+      },
+      "0x2361102893CCabFb543bc55AC4cC8d6d0824A67E": {
+        "name": "Element Principal Token yvcrvSTETH-15APR22",
+        "symbol": "ePyvcrvSTETH-15APR22",
+        "decimals": 18
+      },
+      "0x76a34D72b9CF97d972fB0e390eB053A37F211c74": {
+        "name": "Element Principal Token yvUSDC-17DEC21",
+        "symbol": "ePyvUSDC-17DEC21",
+        "decimals": 6
+      },
+      "0x285328906D0D33cb757c1E471F5e2176683247c2": {
+        "name": "Element Principal Token yvcrv3crypto-29APR22",
+        "symbol": "ePyvcrv3crypto-29APR22",
+        "decimals": 18
+      },
+      "0xC63958D9D01eFA6B8266b1df3862c6323CbDb52B": {
+        "name": "Element Principal Token yvCurve-MIM-29APR22",
+        "symbol": "ePyvCurve-MIM-29APR22",
+        "decimals": 18
+      },
+      "0x7d807a71D005C22E4e5C598B2C51e8e75560D133": {
+        "name": "Element Principal Token yvUSDC-29APR22",
+        "symbol": "ePyvUSDC-29APR22",
+        "decimals": 6
+      },
+      "0x52C9886d5D87B0f06EbACBEff750B5Ffad5d17d9": {
+        "name": "Element Principal Token yvUSDC-29APR22",
+        "symbol": "ePyvUSDC-29APR22",
+        "decimals": 6
+      },
+      "0xEaa1cBA8CC3CF01a92E9E853E90277B5B8A23e07": {
+        "name": "Element Principal Token yvCurve-alUSD-29APR22",
+        "symbol": "ePyvCurve-alUSD-29APR22",
+        "decimals": 18
+      },
+      "0x49e9e169f0B661Ea0A883f490564F4CC275123Ed": {
+        "name": "Element Principal Token yvWBTC-29APR22",
+        "symbol": "ePyvWBTC-29APR22",
+        "decimals": 8
+      },
+      "0x0740A6CfB9468B8b53070C0B327099293DCCB82d": {
+        "name": "Element Principal Token yvCurveLUSD-29APR22",
+        "symbol": "ePyvCurveLUSD-29APR22",
+        "decimals": 18
+      },
+      "0x2c72692E94E757679289aC85d3556b2c0f717E0E": {
+        "name": "Element Principal Token yvDAI-29APR22",
+        "symbol": "ePyvDAI-29APR22",
+        "decimals": 18
+      },
+      "0xCFe60a1535ecc5B0bc628dC97111C8bb01637911": {
+        "name": "Element Principal Token yvUSDC-16SEP22",
+        "symbol": "ePyvUSDC-16SEP22",
+        "decimals": 6
+      },
+      "0x21Fb757C2d3a5C574e8721027C3d7a506d77b6b3": {
+        "name": "Element Principal Token yvCurve-stETH-16SEP22",
+        "symbol": "ePyvCurve-stETH-16SEP22",
+        "decimals": 18
+      },
+      "0xCCE00da653eB50133455D4075fE8BcA36750492c": {
+        "name": "Element Principal Token yvDAI-16SEP22",
+        "symbol": "ePyvDAI-16SEP22",
+        "decimals": 18
+      },
+      "0x83d392a7be901892a8c861c96Ea430B8d9c2BD51": {
+        "name": "Element Principal Token yvCurve-LUSD-16SEP22",
+        "symbol": "ePyvCurve-LUSD-16SEP22",
+        "decimals": 18
+      },
+      "0x097F9f108ee0Db2Cb266AA16Ccfb4831Ec4D770b": {
+        "name": "Element Principal Token yvCurve-3Crypto-16SEP22",
+        "symbol": "ePyvCurve-3Crypto-16SEP22",
+        "decimals": 18
+      },
+      "0xc9B88361C09eC184bdd32Cf52CFFc79a1452F79D": {
+        "name": "Element Principal Token yvCurve-alUSD-16SEP22",
+        "symbol": "ePyvCurve-alUSD-16SEP22",
+        "decimals": 18
+      }
+    }
+  }
+}

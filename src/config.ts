@@ -1,4 +1,4 @@
-import { SonraFetch, SonraModel } from './types'
+import { SonraFetch, SonraModel } from './schema'
 
 export type SonraConfig<M extends SonraModel> = {
   /**

@@ -1,5 +1,5 @@
 import { isEqual, keys } from 'lodash'
-import { SonraDataModel, SonraModel } from '../types'
+import { SonraDataModel, SonraModel } from '../schema'
 
 export function validateCategories({
   addresses,
