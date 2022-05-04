@@ -89,6 +89,7 @@ export async function run<M extends SonraModel>({
 
   const categoryFileDict = generateFiles(
     categories,
+    model,
     data,
     categoryContractFactoryDict,
   )
