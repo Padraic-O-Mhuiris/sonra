@@ -19,8 +19,12 @@ export type TagAddress<T extends string> = Address & {
 
 export const zeroAddress = addressSchema.parse(ethers.constants.AddressZero)
 
+export type TaggedAddressSchema<T extends string> = z.ZodType<TagAddress<T>>
+
 // custom address type of the structure <tag>:<address>
-export const createTaggedAddressSchema = <T extends string>(_tag: T) =>
+export const createTaggedAddressSchema = <T extends string>(
+  _tag: T,
+): TaggedAddressSchema<T> =>
   z.custom<TagAddress<T>>(
     (val) =>
       z
@@ -36,8 +40,6 @@ export const createTaggedAddressSchema = <T extends string>(_tag: T) =>
         .safeParse(val).success,
   )
 
-export type TaggedAddressSchema<T extends string> = z.ZodType<TagAddress<T>>
-
 export const randomAddress = () =>
   addressSchema.parse(ethers.Wallet.createRandom().address)
 
@@ -48,3 +50,29 @@ export const createTagAddress = <T extends string, A extends Address>(
 
 export const randomTagAddress = <T extends string>(tag: T): TagAddress<T> =>
   createTagAddress(tag, randomAddress())
+
+export const sonraAddress = <T extends string | undefined = undefined>(
+  address: string,
+  tag?: T,
+): T extends string ? TagAddress<T> : Address => {
+  if (tag) {
+    return createTagAddress(
+      tag,
+      addressSchema.parse(address),
+    ) as T extends string ? TagAddress<T> : never
+  }
+
+  return addressSchema.parse(address) as T extends string ? never : Address
+}
+
+export const sonraAddressSchema = <T extends string | undefined = undefined>(
+  tag?: T,
+): T extends string ? TaggedAddressSchema<T> : AddressSchema => {
+  if (tag) {
+    return createTaggedAddressSchema(tag) as T extends string
+      ? TaggedAddressSchema<T>
+      : never
+  }
+
+  return addressSchema as T extends string ? never : AddressSchema
+}

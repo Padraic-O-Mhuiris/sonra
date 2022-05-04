@@ -1,6 +1,14 @@
 import { ethers } from 'ethers'
 import { z } from 'zod'
-import { Address, addressSchema, SonraConfig, SonraFetch } from './src'
+import {
+  Address,
+  addressSchema,
+  createTaggedAddressSchema,
+  sonraAddress,
+  sonraAddressSchema,
+  SonraConfig,
+  SonraFetch,
+} from './src'
 import { TrancheFactory__factory, Tranche__factory } from './typechain'
 
 const provider = new ethers.providers.JsonRpcProvider(
@@ -14,13 +22,13 @@ const elementModel = {
       symbol: z.string(),
       decimals: z.number(),
     }),
-    underlying: addressSchema,
-    interestToken: addressSchema,
+    underlying: sonraAddressSchema('baseToken'),
+    interestToken: sonraAddressSchema('yieldToken'),
     term: z.object({
       start: z.date(),
       end: z.date(),
     }),
-    position: addressSchema,
+    position: sonraAddressSchema('wrappedPosition'),
   }),
 } as const
 
@@ -72,12 +80,18 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
       principalToken.name(),
       principalToken.symbol(),
       principalToken.decimals(),
-      principalToken.underlying().then(addressSchema.parse),
+      principalToken
+        .underlying()
+        .then((address) => sonraAddress(address, 'baseToken')),
       principalToken
         .unlockTimestamp()
         .then((result) => new Date(result.toNumber() * 1000)),
-      principalToken.interestToken().then(addressSchema.parse),
-      principalToken.position().then(addressSchema.parse),
+      principalToken
+        .interestToken()
+        .then((address) => sonraAddress(address, 'yieldToken')),
+      principalToken
+        .position()
+        .then((address) => sonraAddress(address, 'wrappedPosition')),
     ])
 
     principalTokenData[address] = {

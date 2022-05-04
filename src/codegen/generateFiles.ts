@@ -9,7 +9,7 @@ import { parseMetadata } from './parseMetadata'
 //   return `Date(${this.toUTCString()})`
 // }
 
-const categoryLabel = ({
+export const categoryLabel = ({
   category,
   categoryPostFix = undefined,
   address = undefined,
@@ -204,7 +204,6 @@ export function generateFiles(
       data.metadata[category],
     )
 
-    console.log(categoryMetadataLabel)
     const file = [
       preamble,
       importLabel,
