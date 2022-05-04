@@ -2,7 +2,12 @@ import prettier from 'prettier'
 import { Address } from '../address'
 import { SonraDataModel, SonraModel } from '../schema'
 import { capitalize } from '../utils'
-import { createTypeAlias, printNode, zodToTs } from 'zod-to-ts'
+import { printNode, zodToTs } from 'zod-to-ts'
+import { parseMetadata } from './parseMetadata'
+
+// Date.prototype.toJSON = function () {
+//   return `Date(${this.toUTCString()})`
+// }
 
 const categoryLabel = ({
   category,
@@ -133,13 +138,10 @@ const genCategoryMetadataLabel = (
   for (const [addressConstLabel, address] of Object.entries(
     constantsAddressDict,
   )) {
-    label += `[${addressConstLabel}]: ${JSON.stringify(
-      metadata[address],
-      null,
-      2,
-    )},\n`
+    const metadataLabel = parseMetadata(metadata[address]!)
+    label += `  [${addressConstLabel}]: ${metadataLabel},\n`
   }
-  return `${label}}`
+  return `${label}\n}`
 }
 
 export function generateFiles(
@@ -202,6 +204,7 @@ export function generateFiles(
       data.metadata[category],
     )
 
+    console.log(categoryMetadataLabel)
     const file = [
       preamble,
       importLabel,

@@ -11,13 +11,11 @@ import { findTypechainDir } from './findTypechainDir'
 import { generateFiles } from './generateFiles'
 import { validateCategories } from './validateCategories'
 import { validateContracts } from './validateContracts'
-import result from '../result.json'
-
-import { z } from 'zod'
 
 export async function run<M extends SonraModel>({
   dir,
   model,
+  fetch,
 }: SonraConfig<M>) {
   const typechainDirPath = await findTypechainDir()
   if (!typechainDirPath) {
@@ -52,10 +50,10 @@ export async function run<M extends SonraModel>({
   const schema = createSonraSchema<SonraModel>(model)
 
   console.log('Fetching data...')
-  //const fetchResult = await fetch()
+  const fetchResult = await fetch()
 
   console.log('Fetched data model, ...validating against schema')
-  const schemaResult = schema.safeParse(result)
+  const schemaResult = schema.safeParse(fetchResult)
 
   if (!schemaResult.success) {
     console.error(schemaResult.error)

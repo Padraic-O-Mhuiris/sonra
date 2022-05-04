@@ -9,14 +9,18 @@ const provider = new ethers.providers.JsonRpcProvider(
 
 const elementModel = {
   principalToken: z.object({
-    name: z.string(),
-    symbol: z.string(),
-    decimals: z.number(),
-    // underlying: addressSchema,
-    // interestToken: addressSchema,
-    // termStart: z.date(),
-    // termEnd: z.date(),
-    // position: addressSchema,
+    erc20: z.object({
+      name: z.string(),
+      symbol: z.string(),
+      decimals: z.number(),
+    }),
+    underlying: addressSchema,
+    interestToken: addressSchema,
+    term: z.object({
+      start: z.date(),
+      end: z.date(),
+    }),
+    position: addressSchema,
   }),
 } as const
 
@@ -30,7 +34,10 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
   )
 
   const filter = trancheFactory.filters.TrancheCreated(null, null, null)
-  const trancheCreatedEvents = await trancheFactory.queryFilter(filter)
+  const trancheCreatedEvents = await trancheFactory.queryFilter(
+    filter,
+    14600000,
+  )
 
   const addressAndCreatedDateInfo: [Address, Date][] = await Promise.all(
     trancheCreatedEvents.map(async (event) => {
@@ -57,31 +64,35 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
       name,
       symbol,
       decimals,
-      // underlying,
-      // termEnd,
-      // interestToken,
-      // position,
+      underlying,
+      termEnd,
+      interestToken,
+      position,
     ] = await Promise.all([
       principalToken.name(),
       principalToken.symbol(),
       principalToken.decimals(),
-      // principalToken.underlying().then(addressSchema.parse),
-      // principalToken
-      //   .unlockTimestamp()
-      //   .then((result) => new Date(result.toNumber() * 1000)),
-      // principalToken.interestToken().then(addressSchema.parse),
-      // principalToken.position().then(addressSchema.parse),
+      principalToken.underlying().then(addressSchema.parse),
+      principalToken
+        .unlockTimestamp()
+        .then((result) => new Date(result.toNumber() * 1000)),
+      principalToken.interestToken().then(addressSchema.parse),
+      principalToken.position().then(addressSchema.parse),
     ])
 
     principalTokenData[address] = {
-      name,
-      symbol,
-      decimals,
-      // underlying,
-      // termStart,
-      // termEnd,
-      // interestToken,
-      // position,
+      erc20: {
+        name,
+        symbol,
+        decimals,
+      },
+      underlying,
+      term: {
+        start: termStart,
+        end: termEnd,
+      },
+      interestToken,
+      position,
     }
   }
 
