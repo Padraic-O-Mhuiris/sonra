@@ -4,7 +4,6 @@ import { createAddress } from './src/address'
 import { SonraConfig } from './src/config'
 import { SonraFetch } from './src/schema'
 import * as zx from './src/zod'
-
 import { TrancheFactory__factory, Tranche__factory } from './typechain'
 
 const provider = new ethers.providers.JsonRpcProvider(
@@ -13,11 +12,14 @@ const provider = new ethers.providers.JsonRpcProvider(
 
 const elementModel = {
   principalToken: z.object({
-    erc20: z.object({
-      name: z.string(),
-      symbol: z.string(),
-      decimals: z.number(),
-    }),
+    erc20: z
+      .object({
+        name: z.string(),
+        symbol: z.string(),
+        decimals: z.number(),
+      })
+      .array(),
+    addressList: zx.address('baseToken').array().array(),
     underlying: zx.address('baseToken'),
     interestToken: zx.address('yieldToken'),
     term: z.object({
@@ -40,7 +42,7 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
   const filter = trancheFactory.filters.TrancheCreated(null, null, null)
   const trancheCreatedEvents = await trancheFactory.queryFilter(
     filter,
-    14600000,
+    14650000,
   )
 
   const addressAndCreatedDateInfo: [zx.Address, Date][] = await Promise.all(
@@ -91,11 +93,30 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
     ])
 
     principalTokenData[address] = {
-      erc20: {
-        name,
-        symbol,
-        decimals,
-      },
+      erc20: [
+        {
+          name,
+          symbol,
+          decimals,
+        },
+        {
+          name,
+          symbol,
+          decimals,
+        },
+      ],
+      addressList: [
+        [underlying, underlying, underlying],
+        [underlying, underlying, underlying],
+        [
+          underlying,
+          underlying,
+          underlying,
+          underlying,
+          underlying,
+          underlying,
+        ],
+      ],
       underlying,
       term: {
         start: termStart,

@@ -1,11 +1,14 @@
 import prettier from 'prettier'
+import { printNode, zodToTs } from 'zod-to-ts'
 import { SonraDataModel, SonraModel } from '../schema'
 import { capitalize } from '../utils'
-import { printNode, zodToTs } from 'zod-to-ts'
-import { parseMetadata } from './parseMetadata'
-import { buildTrie, Trie } from './buildTrie'
 import * as zx from '../zod'
-import { keys } from 'lodash'
+import {
+  buildCategoryTrieDict,
+  generateRootTrieValues,
+  TrieLabel,
+} from './buildTrie'
+import { parseMetadata } from './parseMetadata'
 
 export const categoryLabel = ({
   category,
@@ -141,28 +144,19 @@ const genCategoryMetadataLabel = (
   }
   return `${label}\n}`
 }
-
 export function generateFiles(
   categories: [string, ...string[]],
   model: SonraModel,
   data: SonraDataModel<SonraModel>,
   categoryContractFactoryDict: { [k in string]: string },
 ): { [k in string]: string } {
-  const categoryTrieDict = Object.fromEntries(
-    categories.map((category) => {
-      const categoryAddresses = keys(data.metadata[category]) as zx.Address[]
+  const categoryTrieDict = buildCategoryTrieDict(categories, data.metadata)
 
-      return [
-        category,
-        categoryAddresses.map((address) => [
-          address,
-          buildTrie(data.metadata[category][address as zx.Address]),
-        ]),
-      ]
-    }) as [string, [string, Trie]][],
-  )
-
-  console.log(JSON.stringify(categoryTrieDict, null, 2))
+  //console.log(JSON.stringify(categoryTrieDict, null, 2))
+  const x = generateRootTrieValues(categoryTrieDict)
+  console.log(JSON.stringify(x, null, 2))
+  // const y = x.filter((y) => y.label === TrieLabel.ARRAY)
+  // console.log(y[0].value)
 
   const categoryFileDict: Record<string, string> = {}
 
