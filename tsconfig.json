@@ -15,6 +15,12 @@
     "esModuleInterop": true,
     "outDir": "dist"
   },
-  "include": ["src/**/*.ts", "src/**/*.json", "sonra-types", "sonra.config.ts"],
+  "include": [
+    "src/**/*.ts",
+    "typechain/**/*.ts",
+    "src/**/*.json",
+    //"sonra-types",
+    "sonra.config.ts"
+  ],
   "exclude": ["**/node_modules"]
 }

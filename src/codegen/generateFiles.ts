@@ -1,13 +1,11 @@
 import prettier from 'prettier'
-import { Address } from '../address'
 import { SonraDataModel, SonraModel } from '../schema'
 import { capitalize } from '../utils'
 import { printNode, zodToTs } from 'zod-to-ts'
 import { parseMetadata } from './parseMetadata'
-
-// Date.prototype.toJSON = function () {
-//   return `Date(${this.toUTCString()})`
-// }
+import { buildTrie, Trie } from './buildTrie'
+import * as zx from '../zod'
+import { keys } from 'lodash'
 
 export const categoryLabel = ({
   category,
@@ -18,7 +16,7 @@ export const categoryLabel = ({
 }: {
   category: string
   categoryPostFix?: string
-  address?: Address
+  address?: zx.Address
   capital?: boolean
   postFix?: boolean
 }) => {
@@ -28,7 +26,7 @@ export const categoryLabel = ({
   return capital ? capitalize(label) : label
 }
 
-const buildConstantsAddressDict = (category: string, addresses: Address[]) =>
+const buildConstantsAddressDict = (category: string, addresses: zx.Address[]) =>
   addresses.reduce(
     (acc, address) => ({
       ...acc,
@@ -39,7 +37,7 @@ const buildConstantsAddressDict = (category: string, addresses: Address[]) =>
         categoryPostFix: 'Address',
       })]: address,
     }),
-    {} as { [k in string]: Address },
+    {} as { [k in string]: zx.Address },
   )
 
 //////
@@ -58,7 +56,7 @@ const genBrandedTypeLabel = (typeLabel: string) =>
 
 const genAddressConstantsLabel = (
   categoryTypeLabel: string,
-  constantsAddressDict: { [k in string]: Address },
+  constantsAddressDict: { [k in string]: zx.Address },
 ) => {
   let label = ''
 
@@ -70,7 +68,7 @@ const genAddressConstantsLabel = (
 
 const genAddressListLabel = (
   categoryAddressListConstLabel: string,
-  constantsAddressDict: { [k in string]: Address },
+  constantsAddressDict: { [k in string]: zx.Address },
 ) => {
   let label = `export const ${categoryAddressListConstLabel} = [\n`
   for (const [constLabel] of Object.entries(constantsAddressDict)) {
@@ -120,7 +118,7 @@ const genCategoryMetadataTypeLabel = (
 
 const genCategoryMetadataLabel = (
   category: string,
-  constantsAddressDict: { [k in string]: Address },
+  constantsAddressDict: { [k in string]: zx.Address },
   metadata: SonraDataModel<SonraModel>['metadata'][string],
 ) => {
   const constLabel = categoryLabel({
@@ -150,6 +148,22 @@ export function generateFiles(
   data: SonraDataModel<SonraModel>,
   categoryContractFactoryDict: { [k in string]: string },
 ): { [k in string]: string } {
+  const categoryTrieDict = Object.fromEntries(
+    categories.map((category) => {
+      const categoryAddresses = keys(data.metadata[category]) as zx.Address[]
+
+      return [
+        category,
+        categoryAddresses.map((address) => [
+          address,
+          buildTrie(data.metadata[category][address as zx.Address]),
+        ]),
+      ]
+    }) as [string, [string, Trie]][],
+  )
+
+  console.log(JSON.stringify(categoryTrieDict, null, 2))
+
   const categoryFileDict: Record<string, string> = {}
 
   for (const category of categories) {

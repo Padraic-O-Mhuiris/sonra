@@ -1,6 +1,6 @@
 import { keys } from 'lodash'
 import { z } from 'zod'
-import { addressArraySchema, addressSchema, AddressSchema } from './address'
+import * as zx from './zod'
 
 export type SonraModel = {
   readonly [k in string]: z.AnyZodObject
@@ -8,13 +8,13 @@ export type SonraModel = {
 
 export type SonraSchema<Model extends SonraModel> = z.ZodObject<{
   addresses: z.ZodObject<{
-    [k in keyof Model & string]: z.ZodArray<AddressSchema>
+    [k in keyof Model & string]: z.ZodArray<zx.ZodAddress>
   }>
   contracts: z.ZodObject<{
     [k in keyof Model & string]: z.ZodString
   }>
   metadata: z.ZodObject<{
-    [k in keyof Model & string]: z.ZodRecord<AddressSchema, Model[k]>
+    [k in keyof Model & string]: zx.ZodAddressRecord<Model[k]>
   }>
 }>
 
@@ -31,10 +31,10 @@ export const createSonraSchema = <Model extends SonraModel>(
     modelKeys.reduce(
       (acc, arg) => ({
         ...acc,
-        [arg]: addressArraySchema,
+        [arg]: zx.address().array(),
       }),
       {} as {
-        [k in keyof Model & string]: z.ZodArray<AddressSchema>
+        [k in keyof Model & string]: z.ZodArray<zx.ZodAddress>
       },
     ),
   )
@@ -55,10 +55,10 @@ export const createSonraSchema = <Model extends SonraModel>(
     modelKeys.reduce(
       (acc, arg) => ({
         ...acc,
-        [arg]: z.record(addressSchema, model[arg]),
+        [arg]: zx.addressRecord(model[arg]),
       }),
       {} as {
-        [k in keyof Model & string]: z.ZodRecord<AddressSchema, Model[k]>
+        [k in keyof Model & string]: zx.ZodAddressRecord<Model[k]>
       },
     ),
   )

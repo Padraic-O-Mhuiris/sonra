@@ -38,6 +38,7 @@
     "lodash": "^4.17.21",
     "prettier": "^2.6.2",
     "rimraf": "^3.0.2",
+    "ts-essentials": "^9.1.2",
     "ts-jest": "^28.0.0",
     "ts-node": "^10.7.0",
     "typechain": "^8.0.0",

@@ -1,14 +1,10 @@
 import { ethers } from 'ethers'
 import { z } from 'zod'
-import {
-  Address,
-  addressSchema,
-  createTaggedAddressSchema,
-  sonraAddress,
-  sonraAddressSchema,
-  SonraConfig,
-  SonraFetch,
-} from './src'
+import { createAddress } from './src/address'
+import { SonraConfig } from './src/config'
+import { SonraFetch } from './src/schema'
+import * as zx from './src/zod'
+
 import { TrancheFactory__factory, Tranche__factory } from './typechain'
 
 const provider = new ethers.providers.JsonRpcProvider(
@@ -22,13 +18,13 @@ const elementModel = {
       symbol: z.string(),
       decimals: z.number(),
     }),
-    underlying: sonraAddressSchema('baseToken'),
-    interestToken: sonraAddressSchema('yieldToken'),
+    underlying: zx.address('baseToken'),
+    interestToken: zx.address('yieldToken'),
     term: z.object({
       start: z.date(),
       end: z.date(),
     }),
-    position: sonraAddressSchema('wrappedPosition'),
+    position: zx.address('wrappedPosition'),
   }),
 } as const
 
@@ -47,9 +43,9 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
     14600000,
   )
 
-  const addressAndCreatedDateInfo: [Address, Date][] = await Promise.all(
+  const addressAndCreatedDateInfo: [zx.Address, Date][] = await Promise.all(
     trancheCreatedEvents.map(async (event) => {
-      const address = addressSchema.parse(event.args.trancheAddress)
+      const address = zx.address().parse(event.args.trancheAddress)
       const termStart = new Date((await event.getBlock()).timestamp * 1000)
       return [address, termStart]
     }),
@@ -61,7 +57,7 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
   )
 
   const principalTokenData: {
-    [k in Address]: z.infer<ElementModel['principalToken']>
+    [k in zx.Address]: z.infer<ElementModel['principalToken']>
   } = {}
 
   for (const [address, termStart] of addressAndCreatedDateInfo) {
@@ -82,16 +78,16 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
       principalToken.decimals(),
       principalToken
         .underlying()
-        .then((address) => sonraAddress(address, 'baseToken')),
+        .then((address) => createAddress(address, 'baseToken')),
       principalToken
         .unlockTimestamp()
         .then((result) => new Date(result.toNumber() * 1000)),
       principalToken
         .interestToken()
-        .then((address) => sonraAddress(address, 'yieldToken')),
+        .then((address) => createAddress(address, 'yieldToken')),
       principalToken
         .position()
-        .then((address) => sonraAddress(address, 'wrappedPosition')),
+        .then((address) => createAddress(address, 'wrappedPosition')),
     ])
 
     principalTokenData[address] = {

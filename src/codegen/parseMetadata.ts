@@ -1,6 +1,6 @@
 import { BigNumber } from 'ethers'
-import { addressSchema } from '../address'
 import { categoryLabel } from './generateFiles'
+import * as zx from '../zod'
 
 export function parseMetadata(obj: { [k in string]: any }): string {
   const entries = Object.entries(obj)
@@ -20,12 +20,12 @@ export function parseMetadata(obj: { [k in string]: any }): string {
 
     if (typeof val === 'string') {
       if (val.includes(':')) {
-        const [category, addressString] = val.split(':')
-        const parsedAddress = addressSchema.safeParse(addressString)
-        if (parsedAddress.success) {
+        const [category, _address] = val.split(':')
+        const address = zx.address().safeParse(_address)
+        if (address.success) {
           return (acc += `  ${key}: ${categoryLabel({
             category,
-            address: parsedAddress.data,
+            address: address.data,
             postFix: true,
           })},\n`)
         }
