@@ -1,6 +1,7 @@
 import { keys } from 'lodash'
 import { z } from 'zod'
 import * as zx from './zod'
+import { log } from './utils'
 
 export type SonraModel = {
   readonly [k in string]: z.AnyZodObject
@@ -68,4 +69,23 @@ export const createSonraSchema = <Model extends SonraModel>(
     contracts,
     metadata,
   })
+}
+
+export const fetchAndValidate = async (
+  model: SonraModel,
+  fetch: SonraFetch<SonraModel>,
+): Promise<SonraDataModel<SonraModel>> => {
+  log('Creating schema and validating fetch result')
+  const schema = createSonraSchema<SonraModel>(model)
+  const fetchResult = await fetch()
+
+  const schemaResult = schema.safeParse(fetchResult)
+
+  if (!schemaResult.success) {
+    log('Fetch result failed validation by schema:')
+    throw new Error(schemaResult.error.toString())
+  }
+
+  log('Schema parse success')
+  return schemaResult.data
 }

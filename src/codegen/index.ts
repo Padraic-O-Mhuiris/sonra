@@ -2,8 +2,8 @@ import fs from 'fs'
 import { keys } from 'lodash'
 import path from 'path'
 import { SonraConfig } from '../config'
-import { createSonraSchema } from '../schema'
-import { SonraModel } from '../schema'
+import { fetchAndValidate, SonraModel } from '../schema'
+import { log } from '../utils'
 import { bundleAddressFile } from './bundleAddressFile'
 import { bundleContractTypes } from './bundleContractTypes'
 import { createSonraDir } from './createSonraDir'
@@ -11,90 +11,37 @@ import { findTypechainDir } from './findTypechainDir'
 import { generateFiles } from './generateFiles'
 import { validateCategories } from './validateCategories'
 import { validateContracts } from './validateContracts'
-import { log } from '../utils'
 
-export async function run<M extends SonraModel>({
-  dir,
-  model,
-  fetch,
-}: SonraConfig<M>) {
+export async function run({ dir, model, fetch }: SonraConfig<SonraModel>) {
   const typechainDirPath = await findTypechainDir()
-  if (!typechainDirPath) {
-    log('Contract types must be generated, ...exiting')
-    return
-  }
+  log(`Typechain directory found at: ${typechainDirPath}`)
 
   const { factories, ...rest } = require(typechainDirPath) as {
     factories: any
   } & { [k in string]: any }
 
-  const typechainFactoryNames = keys(rest)
-  log(`Contract Factory names: ${typechainFactoryNames.join(', ')}`)
+  const contractFactories = keys(rest)
+  log(`Contract Factory names:\n ${contractFactories.join(',\n')}`)
 
   const dirPath = path.join(process.cwd(), dir)
-  if (!(await createSonraDir(dirPath))) {
-    log('Something went wrong creating working directory, ...exiting')
-    return
-  }
 
-  if (!(await bundleContractTypes(dirPath, typechainDirPath))) {
-    log('Something went wrong copying typechain files, ...exiting')
-    return
-  }
+  await createSonraDir(dirPath)
+  await bundleContractTypes(dirPath, typechainDirPath)
+  await bundleAddressFile(dirPath)
 
-  if (!(await bundleAddressFile(dirPath))) {
-    log('Something went wrong creating address file, ...exiting')
-    return
-  }
-
-  log('Creating schema from model')
-  const schema = createSonraSchema<SonraModel>(model)
-
-  log('Fetching data...')
-  const fetchResult = await fetch()
-
-  log('Fetched data model, ...validating against schema')
-  const schemaResult = schema.safeParse(fetchResult)
-
-  if (!schemaResult.success) {
-    log('Schema parse failed, ...exiting')
-    throw new Error(schemaResult.error.toString())
-  }
-
-  const data = schemaResult.data
-
+  const data = await fetchAndValidate(model, fetch)
   const categories = validateCategories(data)
-  if (!categories) {
-    throw new Error('Categories could not be validated, ...exiting')
-  }
 
-  log(`Categories: ${categories.join(', ')}`)
-  log('Schema parse success, ...checking contracts correspondance')
+  const contractFactoriesByCategory = validateContracts(data, contractFactories)
 
-  const categoryContractFactoryDict = validateContracts(
-    data,
-    typechainFactoryNames,
-  )
-
-  if (!categoryContractFactoryDict) {
-    throw new Error(
-      'Could not find all correspondances for contracts declared in the model, ...exiting',
-    )
-  }
-
-  const categoryFileDict = generateFiles(
+  const categoryFilesByCategory = generateFiles(
     categories,
     model,
     data,
-    categoryContractFactoryDict,
+    contractFactoriesByCategory,
   )
 
-  for (const [category, file] of Object.entries(categoryFileDict)) {
-    try {
-      await fs.promises.writeFile(path.join(dirPath, `${category}.ts`), file)
-    } catch {
-      log(`Something went wrong writing ${category}.ts, ...exiting`)
-      return
-    }
+  for (const [category, file] of Object.entries(categoryFilesByCategory)) {
+    await fs.promises.writeFile(path.join(dirPath, `${category}.ts`), file)
   }
 }

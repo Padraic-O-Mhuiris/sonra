@@ -1,3 +1,4 @@
+import { includes } from 'lodash'
 import { SonraDataModel, SonraModel } from '../schema'
 import { capitalize } from '../utils'
 
@@ -16,8 +17,8 @@ const normalizeContractName = (contractName: string): string => {
 
 export function validateContracts(
   { contracts }: SonraDataModel<SonraModel>,
-  contractFactoryNames: string[],
-): { [k in string]: string } | null {
+  contractFactories: string[],
+): Record<string, string> {
   const normalizedContracts = Object.entries(contracts).map(
     ([category, contractName]) => [
       category,
@@ -25,19 +26,15 @@ export function validateContracts(
     ],
   )
 
-  const contractCategoryDict: Record<string, string> = {}
-  for (const [category, contractName] of normalizedContracts) {
-    if (
-      !contractFactoryNames.some(
-        (contractFactoryName) => contractFactoryName === contractName,
-      )
-    ) {
-      console.log(
+  const contractFactoriesByCategory: Record<string, string> = {}
+  for (const [category, name] of normalizedContracts) {
+    if (!includes(contractFactories, name)) {
+      throw new Error(
         `Could not find associated contract factory for ${contracts[category]}`,
       )
-      return null
     }
-    contractCategoryDict[category] = contractName
+    contractFactoriesByCategory[category] = name
   }
-  return contractCategoryDict
+
+  return contractFactoriesByCategory
 }

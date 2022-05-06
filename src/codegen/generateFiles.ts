@@ -10,7 +10,6 @@ import {
   TrieLabel,
 } from './buildTrie'
 import { parseMetadata } from './parseMetadata'
-import { log } from '../utils'
 
 export const categoryLabel = ({
   category,
@@ -160,7 +159,7 @@ export function generateFiles(
 
   model: SonraModel,
   data: SonraDataModel<SonraModel>,
-  categoryContractFactoryDict: { [k in string]: string },
+  contractFactoriesByCategory: Record<string, string>,
 ): { [k in string]: string } {
   const categoryTrieDict = buildCategoryTrieDict(categories, data.metadata)
 
@@ -183,7 +182,7 @@ export function generateFiles(
 
   for (const category of categories) {
     const addresses = data.addresses[category]
-    const contractFactory = categoryContractFactoryDict[category]
+    const contractFactory = contractFactoriesByCategory[category]
 
     const categoryTypeLabel = categoryLabel({
       category,

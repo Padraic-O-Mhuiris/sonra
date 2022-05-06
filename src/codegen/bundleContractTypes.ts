@@ -1,18 +1,17 @@
 import path from 'path'
 import fs from 'fs'
 import fse from 'fs-extra'
+import { log } from '../utils'
 
 export async function bundleContractTypes(
   dirPath: string,
   typechainDirPath: string,
-): Promise<boolean> {
-  const typechainSonraPath = path.join(dirPath, 'contracts')
-  try {
-    await fs.promises.mkdir(typechainSonraPath)
-    await fse.copy(typechainDirPath, typechainSonraPath)
-  } catch (e) {
-    console.error(e)
-    return false
-  }
-  return true
+): Promise<void> {
+  const sonraContractsPath = path.join(dirPath, 'contracts') // TODO user specified name
+  await fs.promises.mkdir(sonraContractsPath)
+  await fse.copy(typechainDirPath, sonraContractsPath)
+
+  log(
+    `Copied typechain types from ${typechainDirPath} to ${sonraContractsPath}`,
+  )
 }

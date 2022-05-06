@@ -1,23 +1,19 @@
 import fs from 'fs'
 import rimraf from 'rimraf'
+import { log } from '../utils'
 
-export async function createSonraDir(dirPath: string): Promise<boolean> {
-  try {
-    if (!fs.existsSync(dirPath)) {
-      console.log(`Creating sonra working dir: ${dirPath}`)
-      await fs.promises.mkdir(dirPath, { recursive: true })
-    } else {
-      console.log(`${dirPath} already exists, ...overwriting`)
-      if (dirPath === process.cwd()) {
-        console.error('Cannot delete project directory')
-        return false
-      }
-      await new Promise<void>((resolve) => rimraf(dirPath, {}, () => resolve()))
-      await fs.promises.mkdir(dirPath, { recursive: true })
+export async function createSonraDir(dirPath: string): Promise<void> {
+  if (!fs.existsSync(dirPath)) {
+    log(`Creating sonra working dir: ${dirPath}`)
+    await fs.promises.mkdir(dirPath, { recursive: true })
+  } else {
+    log(`${dirPath} already exists, ...overwriting`)
+    if (dirPath === process.cwd()) {
+      throw new Error('Cannot delete current project directory')
     }
-  } catch {
-    return false
+    await new Promise<void>((resolve) => rimraf(dirPath, {}, () => resolve()))
+    await fs.promises.mkdir(dirPath, { recursive: true })
   }
 
-  return true
+  log(`Created sonra working directory at: ${dirPath}`)
 }

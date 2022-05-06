@@ -8,22 +8,17 @@ const HardhatConfigFileName = 'hardhat.config.ts'
  * Finds typechain directory from hardhat config, presumes hardhat config is
  * standard
  * */
-export async function findTypechainDir(): Promise<string | null> {
+export async function findTypechainDir(): Promise<string> {
   log('Looking for hardhat config')
   const hardhatConfigPath = path.join(process.cwd(), HardhatConfigFileName)
   if (!fs.existsSync(hardhatConfigPath)) {
     throw new Error('No hardhat config found')
   }
 
-  let hardhatConfigContents: string = ''
-  try {
-    log('Found hardhat config')
-    hardhatConfigContents = (
-      await fs.promises.readFile(hardhatConfigPath, 'utf8')
-    ).toString()
-  } catch {
-    throw new Error('Could not read contents of hardhat config')
-  }
+  log(`Found hardhat config at: ${hardhatConfigPath}`)
+  const hardhatConfigContents = (
+    await fs.promises.readFile(hardhatConfigPath, 'utf8')
+  ).toString()
 
   const outDirStr = hardhatConfigContents
     .split(/\r?\n/)
@@ -36,8 +31,6 @@ export async function findTypechainDir(): Promise<string | null> {
   if (typechainOutDir === '') {
     throw new Error('outDir could not be parsed')
   }
-
-  log(`Typechain path specified at: ${typechainOutDir}`)
 
   const typechainDirPath = path.join(process.cwd(), typechainOutDir)
 
