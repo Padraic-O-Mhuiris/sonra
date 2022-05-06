@@ -26,6 +26,6 @@ export function validateCategories({
     throw new Error('No categories specified')
   }
 
-  log(`Categories:\n${addressKeys.join(',\n')}`)
+  log('Categories: %O', addressKeys)
   return addressKeys as [string, ...string[]]
 }

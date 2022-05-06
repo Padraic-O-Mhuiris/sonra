@@ -21,7 +21,7 @@ export async function run({ dir, model, fetch }: SonraConfig<SonraModel>) {
   } & { [k in string]: any }
 
   const contractFactories = keys(rest)
-  log(`Contract Factory names:\n ${contractFactories.join(',\n')}`)
+  log('Contract Factory names: %o', contractFactories)
 
   const dirPath = path.join(process.cwd(), dir)
 
@@ -42,6 +42,8 @@ export async function run({ dir, model, fetch }: SonraConfig<SonraModel>) {
   )
 
   for (const [category, file] of Object.entries(categoryFilesByCategory)) {
-    await fs.promises.writeFile(path.join(dirPath, `${category}.ts`), file)
+    const fileName = `${category}.ts`
+    await fs.promises.writeFile(path.join(dirPath, fileName), file)
+    log('Wrote %s to file: %s', category, fileName)
   }
 }

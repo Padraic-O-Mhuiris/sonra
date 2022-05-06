@@ -1,6 +1,7 @@
 import { includes } from 'lodash'
 import { SonraDataModel, SonraModel } from '../schema'
 import { capitalize } from '../utils'
+import { log } from '../utils'
 
 const normalizeContractName = (contractName: string): string => {
   if (contractName.endsWith('.sol')) {
@@ -36,5 +37,6 @@ export function validateContracts(
     contractFactoriesByCategory[category] = name
   }
 
+  log('ContractFactoriesByCategory: %O', contractFactoriesByCategory)
   return contractFactoriesByCategory
 }
