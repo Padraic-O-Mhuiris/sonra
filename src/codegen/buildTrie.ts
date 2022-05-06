@@ -25,16 +25,9 @@ type TrieValueByLabel<T extends TrieLabel> = {
   [TrieLabel.DATE]: Date
   [TrieLabel.ADDRESS]: zx.Address
   [TrieLabel.CATEGORISED_ADDRESS]: zx.CategorisedAddress<string>
-  [TrieLabel.ARRAY]: TrieValue[]
-  [TrieLabel.OBJECT]: TrieObject
+  [TrieLabel.ARRAY]: Trie
+  [TrieLabel.OBJECT]: Trie
 }[T]
-
-type TrieObjectValue<T extends TrieLabel> = {
-  label: T
-  value: TrieValueByLabel<T>
-}
-type TrieObjectEntry = { key: string } & TrieObjectValue<TrieLabel>
-type TrieObject = TrieObjectEntry[]
 
 type TrieBasicValue =
   | null
@@ -46,20 +39,9 @@ type TrieBasicValue =
   | zx.Address
   | zx.CategorisedAddress<string>
 
-export type TrieValue = TrieBasicValue | TrieObject | TrieValue[]
-
-type TrieRootLabels =
-  | TrieLabel.NULL
-  | TrieLabel.STRING
-  | TrieLabel.NUMBER
-  | TrieLabel.BOOLEAN
-  | TrieLabel.BIGNUMBER
-  | TrieLabel.DATE
-  | TrieLabel.ADDRESS
-  | TrieLabel.CATEGORISED_ADDRESS
-  | TrieLabel.ARRAY
-
-type TrieRoot = { key: string } & TrieObjectValue<TrieRootLabels>
+export type TrieValue = TrieBasicValue | Trie
+type Trie = { key: string; label: TrieLabel; value: TrieValue }[]
+type TrieRoot = { key: string; label: TrieLabel; value: TrieBasicValue }
 
 function classifyTrieValue(val: any): TrieLabel {
   if (z.string().safeParse(val).success) {
@@ -112,7 +94,7 @@ const buildArray = (arr: any[], keyLabel: string) =>
     return { key: `${keyLabel}_${idx}`, label: idxLabel, value }
   })
 
-function buildTrie(obj: { [k in string]: any }): TrieObject {
+function buildTrie(obj: { [k in string]: any }): Trie {
   return Object.entries(obj).reduce((acc, [key, value]) => {
     const label = classifyTrieValue(value)
     if (label === TrieLabel.OBJECT) {
@@ -124,12 +106,12 @@ function buildTrie(obj: { [k in string]: any }): TrieObject {
     }
 
     return [...acc, { key, label, value }]
-  }, [] as TrieObject)
+  }, [] as Trie)
 }
 
 interface CategoryTrieDict {
   [k: string]: {
-    [j in zx.Address]: TrieObject
+    [j in zx.Address]: Trie
   }
 }
 
@@ -151,26 +133,20 @@ export const buildCategoryTrieDict = (
     {} as CategoryTrieDict,
   )
 
-export function extractTrieRoots(trie: TrieValue): TrieRoot[] {
+export function extractTrieRoots(trie: Trie): TrieRoot[] {
   const roots: TrieRoot[] = []
 
-  if (Array.isArray(trie)) {
-    for (const leaf of trie) {
-      if (
-        (leaf as TrieObjectEntry).label === TrieLabel.OBJECT ||
-        (leaf as TrieObjectEntry).label === TrieLabel.ARRAY
-      ) {
-        roots.push(...extractTrieRoots((leaf as TrieObjectEntry).value))
-      } else if ((leaf as TrieObject[number]).label !== TrieLabel.OBJECT) {
-        roots.push(leaf as TrieRoot)
-      }
+  for (const leaf of trie) {
+    if (leaf.label === TrieLabel.OBJECT || leaf.label === TrieLabel.ARRAY) {
+      roots.push(...extractTrieRoots(leaf.value as Trie))
     }
+    roots.push(leaf as TrieRoot)
   }
   return roots
 }
 
 export function generateRootTrieValues(categoryTrieDict: CategoryTrieDict) {
-  const trieList: TrieObject = Object.values<CategoryTrieDict[string]>(
+  const trieList: Trie = Object.values<CategoryTrieDict[string]>(
     categoryTrieDict,
   )
     .map((v) => Object.values<CategoryTrieDict[string][zx.Address]>(v))

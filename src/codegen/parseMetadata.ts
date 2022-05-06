@@ -36,10 +36,4 @@ export function parseMetadata(obj: { [k in string]: any }): string {
   }, '')
 
   return `{\n${stringifiedObjList}}`
-
-  // for (const [key, val] of entries) {
-  //   if (val instanceof Date) {
-  //     stringifiedObjList
-  //   }
-  // }
 }

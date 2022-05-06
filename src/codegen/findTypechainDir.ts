@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import { log } from '../utils'
 
 const HardhatConfigFileName = 'hardhat.config.ts'
 
@@ -8,22 +9,20 @@ const HardhatConfigFileName = 'hardhat.config.ts'
  * standard
  * */
 export async function findTypechainDir(): Promise<string | null> {
-  console.log('Looking for hardhat config')
+  log('Looking for hardhat config')
   const hardhatConfigPath = path.join(process.cwd(), HardhatConfigFileName)
   if (!fs.existsSync(hardhatConfigPath)) {
-    console.log('No hardhat config found')
-    return null
+    throw new Error('No hardhat config found')
   }
 
   let hardhatConfigContents: string = ''
   try {
-    console.log('Found hardhat config')
+    log('Found hardhat config')
     hardhatConfigContents = (
       await fs.promises.readFile(hardhatConfigPath, 'utf8')
     ).toString()
   } catch {
-    console.log('Could not read contents of hardhat config')
-    return null
+    throw new Error('Could not read contents of hardhat config')
   }
 
   const outDirStr = hardhatConfigContents
@@ -35,25 +34,22 @@ export async function findTypechainDir(): Promise<string | null> {
     : 'typechain-types'
 
   if (typechainOutDir === '') {
-    console.log('outDir could not be parsed')
-    return null
+    throw new Error('outDir could not be parsed')
   }
 
-  console.log(`Typechain path specified at: ${typechainOutDir}`)
+  log(`Typechain path specified at: ${typechainOutDir}`)
 
   const typechainDirPath = path.join(process.cwd(), typechainOutDir)
 
-  console.log('Validating contract types have been built')
+  log('Validating contract types have been built')
   if (!fs.existsSync(typechainDirPath)) {
-    console.log('No contract types could be found')
-    return null
+    throw new Error('No contract types could be found')
   }
 
   const typechainIndexFile = require(typechainDirPath) as { factories?: any }
 
   if (!typechainIndexFile.factories) {
-    console.log('Contract factories were not detected')
-    return null
+    throw new Error('Contract factories were not detected')
   }
 
   return typechainDirPath

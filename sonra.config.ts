@@ -5,6 +5,7 @@ import { SonraConfig } from './src/config'
 import { SonraFetch } from './src/schema'
 import * as zx from './src/zod'
 import { TrancheFactory__factory, Tranche__factory } from './typechain'
+import { log } from './src/utils'
 
 const provider = new ethers.providers.JsonRpcProvider(
   'https://mainnet.infura.io/v3/7b2295eb2ca8443fba441bfd462cd93a',
@@ -53,7 +54,7 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
     }),
   )
 
-  console.log('Found all principalToken address creation events')
+  log('Found all principalToken address creation events')
   const principalTokenAddresses = addressAndCreatedDateInfo.map(
     ([address]) => address,
   )
@@ -63,7 +64,7 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
   } = {}
 
   for (const [address, termStart] of addressAndCreatedDateInfo) {
-    console.log(`Finding data for principal token: ${address} :: ${termStart}`)
+    log(`Finding data for principal token: ${address} :: ${termStart}`)
     const principalToken = Tranche__factory.connect(address, provider)
 
     const [

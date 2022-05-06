@@ -47,7 +47,7 @@ module.exports = {
       },
     ],
     'no-control-regex': 'error',
-    //'no-console': 'warn',
+    'no-console': 'error',
     'no-debugger': 'error',
     'no-delete-var': 'error',
     'no-dupe-args': 'error',
