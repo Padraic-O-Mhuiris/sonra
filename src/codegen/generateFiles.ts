@@ -5,11 +5,11 @@ import { capitalize } from '../utils'
 import * as zx from '../zod'
 import { Address } from '../zod'
 import {
-  buildCategoryTrieDict,
-  generateRootTrieValues,
-  TrieLabel,
+  buildSonraTrieByCategoryAndAddress,
+  sonraRootTrieList,
 } from './buildTrie'
 import { parseMetadata } from './parseMetadata'
+import { log } from '../utils'
 
 export const categoryLabel = ({
   category,
@@ -156,19 +156,20 @@ const genCategoryMetadataLabel = (
 }
 export function generateFiles(
   categories: [string, ...string[]],
-
   model: SonraModel,
   data: SonraDataModel<SonraModel>,
   contractFactoriesByCategory: Record<string, string>,
 ): { [k in string]: string } {
-  const categoryTrieDict = buildCategoryTrieDict(categories, data.metadata)
+  const sonraTrieByCategoryAndAddress = buildSonraTrieByCategoryAndAddress(
+    data.metadata,
+  )
 
-  //log(JSON.stringify(categoryTrieDict, null, 2))
-  const rootMetadataValues = generateRootTrieValues(categoryTrieDict)
+  const sonraRoots = sonraRootTrieList(sonraTrieByCategoryAndAddress)
+  log('sonraRoots: %O', sonraRoots)
   const uniqueCategorisedAddresses = Array.from(
     new Set(
-      rootMetadataValues
-        .filter((root) => root.label === TrieLabel.CATEGORISED_ADDRESS)
+      sonraRoots
+        .filter((root) => root.label === 'CATEGORISED_ADDRESS')
         .map(({ value }) => value),
     ),
   )

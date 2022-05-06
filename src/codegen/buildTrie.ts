@@ -2,156 +2,151 @@ import { BigNumber } from 'ethers'
 import { z } from 'zod'
 import { SonraDataModel, SonraModel } from '../schema'
 import * as zx from '../zod'
+import { Address } from '../zod'
 
-export enum TrieLabel {
-  NULL = 'NULL',
-  STRING = 'STRING',
-  NUMBER = 'NUMBER',
-  BOOLEAN = 'BOOLEAN',
-  BIGNUMBER = 'BIGNUMBER',
-  DATE = 'DATE',
-  ADDRESS = 'ADDRESS',
-  CATEGORISED_ADDRESS = 'CATEGORISED_ADDRESS',
-  ARRAY = 'ARRAY',
-  OBJECT = 'OBJECT',
+type SonraNodeLabel =
+  | 'NULL'
+  | 'STRING'
+  | 'NUMBER'
+  | 'BOOLEAN'
+  | 'BIGNUMBER'
+  | 'DATE'
+  | 'ADDRESS'
+  | 'CATEGORISED_ADDRESS'
+  | 'ARRAY'
+  | 'OBJECT'
+
+type SonraBranchNodeLabel = 'OBJECT' | 'ARRAY'
+type SonraRootNodeLabel = Exclude<SonraNodeLabel, SonraBranchNodeLabel>
+
+type SonraNodeValue<L extends SonraRootNodeLabel> = {
+  NULL: null
+  STRING: string
+  NUMBER: number
+  BOOLEAN: boolean
+  BIGNUMBER: BigNumber
+  DATE: Date
+  ADDRESS: zx.Address
+  CATEGORISED_ADDRESS: zx.CategorisedAddress<string>
+}[L]
+
+type SonraRootNode<L extends SonraRootNodeLabel> = SonraNode<L>
+
+type SonraNode<L extends SonraNodeLabel> = {
+  key: string
+  label: L
+  value: L extends SonraRootNodeLabel ? SonraNodeValue<L> : SonraTrie
 }
 
-type TrieValueByLabel<T extends TrieLabel> = {
-  [TrieLabel.NULL]: null
-  [TrieLabel.STRING]: string
-  [TrieLabel.NUMBER]: number
-  [TrieLabel.BOOLEAN]: boolean
-  [TrieLabel.BIGNUMBER]: BigNumber
-  [TrieLabel.DATE]: Date
-  [TrieLabel.ADDRESS]: zx.Address
-  [TrieLabel.CATEGORISED_ADDRESS]: zx.CategorisedAddress<string>
-  [TrieLabel.ARRAY]: Trie
-  [TrieLabel.OBJECT]: Trie
-}[T]
+type SonraTrieNode = SonraNode<SonraNodeLabel>
+type SonraTrieRoot = SonraRootNode<SonraRootNodeLabel>
+type SonraTrie = SonraTrieNode[]
 
-type TrieBasicValue =
-  | null
-  | string
-  | number
-  | boolean
-  | BigNumber
-  | Date
-  | zx.Address
-  | zx.CategorisedAddress<string>
-
-export type TrieValue = TrieBasicValue | Trie
-type Trie = { key: string; label: TrieLabel; value: TrieValue }[]
-type TrieRoot = { key: string; label: TrieLabel; value: TrieBasicValue }
-
-function classifyTrieValue(val: any): TrieLabel {
+function labelSonraNodeValue(val: any): SonraNodeLabel {
   if (z.string().safeParse(val).success) {
     if (
       (val as string).includes(':') &&
       zx.address().safeParse((val as string).split(':')[1]).success
     ) {
-      return TrieLabel.CATEGORISED_ADDRESS
+      return 'CATEGORISED_ADDRESS'
     }
     if (zx.address().safeParse(val).success) {
-      return TrieLabel.ADDRESS
+      return 'ADDRESS'
     }
-    return TrieLabel.STRING
+    return 'STRING'
   }
   if (z.number().safeParse(val).success) {
-    return TrieLabel.NUMBER
+    return 'NUMBER'
   }
   if (z.boolean().safeParse(val).success) {
-    return TrieLabel.BOOLEAN
+    return 'BOOLEAN'
   }
   if (z.date().safeParse(val).success) {
-    return TrieLabel.DATE
+    return 'DATE'
   }
   if (BigNumber.isBigNumber(val)) {
-    return TrieLabel.BIGNUMBER
+    return 'BIGNUMBER'
   }
 
   if (z.record(z.any()).safeParse(val).success && val.length === undefined) {
-    return TrieLabel.OBJECT
+    return 'OBJECT'
   }
 
   if (z.any().array().safeParse(val).success) {
-    return TrieLabel.ARRAY
+    return 'ARRAY'
   }
 
-  return TrieLabel.NULL
+  return 'NULL'
 }
-const buildArray = (arr: any[], keyLabel: string) =>
-  arr.map((value, idx) => {
-    const idxLabel = classifyTrieValue(value)
 
-    if (idxLabel === TrieLabel.OBJECT) {
-      value = buildTrie(value)
-    }
+function buildSonraTrie(
+  o: Record<string, any> | Array<any>,
+  keyLabel: string | undefined = '',
+): SonraTrie {
+  if (Array.isArray(o)) {
+    o = o.map((v, idx) => [`${keyLabel}_${idx}`, v]) as [string, any][]
+  } else {
+    o = Object.entries(o) as [string, any][]
+  }
 
-    if (idxLabel === TrieLabel.ARRAY) {
-      value = buildArray(value, `${keyLabel}_${idx}`)
-    }
-
-    return { key: `${keyLabel}_${idx}`, label: idxLabel, value }
-  })
-
-function buildTrie(obj: { [k in string]: any }): Trie {
-  return Object.entries(obj).reduce((acc, [key, value]) => {
-    const label = classifyTrieValue(value)
-    if (label === TrieLabel.OBJECT) {
-      value = buildTrie(value)
-    }
-
-    if (label === TrieLabel.ARRAY) {
-      value = buildArray(value as any[], key)
+  return (o as [string, any][]).reduce((acc, [key, value]) => {
+    const label = labelSonraNodeValue(value)
+    if (label === 'OBJECT' || label === 'ARRAY') {
+      value = buildSonraTrie(value, key)
     }
 
     return [...acc, { key, label, value }]
-  }, [] as Trie)
+  }, [] as SonraTrie)
 }
 
-interface CategoryTrieDict {
-  [k: string]: {
-    [j in zx.Address]: Trie
-  }
-}
+type SonraTrieByCategoryAndAddress = Record<
+  string,
+  Record<zx.Address, SonraTrie>
+>
 
-export const buildCategoryTrieDict = (
-  categories: [string, ...string[]],
+export const buildSonraTrieByCategoryAndAddress = (
   metadata: SonraDataModel<SonraModel>['metadata'],
-): CategoryTrieDict =>
-  categories.reduce(
-    (acc, category) => ({
-      ...acc,
-      [category]: Object.keys(metadata[category]).reduce(
-        (_acc, address) => ({
-          ..._acc,
-          [address]: buildTrie(metadata[category][address as zx.Address]),
-        }),
-        {} as CategoryTrieDict[string],
-      ),
-    }),
-    {} as CategoryTrieDict,
-  )
+): SonraTrieByCategoryAndAddress => {
+  const sonraTrieByCategoryAndAddress: SonraTrieByCategoryAndAddress = {}
+  for (const [category, categoryEntry] of Object.entries(metadata)) {
+    sonraTrieByCategoryAndAddress[category] = {}
 
-export function extractTrieRoots(trie: Trie): TrieRoot[] {
-  const roots: TrieRoot[] = []
-
-  for (const leaf of trie) {
-    if (leaf.label === TrieLabel.OBJECT || leaf.label === TrieLabel.ARRAY) {
-      roots.push(...extractTrieRoots(leaf.value as Trie))
+    for (const [address, addressEntry] of Object.entries(categoryEntry)) {
+      sonraTrieByCategoryAndAddress[category][address as Address] =
+        buildSonraTrie(addressEntry)
     }
-    roots.push(leaf as TrieRoot)
   }
-  return roots
+  return sonraTrieByCategoryAndAddress
 }
 
-export function generateRootTrieValues(categoryTrieDict: CategoryTrieDict) {
-  const trieList: Trie = Object.values<CategoryTrieDict[string]>(
-    categoryTrieDict,
+function nodeIsBranch(s: SonraTrieNode): s is SonraNode<SonraBranchNodeLabel> {
+  return s.label === 'OBJECT' || s.label === 'ARRAY'
+}
+
+export const mapSonraTrie = <A extends unknown>(
+  trie: SonraTrie,
+  fn: (x: SonraTrieRoot) => A,
+): A[] => {
+  return trie
+    .map((node) =>
+      nodeIsBranch(node)
+        ? mapSonraTrie(node.value, fn)
+        : [fn(node as SonraTrieRoot)],
+    )
+    .flat()
+}
+
+export function sonraRootTrieList(
+  sonraTrie: SonraTrieByCategoryAndAddress,
+): SonraTrieRoot[] {
+  const trie: SonraTrie = Object.values<SonraTrieByCategoryAndAddress[string]>(
+    sonraTrie,
   )
-    .map((v) => Object.values<CategoryTrieDict[string][zx.Address]>(v))
+    .map((v) =>
+      Object.values<SonraTrieByCategoryAndAddress[string][zx.Address]>(v),
+    )
     .flat()
     .flat()
 
-  return extractTrieRoots(trieList)
+  return mapSonraTrie(trie, (x) => x)
 }
