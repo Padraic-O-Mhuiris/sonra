@@ -45,5 +45,6 @@ export async function findTypechainDir(): Promise<string> {
     throw new Error('Contract factories were not detected')
   }
 
+  log(`Typechain directory found at: ${typechainDirPath}`)
   return typechainDirPath
 }

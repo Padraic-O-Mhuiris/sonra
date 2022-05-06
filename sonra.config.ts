@@ -4,7 +4,11 @@ import { createAddress } from './src/address'
 import { SonraConfig } from './src/config'
 import { SonraFetch } from './src/schema'
 import * as zx from './src/zod'
-import { TrancheFactory__factory, Tranche__factory } from './typechain'
+import {
+  ERC20__factory,
+  TrancheFactory__factory,
+  Tranche__factory,
+} from './typechain'
 import { log } from './src/utils'
 
 const provider = new ethers.providers.JsonRpcProvider(
@@ -12,22 +16,22 @@ const provider = new ethers.providers.JsonRpcProvider(
 )
 
 const elementModel = {
+  baseToken: z.object({
+    name: z.string(),
+    symbol: z.string(),
+    decimals: z.number(),
+  }),
   principalToken: z.object({
-    erc20: z
-      .object({
-        name: z.string(),
-        symbol: z.string(),
-        decimals: z.number(),
-      })
-      .array(),
-    addressList: zx.address('baseToken').array().array(),
+    name: z.string(),
+    symbol: z.string(),
+    decimals: z.number(),
     underlying: zx.address('baseToken'),
-    interestToken: zx.address('yieldToken'),
+    interestToken: zx.address(),
+    position: zx.address(),
     term: z.object({
       start: z.date(),
       end: z.date(),
     }),
-    position: zx.address('wrappedPosition'),
   }),
 } as const
 
@@ -85,39 +89,14 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
       principalToken
         .unlockTimestamp()
         .then((result) => new Date(result.toNumber() * 1000)),
-      principalToken
-        .interestToken()
-        .then((address) => createAddress(address, 'yieldToken')),
-      principalToken
-        .position()
-        .then((address) => createAddress(address, 'wrappedPosition')),
+      principalToken.interestToken().then((address) => createAddress(address)),
+      principalToken.position().then((address) => createAddress(address)),
     ])
 
     principalTokenData[address] = {
-      erc20: [
-        {
-          name,
-          symbol,
-          decimals,
-        },
-        {
-          name,
-          symbol,
-          decimals,
-        },
-      ],
-      addressList: [
-        [underlying, underlying, underlying],
-        [underlying, underlying, underlying],
-        [
-          underlying,
-          underlying,
-          underlying,
-          underlying,
-          underlying,
-          underlying,
-        ],
-      ],
+      name,
+      symbol,
+      decimals,
       underlying,
       term: {
         start: termStart,
@@ -128,14 +107,38 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
     }
   }
 
+  const baseTokenData: {
+    [k in zx.Address]: z.infer<ElementModel['baseToken']>
+  } = {}
+
+  const baseTokenAddresses = Object.entries(principalTokenData).map(
+    ([, { underlying }]) => zx.address().parse(underlying.split(':')[1]),
+  )
+
+  for (const baseTokenAddress of baseTokenAddresses) {
+    log(`Finding data for base token: ${baseTokenAddress}`)
+    const baseToken = ERC20__factory.connect(baseTokenAddress, provider)
+
+    const [name, symbol, decimals] = await Promise.all([
+      baseToken.name(),
+      baseToken.symbol(),
+      baseToken.decimals(),
+    ])
+
+    baseTokenData[baseTokenAddress] = { name, symbol, decimals }
+  }
+
   return {
     addresses: {
+      baseToken: baseTokenAddresses,
       principalToken: principalTokenAddresses,
     },
     contracts: {
+      baseToken: 'ERC20.sol',
       principalToken: 'Tranche.sol',
     },
     metadata: {
+      baseToken: baseTokenData,
       principalToken: principalTokenData,
     },
   }

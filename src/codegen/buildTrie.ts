@@ -150,3 +150,21 @@ export function sonraRootTrieList(
 
   return mapSonraTrie(trie, (x) => x)
 }
+
+type SonraRootsByCategory = Record<string, SonraTrieRoot[]>
+
+export function buildSonraRootTrieListByCategory(
+  sonraTrie: SonraTrieByCategoryAndAddress,
+): SonraRootsByCategory {
+  const sonraRootsByCategory: SonraRootsByCategory = {}
+
+  for (const [category, categoryEntry] of Object.entries(sonraTrie)) {
+    sonraRootsByCategory[category] = mapSonraTrie(
+      Object.values<SonraTrieByCategoryAndAddress[string][zx.Address]>(
+        categoryEntry,
+      ).flat(),
+      (x) => x,
+    )
+  }
+  return sonraRootsByCategory
+}
