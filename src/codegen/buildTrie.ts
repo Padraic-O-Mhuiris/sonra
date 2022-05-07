@@ -1,4 +1,5 @@
 import { BigNumber } from 'ethers'
+import { flatMapDeep } from 'lodash'
 import { z } from 'zod'
 import { SonraDataModel, SonraModel } from '../schema'
 import * as zx from '../zod'
@@ -188,4 +189,31 @@ export const getRootValuesByCategory = <T extends SonraRootNodeLabel>(
       .map((r) => r.value as SonraNodeValue<T>)
   }
   return rootValuesByCategory
+}
+
+export const reifyTrie = (trie: SonraTrie) => {
+  return flatMapDeep(trie, (x) => x)
+}
+
+export const buildMetadataEntriesByAddressAndCategory = (
+  data: SonraDataModel<SonraModel>,
+): Record<string, Record<Address, string>> => {
+  const trieByCategoryAndAddress = buildSonraTrieByCategoryAndAddress(
+    data.metadata,
+  )
+
+  const metadataEntriesByAddressAndCategory: Record<
+    string,
+    Record<Address, string>
+  > = {}
+  for (const [category, addressEntry] of Object.entries(
+    trieByCategoryAndAddress,
+  )) {
+    metadataEntriesByAddressAndCategory[category] = {}
+    for (const [address, trie] of Object.entries(addressEntry)) {
+      metadataEntriesByAddressAndCategory[category][address as Address] =
+        reifyTrie(trie)
+    }
+  }
+  return metadataEntriesByAddressAndCategory
 }

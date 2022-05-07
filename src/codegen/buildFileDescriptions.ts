@@ -7,7 +7,10 @@ import {
   buildCategorisedAddressImportsByCategory,
   CategorisedAddressImport,
 } from './buildCategorisedAddressImports'
-import { getRootValuesByCategory } from './buildTrie'
+import {
+  buildMetadataEntriesByAddressAndCategory,
+  getRootValuesByCategory,
+} from './buildTrie'
 import { buildUniqueCategories } from './buildUniqueCategories'
 import {
   addressConstant,
@@ -23,9 +26,10 @@ interface SonraFileDescription {
   addressImports: CategorisedAddressImport[]
   addressConstantsByAddress: Record<Address, string>
   addressType: string
-  categoryMetadataType: string
+  metadataType: string
   importBigNumber: boolean
   isUnique: boolean
+  metadataEntriesByAddress: Record<Address, string>
 }
 
 export type FileDescriptionsByCategory = Record<string, SonraFileDescription>
@@ -49,6 +53,9 @@ export function buildFileDescriptions(
       categorisedAddressesByCategory,
     )
 
+  const metadataEntriesByAddressAndCategory =
+    buildMetadataEntriesByAddressAndCategory(data)
+
   const bigNumbersByCategory = getRootValuesByCategory(data, 'BIGNUMBER')
 
   const fileDescriptionByCategory: FileDescriptionsByCategory = {}
@@ -70,12 +77,14 @@ export function buildFileDescriptions(
 
     const addressImports = categorisedAddressImportsByCategory[category]
 
+    const metadataEntriesByAddress =
+      metadataEntriesByAddressAndCategory[category]
     const importBigNumber = !!bigNumbersByCategory[category].length
 
     const addressType = categoryAddressType(category)
-    const categoryMetadataType = printNode(zodToTs(model[category]).node)
+    const metadataType = printNode(zodToTs(model[category]).node)
 
-    log('%s imports: %O', category, addressImports)
+    log('%s imports: %s', category, metadataEntriesByAddress)
 
     fileDescriptionByCategory[category] = {
       contractFactory,
@@ -83,9 +92,10 @@ export function buildFileDescriptions(
       addressImports,
       addressType,
       addressConstantsByAddress,
-      categoryMetadataType,
+      metadataType,
       importBigNumber,
       isUnique,
+      metadataEntriesByAddress,
     }
   }
 
