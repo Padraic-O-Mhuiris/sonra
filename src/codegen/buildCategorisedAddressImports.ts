@@ -36,7 +36,7 @@ function buildImportsFromCategorisedAddresses(
   for (const [category, categorisedAddresses] of Object.entries(
     categorisedAddressesByCategory,
   )) {
-    const path = `./${category}.ts`
+    const path = `./${category}`
     const addressType = categoryAddressType(category)
     const addressConstants: string[] = []
 

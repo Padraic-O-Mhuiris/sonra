@@ -1,5 +1,4 @@
 import prettier from 'prettier'
-import { CategorisedAddressImport } from './buildCategorisedAddressImports'
 // import { printNode, zodToTs } from 'zod-to-ts'
 // import { SonraDataModel, SonraModel } from '../schema'
 // import { capitalize } from '../utils'
@@ -11,10 +10,10 @@ import { CategorisedAddressImport } from './buildCategorisedAddressImports'
 // } from './buildTrie'
 // import { parseMetadata } from './parseMetadata'
 // import { log } from '../utils'
-
 import { log } from '../utils'
+import { Address } from '../zod'
+import { CategorisedAddressImport } from './buildCategorisedAddressImports'
 import { FileDescriptionsByCategory } from './buildFileDescriptions'
-import { Address, address } from '../zod'
 
 //const buildConstantsAddressDict = (category: string, addresses: zx.Address[]) =>
 //   addresses.reduce(
@@ -262,13 +261,28 @@ const addressImportLabel = ({
   )} } from "${path}"\nimport type { ${addressType} } from "${path}"`
 
 const addressTypeLabel = (addressType: string) =>
-  `type ${addressType} = Address & { readonly ${addressType}: unique symbol }`
+  `export type ${addressType} = Address & { readonly ${addressType}: unique symbol }`
 
 const addressConstLabel = (
   address: Address,
   addressConstant: string,
   addressType: string,
-) => `const ${addressConstant} = ${address} as ${addressType}`
+) => `export const ${addressConstant} = "${address}" as ${addressType}`
+
+const addressListLabel = (category: string, addressConsts: string[]) =>
+  `export const ${category}List = [\n${addressConsts.join(',\n')}]`
+
+const addressGuardLabel = (
+  category: string,
+  addressType: string,
+  isUnique: boolean,
+  addressConsts: string[],
+) =>
+  `export const is${addressType} = (address: string): address is ${addressType} => isAddress(address) && ${
+    isUnique
+      ? `address === ${addressConsts[0]}`
+      : `${category}List.some((${category}Address) => ${category}Address === address)`
+  }`
 
 export function generateFiles(
   categories: [string, ...string[]],
@@ -292,6 +306,10 @@ export function generateFiles(
       ...addressImports.map(addressImportLabel),
     ].join('\n')
 
+    const addressConsts = addresses.map(
+      (address) => addressConstantsByAddress[address],
+    )
+
     const addressConstLabels = addresses
       .map((address) =>
         addressConstLabel(
@@ -302,18 +320,24 @@ export function generateFiles(
       )
       .join('\n')
 
+    const addressList = !isUnique
+      ? addressListLabel(category, addressConsts)
+      : ''
+
     const file = [
       preamble,
       imports,
       addressTypeLabel(addressType),
       addressConstLabels,
+      addressList,
+      addressGuardLabel(category, addressType, isUnique, addressConsts),
     ]
       .filter((s) => s !== '')
       .join('\n\n')
 
     fileByCategory[category] = prettier.format(file, {
       parser: 'typescript',
-      printWidth: 100,
+      printWidth: 80,
       tabWidth: 2,
       semi: false,
       trailingComma: 'all',
