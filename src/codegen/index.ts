@@ -1,3 +1,4 @@
+import fs from 'fs'
 import { keys } from 'lodash'
 import path from 'path'
 import { SonraConfig } from '../config'
@@ -8,8 +9,8 @@ import { bundleAddressFile } from './bundleAddressFile'
 import { bundleContractTypes } from './bundleContractTypes'
 import { createSonraDir } from './createSonraDir'
 import { findTypechainDir } from './findTypechainDir'
+import { generateFiles } from './generateFiles'
 import { validateCategories } from './validateCategories'
-import { validateContracts } from './validateContracts'
 
 export async function run({ dir, model, fetch }: SonraConfig<SonraModel>) {
   const dirPath = path.join(process.cwd(), dir)
@@ -29,18 +30,24 @@ export async function run({ dir, model, fetch }: SonraConfig<SonraModel>) {
 
   const data = await fetchAndValidate(model, fetch)
 
-  const fileDescriptions = buildFileDescriptions(data, contractFactories)
+  const categories = validateCategories(data)
 
-  // const categoryFilesByCategory = generateFiles(
-  //   categories,
-  //   model,
-  //   data,
-  //   contractFactoriesByCategory,
-  // )
+  const fileDescriptionsByCategory = buildFileDescriptions(
+    data,
+    model,
+    categories,
+    contractFactories,
+  )
 
-  // for (const [category, file] of Object.entries(categoryFilesByCategory)) {
-  //   const fileName = `${category}.ts`
-  //   await fs.promises.writeFile(path.join(dirPath, fileName), file)
-  //   log('Wrote %s to file: %s', category, fileName)
-  // }
+  const categoryFilesByCategory = generateFiles(
+    categories,
+    fileDescriptionsByCategory,
+  )
+
+  for (const category of categories) {
+    const file = categoryFilesByCategory[category]
+    const fileName = `${category}.ts`
+    await fs.promises.writeFile(path.join(dirPath, fileName), file)
+    log('Wrote %s to file: %s', category, fileName)
+  }
 }

@@ -9,7 +9,7 @@ export type SonraModel = {
 
 export type SonraSchema<Model extends SonraModel> = z.ZodObject<{
   addresses: z.ZodObject<{
-    [k in keyof Model & string]: z.ZodArray<zx.ZodAddress>
+    [k in keyof Model & string]: zx.ZodAddressArray
   }>
   contracts: z.ZodObject<{
     [k in keyof Model & string]: z.ZodString
@@ -32,10 +32,10 @@ export const createSonraSchema = <Model extends SonraModel>(
     modelKeys.reduce(
       (acc, arg) => ({
         ...acc,
-        [arg]: zx.address().array(),
+        [arg]: zx.addressArray(),
       }),
       {} as {
-        [k in keyof Model & string]: z.ZodArray<zx.ZodAddress>
+        [k in keyof Model & string]: zx.ZodAddressArray
       },
     ),
   )

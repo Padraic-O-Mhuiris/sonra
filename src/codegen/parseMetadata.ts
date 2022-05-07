@@ -1,6 +1,25 @@
 import { BigNumber } from 'ethers'
-import { categoryLabel } from './generateFiles'
+import { capitalize } from '../utils'
 import * as zx from '../zod'
+
+export const categoryLabel = ({
+  category,
+  categoryPostFix = undefined,
+  address = undefined,
+  capital = false,
+  postFix = false,
+}: {
+  category: string
+  categoryPostFix?: string
+  address?: zx.Address
+  capital?: boolean
+  postFix?: boolean
+}) => {
+  let label = `${category}`
+  label += categoryPostFix ? `${categoryPostFix}` : ''
+  label += postFix && !!address ? `_${address.slice(0, 6)}` : ''
+  return capital ? capitalize(label) : label
+}
 
 export function parseMetadata(obj: { [k in string]: any }): string {
   const entries = Object.entries(obj)

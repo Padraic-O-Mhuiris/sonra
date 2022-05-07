@@ -168,3 +168,24 @@ export function buildSonraRootTrieListByCategory(
   }
   return sonraRootsByCategory
 }
+
+export const getRootValuesByCategory = <T extends SonraRootNodeLabel>(
+  data: SonraDataModel<SonraModel>,
+  label: T,
+): Record<string, SonraNodeValue<T>[]> => {
+  const rootValuesByCategory: Record<string, SonraNodeValue<T>[]> = {}
+
+  const trieByCategoryAndAddress = buildSonraTrieByCategoryAndAddress(
+    data.metadata,
+  )
+  const rootsByCategory = buildSonraRootTrieListByCategory(
+    trieByCategoryAndAddress,
+  )
+
+  for (const [category, root] of Object.entries(rootsByCategory)) {
+    rootValuesByCategory[category] = root
+      .filter((r) => r.label === label)
+      .map((r) => r.value as SonraNodeValue<T>)
+  }
+  return rootValuesByCategory
+}

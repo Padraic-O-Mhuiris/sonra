@@ -16,10 +16,12 @@ const provider = new ethers.providers.JsonRpcProvider(
 )
 
 const elementModel = {
+  trancheFactory: z.object({}),
   baseToken: z.object({
     name: z.string(),
     symbol: z.string(),
     decimals: z.number(),
+    totalSupply: zx.bigNumber(),
   }),
   principalToken: z.object({
     name: z.string(),
@@ -32,13 +34,16 @@ const elementModel = {
       start: z.date(),
       end: z.date(),
     }),
+    creator: zx.address('trancheFactory'),
   }),
 } as const
 
 type ElementModel = typeof elementModel
 
 const elementFetch: SonraFetch<ElementModel> = async () => {
-  const trancheFactoryAddress = '0x62F161BF3692E4015BefB05A03a94A40f520d1c0'
+  const trancheFactoryAddress = zx
+    .address()
+    .parse('0x62F161BF3692E4015BefB05A03a94A40f520d1c0')
   const trancheFactory = TrancheFactory__factory.connect(
     trancheFactoryAddress,
     provider,
@@ -47,7 +52,7 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
   const filter = trancheFactory.filters.TrancheCreated(null, null, null)
   const trancheCreatedEvents = await trancheFactory.queryFilter(
     filter,
-    14650000,
+    14600000,
   )
 
   const addressAndCreatedDateInfo: [zx.Address, Date][] = await Promise.all(
@@ -59,9 +64,9 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
   )
 
   log('Found all principalToken address creation events')
-  const principalTokenAddresses = addressAndCreatedDateInfo.map(
-    ([address]) => address,
-  )
+  const principalTokenAddresses = zx
+    .addressArray()
+    .parse(addressAndCreatedDateInfo.map(([address]) => address))
 
   const principalTokenData: {
     [k in zx.Address]: z.infer<ElementModel['principalToken']>
@@ -104,6 +109,7 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
       },
       interestToken,
       position,
+      creator: createAddress(trancheFactoryAddress, 'trancheFactory'),
     }
   }
 
@@ -111,33 +117,41 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
     [k in zx.Address]: z.infer<ElementModel['baseToken']>
   } = {}
 
-  const baseTokenAddresses = Object.entries(principalTokenData).map(
-    ([, { underlying }]) => zx.address().parse(underlying.split(':')[1]),
-  )
+  const baseTokenAddresses = zx
+    .addressArray()
+    .parse(
+      Object.entries(principalTokenData).map(([, { underlying }]) =>
+        zx.address().parse(underlying.split(':')[1]),
+      ),
+    )
 
   for (const baseTokenAddress of baseTokenAddresses) {
     log(`Finding data for base token: ${baseTokenAddress}`)
     const baseToken = ERC20__factory.connect(baseTokenAddress, provider)
 
-    const [name, symbol, decimals] = await Promise.all([
+    const [name, symbol, decimals, totalSupply] = await Promise.all([
       baseToken.name(),
       baseToken.symbol(),
       baseToken.decimals(),
+      baseToken.totalSupply(),
     ])
 
-    baseTokenData[baseTokenAddress] = { name, symbol, decimals }
+    baseTokenData[baseTokenAddress] = { name, symbol, decimals, totalSupply }
   }
 
   return {
     addresses: {
+      trancheFactory: [trancheFactoryAddress],
       baseToken: baseTokenAddresses,
       principalToken: principalTokenAddresses,
     },
     contracts: {
+      trancheFactory: 'TrancheFactory.sol',
       baseToken: 'ERC20.sol',
       principalToken: 'Tranche.sol',
     },
     metadata: {
+      trancheFactory: {},
       baseToken: baseTokenData,
       principalToken: principalTokenData,
     },

@@ -8,7 +8,7 @@ import { ethers } from 'ethers'
 
 export type Address = string & { readonly Address: unique symbol }
 
-export const isAddress = (address: string): address is Address => ethers.utils.isAddress(x)
+export const isAddress = (address: string): address is Address => ethers.utils.isAddress(address)
 `
   await fs.promises.writeFile(path.join(dirPath, 'address.ts'), addressFile)
 
