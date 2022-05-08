@@ -8,7 +8,8 @@ import {
   CategorisedAddressImport,
 } from './buildCategorisedAddressImports'
 import {
-  buildMetadataEntriesByAddressAndCategory,
+  buildMetadataEntriesByAddress,
+  buildSonraTrieByCategoryAndAddress,
   getRootValuesByCategory,
 } from './buildTrie'
 import { buildUniqueCategories } from './buildUniqueCategories'
@@ -52,14 +53,13 @@ export function buildFileDescriptions(
       uniqueCategories,
       categorisedAddressesByCategory,
     )
-
-  const metadataEntriesByAddressAndCategory =
-    buildMetadataEntriesByAddressAndCategory(data)
-
   const bigNumbersByCategory = getRootValuesByCategory(data, 'BIGNUMBER')
 
   const fileDescriptionByCategory: FileDescriptionsByCategory = {}
 
+  const trieByCategoryAndAddress = buildSonraTrieByCategoryAndAddress(
+    data.metadata,
+  )
   for (const category of categories) {
     const contractFactory = contractFactoriesByCategory[category]
     const addresses = data.addresses[category]
@@ -77,8 +77,10 @@ export function buildFileDescriptions(
 
     const addressImports = categorisedAddressImportsByCategory[category]
 
-    const metadataEntriesByAddress =
-      metadataEntriesByAddressAndCategory[category]
+    const metadataEntriesByAddress = buildMetadataEntriesByAddress(
+      trieByCategoryAndAddress[category],
+      uniqueCategories,
+    )
     const importBigNumber = !!bigNumbersByCategory[category].length
 
     const addressType = categoryAddressType(category)

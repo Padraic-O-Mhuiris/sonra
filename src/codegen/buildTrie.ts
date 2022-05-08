@@ -1,9 +1,10 @@
 import { BigNumber } from 'ethers'
+import { includes } from 'lodash'
 import { z } from 'zod'
 import { SonraDataModel, SonraModel } from '../schema'
 import * as zx from '../zod'
 import { Address, CategorisedAddress, splitCategorisedAddress } from '../zod'
-import { addressConstantWithPostFix } from './utils'
+import { addressConstant, addressConstantWithPostFix } from './utils'
 
 type SonraNodeLabel =
   | 'NULL'
@@ -191,7 +192,10 @@ export const getRootValuesByCategory = <T extends SonraRootNodeLabel>(
   return rootValuesByCategory
 }
 
-export const reifyTrie = (trie: SonraTrie): string => {
+export const reifyTrie = (
+  trie: SonraTrie,
+  uniqueCategories: string[],
+): string => {
   let val = ''
   for (const node of trie) {
     let line = `${node.key}: `
@@ -218,13 +222,19 @@ export const reifyTrie = (trie: SonraTrie): string => {
         const [category, address] = splitCategorisedAddress(
           node.value as CategorisedAddress<string>,
         )
-        line += addressConstantWithPostFix(category, address)
+        if (includes(uniqueCategories, category)) {
+          line += addressConstant(category)
+        } else {
+          line += addressConstantWithPostFix(category, address)
+        }
         break
       case 'ARRAY':
-        line += '[\n' + reifyTrie(node.value as SonraTrie) + '\n]'
+        line +=
+          '[\n' + reifyTrie(node.value as SonraTrie, uniqueCategories) + '\n]'
         break
       case 'OBJECT':
-        line += '{\n' + reifyTrie(node.value as SonraTrie) + '\n}'
+        line +=
+          '{\n' + reifyTrie(node.value as SonraTrie, uniqueCategories) + '\n}'
         break
     }
     val += `${line},\n`
@@ -232,26 +242,17 @@ export const reifyTrie = (trie: SonraTrie): string => {
   return val
 }
 
-export const buildMetadataEntriesByAddressAndCategory = (
-  data: SonraDataModel<SonraModel>,
-): Record<string, Record<Address, string>> => {
-  const trieByCategoryAndAddress = buildSonraTrieByCategoryAndAddress(
-    data.metadata,
-  )
+export const buildMetadataEntriesByAddress = (
+  trieByAddress: Record<Address, SonraTrie>,
+  uniqueCategories: string[],
+): Record<Address, string> => {
+  const metadataEntriesByAddress: Record<Address, string> = {}
 
-  const metadataEntriesByAddressAndCategory: Record<
-    string,
-    Record<Address, string>
-  > = {}
-  for (const [category, addressEntry] of Object.entries(
-    trieByCategoryAndAddress,
-  )) {
-    metadataEntriesByAddressAndCategory[category] = {}
-    for (const [address, trie] of Object.entries(addressEntry)) {
-      metadataEntriesByAddressAndCategory[category][
-        address as Address
-      ] = `{\n${reifyTrie(trie)}\n}`
-    }
+  for (const [address, trie] of Object.entries(trieByAddress)) {
+    metadataEntriesByAddress[address as Address] = `{\n${reifyTrie(
+      trie,
+      uniqueCategories,
+    )}\n}`
   }
-  return metadataEntriesByAddressAndCategory
+  return metadataEntriesByAddress
 }
