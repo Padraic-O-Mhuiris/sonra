@@ -305,6 +305,21 @@ const metadataTypeLabel = (
     category,
   )}Metadata = Record<${addressType}, ${metadataType}>`
 
+const metadataLabel = (
+  category: string,
+  addresses: Address[],
+  addressConstantsByAddress: Record<Address, string>,
+  metadataEntriesByAddress: Record<Address, string>,
+) => {
+  let label = `export const ${category}Metadata: ${capitalize(
+    category,
+  )}Metadata = {\n`
+  for (const address of addresses) {
+    label += `[${addressConstantsByAddress[address]}]: ${metadataEntriesByAddress[address]},\n`
+  }
+  return label + `}`
+}
+
 export function generateFiles(
   categories: [string, ...string[]],
   fileDescriptionsByCategory: FileDescriptionsByCategory,
@@ -321,6 +336,7 @@ export function generateFiles(
       addressType,
       metadataType,
       importBigNumber,
+      metadataEntriesByAddress,
     } = fileDescriptionsByCategory[category]
 
     const imports = [
@@ -357,6 +373,12 @@ export function generateFiles(
       addressGuardLabel(category, addressType, isUnique, addressConsts),
       contractLabel(category, addressType, contractFactory),
       metadataTypeLabel(category, addressType, metadataType),
+      metadataLabel(
+        category,
+        addresses,
+        addressConstantsByAddress,
+        metadataEntriesByAddress,
+      ),
     ]
       .filter((s) => s !== '')
       .join('\n\n')

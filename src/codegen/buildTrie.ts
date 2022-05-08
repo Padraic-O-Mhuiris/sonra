@@ -1,9 +1,9 @@
 import { BigNumber } from 'ethers'
-import { flatMapDeep } from 'lodash'
 import { z } from 'zod'
 import { SonraDataModel, SonraModel } from '../schema'
 import * as zx from '../zod'
-import { Address } from '../zod'
+import { Address, CategorisedAddress, splitCategorisedAddress } from '../zod'
+import { addressConstantWithPostFix } from './utils'
 
 type SonraNodeLabel =
   | 'NULL'
@@ -191,8 +191,45 @@ export const getRootValuesByCategory = <T extends SonraRootNodeLabel>(
   return rootValuesByCategory
 }
 
-export const reifyTrie = (trie: SonraTrie) => {
-  return flatMapDeep(trie, (x) => x)
+export const reifyTrie = (trie: SonraTrie): string => {
+  let val = ''
+  for (const node of trie) {
+    let line = `${node.key}: `
+    switch (node.label) {
+      case 'NULL':
+        line += 'null'
+        break
+      case 'STRING':
+        line += `'${node.value}'`
+        break
+      case 'ADDRESS':
+        line += `'${node.value}' as Address`
+        break
+      case 'NUMBER':
+        line += (node.value as number).toString()
+        break
+      case 'BIGNUMBER':
+        line += `new BigNumber("${(node.value as BigNumber).toString()}")`
+        break
+      case 'DATE':
+        line += `new Date("${(node.value as Date).toISOString()}")`
+        break
+      case 'CATEGORISED_ADDRESS':
+        const [category, address] = splitCategorisedAddress(
+          node.value as CategorisedAddress<string>,
+        )
+        line += addressConstantWithPostFix(category, address)
+        break
+      case 'ARRAY':
+        line += '[\n' + reifyTrie(node.value as SonraTrie) + '\n]'
+        break
+      case 'OBJECT':
+        line += '{\n' + reifyTrie(node.value as SonraTrie) + '\n}'
+        break
+    }
+    val += `${line},\n`
+  }
+  return val
 }
 
 export const buildMetadataEntriesByAddressAndCategory = (
@@ -211,8 +248,9 @@ export const buildMetadataEntriesByAddressAndCategory = (
   )) {
     metadataEntriesByAddressAndCategory[category] = {}
     for (const [address, trie] of Object.entries(addressEntry)) {
-      metadataEntriesByAddressAndCategory[category][address as Address] =
-        reifyTrie(trie)
+      metadataEntriesByAddressAndCategory[category][
+        address as Address
+      ] = `{\n${reifyTrie(trie)}\n}`
     }
   }
   return metadataEntriesByAddressAndCategory

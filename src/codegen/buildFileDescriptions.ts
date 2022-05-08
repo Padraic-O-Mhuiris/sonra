@@ -84,7 +84,7 @@ export function buildFileDescriptions(
     const addressType = categoryAddressType(category)
     const metadataType = printNode(zodToTs(model[category]).node)
 
-    log('%s imports: %s', category, metadataEntriesByAddress)
+    log('%s metadata: %s', category, metadataEntriesByAddress)
 
     fileDescriptionByCategory[category] = {
       contractFactory,
