@@ -45,7 +45,6 @@ export function buildFileDescriptions(
     data,
     categories,
   )
-
   const uniqueCategories = buildUniqueCategories(data)
   const categorisedAddressImportsByCategory =
     buildCategorisedAddressImportsByCategory(
@@ -54,12 +53,12 @@ export function buildFileDescriptions(
       categorisedAddressesByCategory,
     )
   const bigNumbersByCategory = getRootValuesByCategory(data, 'BIGNUMBER')
-
-  const fileDescriptionByCategory: FileDescriptionsByCategory = {}
-
   const trieByCategoryAndAddress = buildSonraTrieByCategoryAndAddress(
     data.metadata,
   )
+
+  const fileDescriptionByCategory: FileDescriptionsByCategory = {}
+
   for (const category of categories) {
     const contractFactory = contractFactoriesByCategory[category]
     const addresses = data.addresses[category]
