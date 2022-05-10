@@ -97,6 +97,7 @@ export function generateFiles(
       metadataType,
       importBigNumber,
       metadataEntriesByAddress,
+      hasMetadata,
     } = fileDescriptionsByCategory[category]
 
     const imports = [
@@ -132,13 +133,15 @@ export function generateFiles(
       addressList,
       addressGuardLabel(category, addressType, isUnique, addressConsts),
       contractLabel(category, addressType, contractFactory),
-      metadataTypeLabel(category, addressType, metadataType),
-      metadataLabel(
-        category,
-        addresses,
-        addressConstantsByAddress,
-        metadataEntriesByAddress,
-      ),
+      hasMetadata ? metadataTypeLabel(category, addressType, metadataType) : '',
+      hasMetadata
+        ? metadataLabel(
+            category,
+            addresses,
+            addressConstantsByAddress,
+            metadataEntriesByAddress,
+          )
+        : '',
     ]
       .filter((s) => s !== '')
       .join('\n\n')

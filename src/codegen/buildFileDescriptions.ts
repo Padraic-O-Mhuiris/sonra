@@ -1,3 +1,4 @@
+import { ethers } from 'ethers'
 import { includes } from 'lodash'
 import { printNode, zodToTs } from 'zod-to-ts'
 import { Address } from '../address'
@@ -31,6 +32,7 @@ interface SonraFileDescription {
   importBigNumber: boolean
   isUnique: boolean
   metadataEntriesByAddress: Record<Address, string>
+  hasMetadata: boolean
 }
 
 export type FileDescriptionsByCategory = Record<string, SonraFileDescription>
@@ -85,7 +87,9 @@ export function buildFileDescriptions(
     const addressType = categoryAddressType(category)
     const metadataType = printNode(zodToTs(model[category]).node)
 
-    log('%s metadata: %s', category, metadataEntriesByAddress)
+    log('%s metadata: %s', category, metadataType)
+
+    const hasMetadata = metadataType !== '{}'
 
     fileDescriptionByCategory[category] = {
       contractFactory,
@@ -97,6 +101,7 @@ export function buildFileDescriptions(
       importBigNumber,
       isUnique,
       metadataEntriesByAddress,
+      hasMetadata,
     }
   }
 

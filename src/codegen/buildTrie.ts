@@ -211,7 +211,7 @@ export const reifyTrie = (
         line += (node.value as number).toString()
         break
       case 'BIGNUMBER':
-        line += `new BigNumber("${(node.value as BigNumber).toString()}")`
+        line += `BigNumber.from("${(node.value as BigNumber).toString()}")`
         break
       case 'DATE':
         line += `new Date("${(node.value as Date).toISOString()}")`
