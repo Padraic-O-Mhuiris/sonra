@@ -12,10 +12,12 @@ import { findTypechainDir } from './findTypechainDir'
 import { generateFiles } from './generateFiles'
 import { validateCategories } from './validateCategories'
 
-export async function run({ dir, model, fetch }: SonraConfig<SonraModel>) {
-  const dirPath = path.join(process.cwd(), dir)
+export async function run(config: SonraConfig<SonraModel>, configPath: string) {
+  const { dir, model, fetch } = config
 
-  const typechainDirPath = await findTypechainDir()
+  const workingDir = path.join(process.cwd(), path.dirname(configPath))
+  const dirPath = path.join(workingDir, dir)
+  const typechainDirPath = await findTypechainDir(workingDir)
 
   const { factories, ...rest } = require(typechainDirPath) as {
     factories: any

@@ -4946,6 +4946,16 @@ ts-command-line-args@^2.2.0:
     command-line-usage "^6.1.0"
     string-format "^2.0.0"
 
+ts-command-line-args@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/ts-command-line-args/-/ts-command-line-args-2.3.0.tgz#9db823193bdfeb1fcce91717864a8dfe8199a2e4"
+  integrity sha512-soWzRi3ALL0qQIkWSR45yOItr1fT8XL0+J0/GJsukh1V5QUEd6RXyWsSSl3ae2pcRqgDFxsenN13LyuntVZh8Q==
+  dependencies:
+    chalk "^4.1.0"
+    command-line-args "^5.1.1"
+    command-line-usage "^6.1.0"
+    string-format "^2.0.0"
+
 ts-essentials@^7.0.1:
   version "7.0.3"
   resolved "https://registry.yarnpkg.com/ts-essentials/-/ts-essentials-7.0.3.tgz#686fd155a02133eedcc5362dc8b5056cde3e5a38"

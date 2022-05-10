@@ -1,15 +1,14 @@
 import { ethers } from 'ethers'
 import { z } from 'zod'
-import { createAddress } from './src/address'
-import { SonraConfig } from './src/config'
-import { SonraFetch } from './src/schema'
-import * as zx from './src/zod'
+import { createAddress } from '../../src/address'
+import { SonraConfig } from '../../src/config'
+import { SonraFetch } from '../../src/schema'
+import * as zx from '../../src/zod'
 import {
   ERC20__factory,
   TrancheFactory__factory,
   Tranche__factory,
 } from './typechain'
-import { log } from './src/utils'
 
 const provider = new ethers.providers.JsonRpcProvider(
   'https://mainnet.infura.io/v3/7b2295eb2ca8443fba441bfd462cd93a',
@@ -65,7 +64,6 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
     }),
   )
 
-  log('Found all principalToken address creation events')
   const principalTokenAddresses = zx
     .addressArray()
     .parse(addressAndCreatedDateInfo.map(([address]) => address))
@@ -75,7 +73,6 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
   } = {}
 
   for (const [address, termStart] of addressAndCreatedDateInfo) {
-    log(`Finding data for principal token: ${address} :: ${termStart}`)
     const principalToken = Tranche__factory.connect(address, provider)
 
     const [
@@ -128,7 +125,6 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
     )
 
   for (const baseTokenAddress of baseTokenAddresses) {
-    log(`Finding data for base token: ${baseTokenAddress}`)
     const baseToken = ERC20__factory.connect(baseTokenAddress, provider)
 
     const [name, symbol, decimals, totalSupply] = await Promise.all([

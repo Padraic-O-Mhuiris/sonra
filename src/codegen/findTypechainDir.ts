@@ -8,9 +8,9 @@ const HardhatConfigFileName = 'hardhat.config.ts'
  * Finds typechain directory from hardhat config, presumes hardhat config is
  * standard
  * */
-export async function findTypechainDir(): Promise<string> {
+export async function findTypechainDir(workingDir: string): Promise<string> {
   log('Looking for hardhat config')
-  const hardhatConfigPath = path.join(process.cwd(), HardhatConfigFileName)
+  const hardhatConfigPath = path.join(workingDir, HardhatConfigFileName)
   if (!fs.existsSync(hardhatConfigPath)) {
     throw new Error('No hardhat config found')
   }
@@ -32,7 +32,7 @@ export async function findTypechainDir(): Promise<string> {
     throw new Error('outDir could not be parsed')
   }
 
-  const typechainDirPath = path.join(process.cwd(), typechainOutDir)
+  const typechainDirPath = path.join(workingDir, typechainOutDir)
 
   log('Validating contract types have been built')
   if (!fs.existsSync(typechainDirPath)) {
