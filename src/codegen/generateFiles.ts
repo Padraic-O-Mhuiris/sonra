@@ -86,6 +86,8 @@ export function generateFiles(
 ): Record<string, string> {
   const fileByCategory: Record<string, string> = {}
 
+  let index = 'export * from "./address"\n'
+
   for (const category of categories) {
     const {
       addresses,
@@ -146,6 +148,8 @@ export function generateFiles(
       .filter((s) => s !== '')
       .join('\n\n')
 
+    index += `export * from "./${category}"\n`
+
     fileByCategory[category] = prettier.format(file, {
       parser: 'typescript',
       printWidth: 80,
@@ -155,5 +159,14 @@ export function generateFiles(
     })
     log(`\nFile %s:\n%s`, category, file)
   }
+
+  fileByCategory['index'] = prettier.format(index, {
+    parser: 'typescript',
+    printWidth: 80,
+    tabWidth: 2,
+    semi: false,
+    trailingComma: 'all',
+  })
+
   return fileByCategory
 }

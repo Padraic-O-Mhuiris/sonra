@@ -46,7 +46,7 @@ export async function run(config: SonraConfig<SonraModel>, configPath: string) {
     fileDescriptionsByCategory,
   )
 
-  for (const category of categories) {
+  for (const category of [...categories, 'index']) {
     const file = categoryFilesByCategory[category]
     const fileName = `${category}.ts`
     await fs.promises.writeFile(path.join(dirPath, fileName), file)
