@@ -1,5 +1,6 @@
-import { Address, address } from './address'
+import { address } from './address'
 import { z } from 'zod'
+import { Address } from '../address'
 
 export type ZodAddressArray = z.ZodType<[Address, ...Address[]]>
 

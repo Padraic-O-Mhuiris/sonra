@@ -1,7 +1,5 @@
 import { parse as commandLineArgs } from 'ts-command-line-args'
-import { run } from './codegen'
-import { SonraConfig } from './config'
-import { SonraModel } from './schema'
+import { SonraModel, SonraConfig, run } from './'
 import path from 'path'
 
 export interface ParsedArgs {

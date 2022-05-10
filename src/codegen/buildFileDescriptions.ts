@@ -1,8 +1,8 @@
 import { includes } from 'lodash'
 import { printNode, zodToTs } from 'zod-to-ts'
+import { Address } from '../address'
 import { SonraDataModel, SonraModel } from '../schema'
 import { log } from '../utils'
-import { zx } from '../zodx'
 import {
   buildCategorisedAddressImportsByCategory,
   CategorisedAddressImport,
@@ -23,14 +23,14 @@ import { validateContracts } from './validateContracts'
 
 interface SonraFileDescription {
   contractFactory: string
-  addresses: [zx.Address, ...zx.Address[]]
+  addresses: [Address, ...Address[]]
   addressImports: CategorisedAddressImport[]
-  addressConstantsByAddress: Record<zx.Address, string>
+  addressConstantsByAddress: Record<Address, string>
   addressType: string
   metadataType: string
   importBigNumber: boolean
   isUnique: boolean
-  metadataEntriesByAddress: Record<zx.Address, string>
+  metadataEntriesByAddress: Record<Address, string>
 }
 
 export type FileDescriptionsByCategory = Record<string, SonraFileDescription>
@@ -72,7 +72,7 @@ export function buildFileDescriptions(
           ? addressConstant(category)
           : addressConstantWithPostFix(category, address),
       ]),
-    ) as Record<zx.Address, string>
+    ) as Record<Address, string>
 
     const addressImports = categorisedAddressImportsByCategory[category]
 

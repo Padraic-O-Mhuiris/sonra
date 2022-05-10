@@ -1,9 +1,7 @@
 import { ethers } from 'ethers'
 import { z } from 'zod'
-import { createAddress } from '../../src/address'
-import { SonraConfig } from '../../src/config'
-import { SonraFetch } from '../../src/schema'
-import * as zx from '../../src/zod'
+import { SonraFetch, SonraConfig, zx, addressify, Address } from '../../src'
+
 import {
   ERC20__factory,
   TrancheFactory__factory,
@@ -56,7 +54,7 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
     14600000,
   )
 
-  const addressAndCreatedDateInfo: [zx.Address, Date][] = await Promise.all(
+  const addressAndCreatedDateInfo: [Address, Date][] = await Promise.all(
     trancheCreatedEvents.map(async (event) => {
       const address = zx.address().parse(event.args.trancheAddress)
       const termStart = new Date((await event.getBlock()).timestamp * 1000)
@@ -69,7 +67,7 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
     .parse(addressAndCreatedDateInfo.map(([address]) => address))
 
   const principalTokenData: {
-    [k in zx.Address]: z.infer<ElementModel['principalToken']>
+    [k in Address]: z.infer<ElementModel['principalToken']>
   } = {}
 
   for (const [address, termStart] of addressAndCreatedDateInfo) {
@@ -89,12 +87,12 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
       principalToken.decimals(),
       principalToken
         .underlying()
-        .then((address) => createAddress(address, 'baseToken')),
+        .then((address) => addressify(address, 'baseToken')),
       principalToken
         .unlockTimestamp()
         .then((result) => new Date(result.toNumber() * 1000)),
-      principalToken.interestToken().then((address) => createAddress(address)),
-      principalToken.position().then((address) => createAddress(address)),
+      principalToken.interestToken().then((address) => addressify(address)),
+      principalToken.position().then((address) => addressify(address)),
     ])
 
     principalTokenData[address] = {
@@ -108,12 +106,12 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
       },
       interestToken,
       position,
-      creator: createAddress(trancheFactoryAddress, 'trancheFactory'),
+      creator: addressify(trancheFactoryAddress, 'trancheFactory'),
     }
   }
 
   const baseTokenData: {
-    [k in zx.Address]: z.infer<ElementModel['baseToken']>
+    [k in Address]: z.infer<ElementModel['baseToken']>
   } = {}
 
   const baseTokenAddresses = zx

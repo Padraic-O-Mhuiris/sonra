@@ -1,13 +1,13 @@
 import { includes } from 'lodash'
+import { Address } from '../address'
 import { SonraDataModel, SonraModel } from '../schema'
 import { splitCategorisedAddress } from '../utils'
-import { zx } from '../zodx'
 import { getRootValuesByCategory } from './buildTrie'
 
 export function validateCategorisedAddresses(
   data: SonraDataModel<SonraModel>,
   categories: [string, ...string[]],
-): Record<string, zx.CategorisedAddress<string>[]> {
+): Record<string, Address<string>[]> {
   const categorisedAddressesByCategory = getRootValuesByCategory(
     data,
     'CATEGORISED_ADDRESS',

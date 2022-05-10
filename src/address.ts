@@ -2,15 +2,25 @@ import { zx } from './zodx'
 
 export const addressify = <T extends string | undefined = undefined>(
   _address: string,
-  _tag?: T,
-): T extends string ? zx.CategorisedAddress<T> : zx.Address => {
-  if (_tag) {
-    return zx
-      .categoriseAddress(_tag)
-      .parse(`${_tag}:${_address}`) as T extends string
-      ? zx.CategorisedAddress<T>
-      : never
-  }
+  _category?: T,
+): T extends string ? Address<T> : Address => {
+  return zx
+    .address(_category)
+    .parse(
+      _category ? `${_category}:${_address}` : _address,
+    ) as T extends string ? Address<T> : Address
+}
 
-  return zx.address().parse(_address) as T extends string ? never : zx.Address
+export type Address<T extends string = ''> = T extends ''
+  ? string & {
+      readonly __brand: 'Address'
+    }
+  : string & {
+      readonly __brand: 'Address'
+    } & {
+      readonly __category: T
+    }
+
+export type AddressRecord<V> = {
+  [k in Address]: V
 }

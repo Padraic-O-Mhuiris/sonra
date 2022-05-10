@@ -1,56 +1,41 @@
 import { ethers } from 'ethers'
 import { z } from 'zod'
 import { withGetType } from 'zod-to-ts'
+import { Address } from '../address'
 import { categoryAddressType } from '../codegen/utils'
 
-export type Address = string & { readonly Address: unique symbol }
+export type ZodAddress<T extends string = ''> = z.ZodType<Address<T>>
 
-const isAddress = (x: string): x is Address => ethers.utils.isAddress(x)
+// export const _address: ZodAddress = withGetType<ZodAddress>(
+//   z.string().refine((x: string): x is Address => ethers.utils.isAddress(x)),
+//   (ts) => ts.factory.createIdentifier('Address'),
+// )
 
-export type ZodAddress = z.ZodType<Address>
+const validateAddress = (_val: string): _val is Address =>
+  ethers.utils.isAddress(_val)
 
-const _address: ZodAddress = withGetType<ZodAddress>(
-  z.string().refine(isAddress),
-  (ts) => ts.factory.createIdentifier('Address'),
-)
-
-export type CategorisedAddress<T extends string> = Address & {
-  readonly __category: T
-}
-
-export type ZodCategorisedAddress<T extends string> = z.ZodType<
-  CategorisedAddress<T>
->
-
-// custom address type of the structure <tag>:<address>
-export const categoriseAddress = <T extends string>(
-  _category: T,
-): ZodCategorisedAddress<T> =>
-  withGetType<ZodCategorisedAddress<T>>(
-    z.custom<CategorisedAddress<T>>(
+export const address = <T extends string = ''>(_category?: T): ZodAddress<T> =>
+  withGetType<ZodAddress<T>>(
+    z.custom<Address<T>>(
       (val) =>
         z
           .string()
           .refine((_val) => {
-            if (!_val.includes(':')) return false
-            const [category, addressString] = _val.split(':')
-            if (category !== _category) return false
+            const valIsAddress = validateAddress(_val)
 
-            return _address.safeParse(addressString).success
+            if (!valIsAddress) {
+              if (!_val.includes(':')) return false
+              const [category, address] = _val.split(':')
+              if (category !== _category) return false
+              return validateAddress(address)
+            } else {
+              return true
+            }
           })
           .safeParse(val).success,
     ),
-    (ts) => ts.factory.createIdentifier(categoryAddressType(_category)),
+    (ts) =>
+      ts.factory.createIdentifier(
+        _category ? categoryAddressType(_category) : 'Address',
+      ),
   )
-
-export const address = <T extends string | undefined = undefined>(
-  tag?: T,
-): T extends string ? ZodCategorisedAddress<T> : ZodAddress => {
-  if (tag) {
-    return categoriseAddress(tag) as T extends string
-      ? ZodCategorisedAddress<T>
-      : never
-  }
-
-  return _address as T extends string ? never : ZodAddress
-}
