@@ -14,7 +14,7 @@
   "scripts": {
     "build": "tsc --build --verbose ./tsconfig.prod.json",
     "watch": "tsc --noEmit --watch --project ./tsconfig.json",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist tsconfig.prod.buildinfo",
     "format": "prettier --check \".src/**/*.ts\" README.md",
     "format:fix": "prettier --write \"./src/**/*.ts\" README.md",
     "prepublish": "yarn clean && yarn build",
