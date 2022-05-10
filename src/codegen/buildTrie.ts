@@ -2,8 +2,8 @@ import { BigNumber } from 'ethers'
 import { includes } from 'lodash'
 import { z } from 'zod'
 import { SonraDataModel, SonraModel } from '../schema'
-import * as zx from '../zod'
-import { Address, CategorisedAddress, splitCategorisedAddress } from '../zod'
+import { splitCategorisedAddress } from '../utils'
+import { zx } from '../zodx'
 import { addressConstant, addressConstantWithPostFix } from './utils'
 
 type SonraNodeLabel =
@@ -114,7 +114,7 @@ export const buildSonraTrieByCategoryAndAddress = (
     sonraTrieByCategoryAndAddress[category] = {}
 
     for (const [address, addressEntry] of Object.entries(categoryEntry)) {
-      sonraTrieByCategoryAndAddress[category][address as Address] =
+      sonraTrieByCategoryAndAddress[category][address as zx.Address] =
         buildSonraTrie(addressEntry)
     }
   }
@@ -220,7 +220,7 @@ export const reifyTrie = (
         break
       case 'CATEGORISED_ADDRESS':
         const [category, address] = splitCategorisedAddress(
-          node.value as CategorisedAddress<string>,
+          node.value as zx.CategorisedAddress<string>,
         )
         if (includes(uniqueCategories, category)) {
           line += addressConstant(category)
@@ -243,13 +243,13 @@ export const reifyTrie = (
 }
 
 export const buildMetadataEntriesByAddress = (
-  trieByAddress: Record<Address, SonraTrie>,
+  trieByAddress: Record<zx.Address, SonraTrie>,
   uniqueCategories: string[],
-): Record<Address, string> => {
-  const metadataEntriesByAddress: Record<Address, string> = {}
+): Record<zx.Address, string> => {
+  const metadataEntriesByAddress: Record<zx.Address, string> = {}
 
   for (const [address, trie] of Object.entries(trieByAddress)) {
-    metadataEntriesByAddress[address as Address] = `{\n${reifyTrie(
+    metadataEntriesByAddress[address as zx.Address] = `{\n${reifyTrie(
       trie,
       uniqueCategories,
     )}\n}`

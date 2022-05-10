@@ -1,16 +1,24 @@
 {
   "name": "sonra",
   "version": "0.0.1",
-  "main": "index.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": "./dist/cli/cli.js",
+  "files": [
+    "dist/**/*"
+  ],
   "repository": "git@github.com:Padraic-O-Mhuiris/sonra.git",
   "author": "Pádraic Ó Mhuiris <patrick.morris.310@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "tsc --build --verbose ./tsconfig.json",
+    "build": "tsc --build --verbose ./tsconfig.prod.json",
     "watch": "tsc --noEmit --watch --project ./tsconfig.json",
     "clean": "rm -rf dist",
     "format": "prettier --check \"./**/*.ts\" README.md",
     "format:fix": "prettier --write \"./**/*.ts\" README.md",
+    "prepublish": "yarn clean && yarn build",
+    "postinstall": "yarn build",
     "element:typechain": "yarn hardhat compile --config examples/element/hardhat.config.ts",
     "element:sonra": "DEBUG=\"SONRA\" yarn ts-node --project ./tsconfig.json src/cli --config ./examples/element/sonra.config.ts",
     "example:element": "yarn element:typechain && yarn element:sonra"

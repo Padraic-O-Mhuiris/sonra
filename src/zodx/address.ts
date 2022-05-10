@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { withGetType } from 'zod-to-ts'
 import { categoryAddressType } from '../codegen/utils'
 
-export type Address = string & { readonly __zod: 'Address' }
+export type Address = string & { readonly Address: unique symbol }
 
 const isAddress = (x: string): x is Address => ethers.utils.isAddress(x)
 
@@ -53,10 +53,4 @@ export const address = <T extends string | undefined = undefined>(
   }
 
   return _address as T extends string ? never : ZodAddress
-}
-
-export function splitCategorisedAddress(
-  c: CategorisedAddress<string>,
-): [string, Address] {
-  return c.split(':') as [string, Address]
 }

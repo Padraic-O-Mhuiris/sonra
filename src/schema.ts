@@ -1,6 +1,6 @@
 import { keys } from 'lodash'
 import { z } from 'zod'
-import * as zx from './zod'
+import { zx } from './zodx'
 import { log } from './utils'
 
 export type SonraModel = {

@@ -1,5 +1,6 @@
 import { includes } from 'lodash'
-import { CategorisedAddress, splitCategorisedAddress } from '../zod'
+import { splitCategorisedAddress } from '../utils'
+import { zx } from '../zodx'
 import {
   addressConstant,
   addressConstantWithPostFix,
@@ -13,7 +14,7 @@ export interface CategorisedAddressImport {
 }
 
 function buildImportsFromCategorisedAddresses(
-  _categorisedAddresses: CategorisedAddress<string>[],
+  _categorisedAddresses: zx.CategorisedAddress<string>[],
   uniqueCategories: string[],
 ) {
   const uniques = Array.from(new Set(_categorisedAddresses))
@@ -23,7 +24,7 @@ function buildImportsFromCategorisedAddresses(
 
   const categorisedAddressesByCategory: Record<
     string,
-    CategorisedAddress<string>[]
+    zx.CategorisedAddress<string>[]
   > = {}
   for (const category of categories) {
     categorisedAddressesByCategory[category] = uniques.filter((c) =>
@@ -63,7 +64,7 @@ type CategorisedAddressImportsByCategory = Record<
 export function buildCategorisedAddressImportsByCategory(
   categories: [string, ...string[]],
   uniqueCategories: string[],
-  categorisedAddresses: Record<string, CategorisedAddress<string>[]>,
+  categorisedAddresses: Record<string, zx.CategorisedAddress<string>[]>,
 ): CategorisedAddressImportsByCategory {
   const categorisedAddressImportsByCategory: CategorisedAddressImportsByCategory =
     {}

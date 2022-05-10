@@ -1,14 +1,16 @@
-import { address, Address, CategorisedAddress, categoriseAddress } from './zod'
+import { zx } from './zodx'
 
-export const createAddress = <T extends string | undefined = undefined>(
+export const addressify = <T extends string | undefined = undefined>(
   _address: string,
   _tag?: T,
-): T extends string ? CategorisedAddress<T> : Address => {
+): T extends string ? zx.CategorisedAddress<T> : zx.Address => {
   if (_tag) {
-    return categoriseAddress(_tag).parse(
-      `${_tag}:${_address}`,
-    ) as T extends string ? CategorisedAddress<T> : never
+    return zx
+      .categoriseAddress(_tag)
+      .parse(`${_tag}:${_address}`) as T extends string
+      ? zx.CategorisedAddress<T>
+      : never
   }
 
-  return address().parse(_address) as T extends string ? never : Address
+  return zx.address().parse(_address) as T extends string ? never : zx.Address
 }
