@@ -18,7 +18,6 @@
     "format": "prettier --check \".src/**/*.ts\" README.md",
     "format:fix": "prettier --write \"./src/**/*.ts\" README.md",
     "prepublish": "yarn clean && yarn build",
-    "postinstall": "yarn build",
     "element:typechain": "yarn hardhat compile --config examples/element/hardhat.config.ts",
     "element:sonra": "DEBUG=\"SONRA\" yarn ts-node --project ./tsconfig.json src/cli --config ./examples/element/sonra.config.ts",
     "example:element": "yarn element:typechain && yarn element:sonra"
