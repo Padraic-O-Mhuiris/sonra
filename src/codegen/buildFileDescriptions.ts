@@ -1,4 +1,3 @@
-import { ethers } from 'ethers'
 import { includes } from 'lodash'
 import { printNode, zodToTs } from 'zod-to-ts'
 import { Address } from '../address'
