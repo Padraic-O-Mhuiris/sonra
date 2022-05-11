@@ -1,6 +1,6 @@
 export { zx } from './zodx'
 export { run } from './codegen'
 export { SonraConfig } from './config'
-export { SonraModel, SonraFetch } from './schema'
+export { SonraModel, SonraFetch, SonraMetadata } from './schema'
 export { addressify, Address } from './address'
 export { splitCategorisedAddress } from './utils'

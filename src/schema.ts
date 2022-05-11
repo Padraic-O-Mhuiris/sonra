@@ -23,6 +23,11 @@ export type SonraDataModel<M extends SonraModel> = z.infer<SonraSchema<M>>
 
 export type SonraFetch<M extends SonraModel> = () => Promise<SonraDataModel<M>>
 
+export type SonraMetadata<
+  M extends SonraModel,
+  T extends keyof M & string,
+> = SonraDataModel<M>['metadata'][T]
+
 export const createSonraSchema = <Model extends SonraModel>(
   model: Model,
 ): SonraSchema<Model> => {
