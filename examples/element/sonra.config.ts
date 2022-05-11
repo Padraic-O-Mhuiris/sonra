@@ -1,6 +1,13 @@
 import { ethers } from 'ethers'
 import { z } from 'zod'
-import { SonraFetch, SonraConfig, zx, addressify, Address } from '../../src'
+import {
+  SonraFetch,
+  SonraConfig,
+  zx,
+  addressify,
+  Address,
+  SonraMetadata,
+} from '../../src'
 import 'tsconfig-paths/register'
 
 import {
@@ -67,9 +74,7 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
     .addressArray()
     .parse(addressAndCreatedDateInfo.map(([address]) => address))
 
-  const principalTokenData: {
-    [k in Address]: z.infer<ElementModel['principalToken']>
-  } = {}
+  const principalTokenData: SonraMetadata<ElementModel, 'principalToken'> = {}
 
   for (const [address, termStart] of addressAndCreatedDateInfo) {
     const principalToken = Tranche__factory.connect(address, provider)

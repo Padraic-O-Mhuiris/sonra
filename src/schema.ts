@@ -2,6 +2,7 @@ import { keys } from 'lodash'
 import { z } from 'zod'
 import { zx } from './zodx'
 import { log } from './utils'
+import { Address } from './address'
 
 export type SonraModel = {
   readonly [k in string]: z.AnyZodObject
@@ -26,7 +27,12 @@ export type SonraFetch<M extends SonraModel> = () => Promise<SonraDataModel<M>>
 export type SonraMetadata<
   M extends SonraModel,
   T extends keyof M & string,
-> = SonraDataModel<M>['metadata'][T]
+  U extends
+    | keyof SonraDataModel<M>['metadata'][T][Address]
+    | undefined = undefined,
+> = U extends keyof SonraDataModel<M>['metadata'][T][Address]
+  ? SonraDataModel<M>['metadata'][T][Address][U]
+  : SonraDataModel<M>['metadata'][T]
 
 export const createSonraSchema = <Model extends SonraModel>(
   model: Model,
