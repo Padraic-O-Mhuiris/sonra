@@ -22,7 +22,7 @@ export const address = <T extends string = ''>(_category?: T): ZodAddress<T> =>
               if (category !== _category) return false
               return isAddress(address)
             } else {
-              isAddress(_val)
+              return isAddress(_val)
             }
           })
           .safeParse(val).success,
