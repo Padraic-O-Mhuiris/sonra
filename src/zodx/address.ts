@@ -6,12 +6,7 @@ import { categoryAddressType } from '../codegen/utils'
 
 export type ZodAddress<T extends string = ''> = z.ZodType<Address<T>>
 
-// export const _address: ZodAddress = withGetType<ZodAddress>(
-//   z.string().refine((x: string): x is Address => ethers.utils.isAddress(x)),
-//   (ts) => ts.factory.createIdentifier('Address'),
-// )
-
-const validateAddress = (_val: string): _val is Address =>
+const isAddress = (_val: string): _val is Address =>
   ethers.utils.isAddress(_val)
 
 export const address = <T extends string = ''>(_category?: T): ZodAddress<T> =>
@@ -21,15 +16,13 @@ export const address = <T extends string = ''>(_category?: T): ZodAddress<T> =>
         z
           .string()
           .refine((_val) => {
-            const valIsAddress = validateAddress(_val)
-
-            if (!valIsAddress) {
+            if (_category) {
               if (!_val.includes(':')) return false
               const [category, address] = _val.split(':')
               if (category !== _category) return false
-              return validateAddress(address)
+              return isAddress(address)
             } else {
-              return true
+              isAddress(_val)
             }
           })
           .safeParse(val).success,
