@@ -12,14 +12,14 @@
   "author": "Pádraic Ó Mhuiris <patrick.morris.310@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "tsc --build --verbose ./tsconfig.prod.json",
+    "build": "tsc --build --verbose ./tsconfig.prod.json && chmod 755 ./dist/cli.js",
     "watch": "tsc --noEmit --watch --project ./tsconfig.json",
-    "clean": "rm -rf dist tsconfig.prod.buildinfo",
+    "clean": "rm -rf dist *.tsbuildinfo",
     "format": "prettier --check \".src/**/*.ts\" README.md",
     "format:fix": "prettier --write \"./src/**/*.ts\" README.md",
     "prepublish": "yarn clean && yarn build",
     "element:typechain": "yarn hardhat compile --config examples/element/hardhat.config.ts",
-    "element:sonra": "DEBUG=\"SONRA\" yarn ts-node --project ./tsconfig.json src/cli --config ./examples/element/sonra.config.ts",
+    "element:sonra": "DEBUG=\"SONRA\" yarn ts-node --project ./tsconfig.json ./dist/cli.js --config ./examples/element/sonra.config.ts",
     "example:element": "yarn element:typechain && yarn element:sonra"
   },
   "devDependencies": {
@@ -43,13 +43,11 @@
     "eslint-plugin-no-only-tests": "^2.6.0",
     "eslint-plugin-sonarjs": "^0.13.0",
     "eslint-plugin-unused-imports": "^2.0.0",
-    "ethers": "^5.6.5",
     "fs-extra": "^10.1.0",
     "hardhat": "^2.9.3",
     "jest": "^28.0.3",
     "lodash": "^4.17.21",
     "mocha": "^10.0.0",
-    "prettier": "^2.6.2",
     "rimraf": "^3.0.2",
     "ts-command-line-args": "^2.3.0",
     "ts-essentials": "^9.1.2",
@@ -57,10 +55,15 @@
     "ts-node": "^10.7.0",
     "typechain": "^8.0.0",
     "typescript": "^4.6.4",
-    "zod": "^3.14.4",
     "zod-to-ts": "^1.0.1"
   },
   "dependencies": {
+    "zod": "^3.14.4",
+    "ethers": "^5.6.5",
+    "prettier": "^2.6.2",
     "tsconfig-paths": "^4.0.0"
+  },
+  "peerDependencies": {
+    "zod": "^3.14.4"
   }
 }
