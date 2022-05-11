@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env ts-node
 import { parse as commandLineArgs } from 'ts-command-line-args'
 import { SonraModel, SonraConfig, run } from './'
 import path from 'path'

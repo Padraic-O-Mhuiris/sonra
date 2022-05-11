@@ -1,6 +1,7 @@
 import { ethers } from 'ethers'
 import { z } from 'zod'
 import { SonraFetch, SonraConfig, zx, addressify, Address } from '../../src'
+import 'tsconfig-paths/register'
 
 import {
   ERC20__factory,

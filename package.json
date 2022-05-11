@@ -20,7 +20,7 @@
     "format:fix": "prettier --write \"./src/**/*.ts\" README.md",
     "prepublish": "yarn clean && yarn build",
     "element:typechain": "yarn hardhat compile --config examples/element/hardhat.config.ts",
-    "element:sonra": "DEBUG=\"SONRA\" yarn ts-node --project ./tsconfig.json ./dist/cli.js --config ./examples/element/sonra.config.ts",
+    "element:sonra": "DEBUG=\"SONRA\" ./dist/cli.js --config ./examples/element/sonra.config.ts",
     "example:element": "yarn element:typechain && yarn element:sonra"
   },
   "devDependencies": {
