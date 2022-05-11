@@ -13,8 +13,10 @@ const ethersImportLabel = (
 import type { Provider } from "@ethersproject/providers";
 ${importBigNumber ? `import { BigNumber } from "ethers"` : ''}`
 
-const contractFactoryImportLabel = (contractFactory: string) =>
-  `import { ${contractFactory} } from "./contracts"`
+const contractFactoryImportLabel = (
+  contractFactory: string,
+  contract: string,
+) => `import { ${contractFactory}, ${contract} } from "./contracts"`
 
 const addressImportLabel = ({
   path,
@@ -52,9 +54,10 @@ const addressGuardLabel = (
 const contractLabel = (
   category: string,
   addressType: string,
+  contract: string,
   contractFactory: string,
 ) =>
-  `export const ${category}Contract = (address: ${addressType}, signerOrProvider: Signer | Provider) => ${contractFactory}.connect(address, signerOrProvider)`
+  `export const ${category}Contract = (address: ${addressType}, signerOrProvider: Signer | Provider): ${contract} => ${contractFactory}.connect(address, signerOrProvider)`
 
 const metadataTypeLabel = (
   category: string,
@@ -91,6 +94,7 @@ export function generateFiles(
   for (const category of categories) {
     const {
       addresses,
+      contract,
       contractFactory,
       addressImports,
       addressConstantsByAddress,
@@ -105,7 +109,7 @@ export function generateFiles(
     const imports = [
       defaultImportLabel,
       ethersImportLabel(importBigNumber),
-      contractFactoryImportLabel(contractFactory),
+      contractFactoryImportLabel(contractFactory, contract),
       ...addressImports.map(addressImportLabel),
     ].join('\n')
 
@@ -134,7 +138,7 @@ export function generateFiles(
       addressConstLabels,
       addressList,
       addressGuardLabel(category, addressType, isUnique, addressConsts),
-      contractLabel(category, addressType, contractFactory),
+      contractLabel(category, addressType, contract, contractFactory),
       hasMetadata ? metadataTypeLabel(category, addressType, metadataType) : '',
       hasMetadata
         ? metadataLabel(

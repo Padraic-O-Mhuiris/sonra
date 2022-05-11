@@ -22,6 +22,7 @@ import { validateCategorisedAddresses } from './validateCategorisedAddresses'
 import { validateContracts } from './validateContracts'
 
 interface SonraFileDescription {
+  contract: string
   contractFactory: string
   addresses: [Address, ...Address[]]
   addressImports: CategorisedAddressImport[]
@@ -62,6 +63,7 @@ export function buildFileDescriptions(
 
   for (const category of categories) {
     const contractFactory = contractFactoriesByCategory[category]
+    const contract = contractFactory.split('__')[0]
     const addresses = data.addresses[category]
 
     const isUnique = includes(uniqueCategories, category)
@@ -91,6 +93,7 @@ export function buildFileDescriptions(
     const hasMetadata = metadataType !== '{}'
 
     fileDescriptionByCategory[category] = {
+      contract,
       contractFactory,
       addresses,
       addressImports,
