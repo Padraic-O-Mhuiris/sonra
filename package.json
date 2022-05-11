@@ -12,8 +12,8 @@
   "author": "Pádraic Ó Mhuiris <patrick.morris.310@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "tsc --build --verbose ./tsconfig.prod.json && chmod 755 ./dist/cli.js",
-    "watch": "tsc --noEmit --watch --project ./tsconfig.json",
+    "build": "./node_modules/.bin/tsc --build --verbose ./tsconfig.prod.json && chmod 755 ./dist/cli.js",
+    "watch": "./node_modules/.bin/tsc --noEmit --watch --project ./tsconfig.json",
     "clean": "rm -rf dist *.tsbuildinfo",
     "format": "prettier --check \".src/**/*.ts\" README.md",
     "format:fix": "prettier --write \"./src/**/*.ts\" README.md",
