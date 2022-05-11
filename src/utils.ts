@@ -10,3 +10,7 @@ export function capitalize(s: string) {
 export function splitCategorisedAddress(c: Address<string>): [string, Address] {
   return c.split(':') as [string, Address]
 }
+
+export const isUniqueArray = <F extends unknown, T extends F[] | [F, ...F[]]>(
+  arr: T,
+): boolean => new Set(arr).size === arr.length

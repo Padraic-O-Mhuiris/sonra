@@ -1,7 +1,7 @@
 import { keys } from 'lodash'
 import { z } from 'zod'
 import { zx } from './zodx'
-import { log } from './utils'
+import { isUniqueArray, log } from './utils'
 import { Address } from './address'
 
 export type SonraModel = {
@@ -10,7 +10,7 @@ export type SonraModel = {
 
 export type SonraSchema<Model extends SonraModel> = z.ZodObject<{
   addresses: z.ZodObject<{
-    [k in keyof Model & string]: zx.ZodAddressArray
+    [k in keyof Model & string]: z.ZodArray<zx.ZodAddress<''>, 'atleastone'>
   }>
   contracts: z.ZodObject<{
     [k in keyof Model & string]: z.ZodString
@@ -43,10 +43,18 @@ export const createSonraSchema = <Model extends SonraModel>(
     modelKeys.reduce(
       (acc, arg) => ({
         ...acc,
-        [arg]: zx.addressArray(),
+        [arg]: zx
+          .address()
+          .array()
+          .nonempty()
+          .refine(isUniqueArray, (arg) => ({
+            message: `Address array must be unique - input: ${JSON.stringify(
+              arg,
+            )}`,
+          })),
       }),
       {} as {
-        [k in keyof Model & string]: zx.ZodAddressArray
+        [k in keyof Model & string]: z.ZodArray<zx.ZodAddress<''>, 'atleastone'>
       },
     ),
   )

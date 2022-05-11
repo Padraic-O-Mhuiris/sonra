@@ -64,10 +64,8 @@ export function buildFileDescriptions(
   for (const category of categories) {
     const contractFactory = contractFactoriesByCategory[category]
     const contract = contractFactory.split('__')[0]
-    const addresses = Array.from(new Set(data.addresses[category])) as [
-      Address,
-      ...Address[],
-    ]
+
+    const addresses = data.addresses[category]
 
     const isUnique = includes(uniqueCategories, category)
 

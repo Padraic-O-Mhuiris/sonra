@@ -1,15 +1,14 @@
 import { ethers } from 'ethers'
+import 'tsconfig-paths/register'
 import { z } from 'zod'
 import {
-  SonraFetch,
-  SonraConfig,
-  zx,
-  addressify,
   Address,
+  addressify,
+  SonraConfig,
+  SonraFetch,
   SonraMetadata,
+  zx,
 } from '../../src'
-import 'tsconfig-paths/register'
-
 import {
   ERC20__factory,
   TrancheFactory__factory,
@@ -71,7 +70,9 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
   )
 
   const principalTokenAddresses = zx
-    .addressArray()
+    .address()
+    .array()
+    .nonempty()
     .parse(addressAndCreatedDateInfo.map(([address]) => address))
 
   const principalTokenData: SonraMetadata<ElementModel, 'principalToken'> = {}
@@ -121,7 +122,9 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
   } = {}
 
   const baseTokenAddresses = zx
-    .addressArray()
+    .address()
+    .array()
+    .nonempty()
     .parse(
       Object.entries(principalTokenData).map(([, { underlying }]) =>
         zx.address().parse(underlying.split(':')[1]),
