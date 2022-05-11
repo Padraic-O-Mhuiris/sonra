@@ -193,10 +193,11 @@ export const getRootValuesByCategory = <T extends SonraRootNodeLabel>(
 export const reifyTrie = (
   trie: SonraTrie,
   uniqueCategories: string[],
+  parentNodeIsArray: boolean | undefined = false,
 ): string => {
   let val = ''
   for (const node of trie) {
-    let line = `${node.key}: `
+    let line = parentNodeIsArray ? '' : `${node.key}: `
     switch (node.label) {
       case 'NULL':
         line += 'null'
@@ -228,7 +229,9 @@ export const reifyTrie = (
         break
       case 'ARRAY':
         line +=
-          '[\n' + reifyTrie(node.value as SonraTrie, uniqueCategories) + '\n]'
+          '[\n' +
+          reifyTrie(node.value as SonraTrie, uniqueCategories, true) +
+          '\n]'
         break
       case 'OBJECT':
         line +=
