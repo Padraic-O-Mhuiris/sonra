@@ -49,7 +49,7 @@ type ElementModel = typeof elementModel
 
 const elementFetch: SonraFetch<ElementModel> = async () => {
   const trancheFactoryAddress = zx
-    .address()
+    .address('aaa')
     .parse('0x62F161BF3692E4015BefB05A03a94A40f520d1c0')
   const trancheFactory = TrancheFactory__factory.connect(
     trancheFactoryAddress,

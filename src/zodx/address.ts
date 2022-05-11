@@ -9,8 +9,17 @@ export type ZodAddress<T extends string = ''> = z.ZodType<Address<T>>
 const isAddress = (_val: string): _val is Address =>
   ethers.utils.isAddress(_val)
 
-export const address = <T extends string = ''>(_category?: T): ZodAddress<T> =>
-  withGetType<ZodAddress<T>>(
+export const address = <T extends string = ''>(
+  _category?: T,
+): ZodAddress<T> => {
+  const errorCategoryStr = '"' + `${_category}` + '"'
+  const errorFn = (arg: any) => ({
+    message: `Incorrect input to zx.address(${
+      _category ? errorCategoryStr : ''
+    }): ${arg}`,
+  })
+
+  return withGetType<ZodAddress<T>>(
     z.custom<Address<T>>(
       (val) =>
         z
@@ -26,9 +35,11 @@ export const address = <T extends string = ''>(_category?: T): ZodAddress<T> =>
             }
           })
           .safeParse(val).success,
+      errorFn,
     ),
     (ts) =>
       ts.factory.createIdentifier(
         _category ? categoryAddressType(_category) : 'Address',
       ),
   )
+}
