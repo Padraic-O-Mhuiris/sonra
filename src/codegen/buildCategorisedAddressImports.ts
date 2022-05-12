@@ -1,6 +1,5 @@
 import { includes } from 'lodash'
-import { Address } from '../address'
-import { splitCategorisedAddress } from '../utils'
+import { Address, reifyAddress } from '../address'
 import {
   addressConstant,
   addressConstantWithPostFix,
@@ -18,9 +17,7 @@ function buildImportsFromCategorisedAddresses(
   uniqueCategories: string[],
 ) {
   const uniques = Array.from(new Set(_categorisedAddresses))
-  const categories = Array.from(
-    new Set(uniques.map(splitCategorisedAddress).map(([x]) => x)),
-  )
+  const categories = Array.from(new Set(uniques.map(reifyAddress)))
 
   const categorisedAddressesByCategory: Record<string, Address<string>[]> = {}
   for (const category of categories) {
@@ -40,11 +37,13 @@ function buildImportsFromCategorisedAddresses(
 
     const isUniqueCategory = includes(uniqueCategories, category)
     for (const categorisedAddress of categorisedAddresses) {
-      const [, address] = splitCategorisedAddress(categorisedAddress)
       addressConstants.push(
         isUniqueCategory
           ? addressConstant(category)
-          : addressConstantWithPostFix(category, address),
+          : addressConstantWithPostFix(
+              category,
+              reifyAddress(categorisedAddress),
+            ),
       )
     }
     categorisedAddressImports.push({ path, addressConstants, addressType })

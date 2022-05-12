@@ -3,7 +3,7 @@ import { includes } from 'lodash'
 import { z } from 'zod'
 import { Address } from '../address'
 import { SonraDataModel, SonraModel } from '../schema'
-import { splitCategorisedAddress } from '../utils'
+import { splitAddress } from '../utils'
 import { zx } from '../zodx'
 import { addressConstant, addressConstantWithPostFix } from './utils'
 
@@ -218,9 +218,7 @@ export const reifyTrie = (
         line += `new Date("${(node.value as Date).toISOString()}")`
         break
       case 'CATEGORISED_ADDRESS':
-        const [category, address] = splitCategorisedAddress(
-          node.value as Address<string>,
-        )
+        const [category, address] = splitAddress(node.value as Address<string>)
         if (includes(uniqueCategories, category)) {
           line += addressConstant(category)
         } else {

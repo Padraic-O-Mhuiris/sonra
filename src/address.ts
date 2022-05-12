@@ -1,3 +1,4 @@
+import { AddressCategory, splitAddress } from './utils'
 import { zx } from './zodx'
 
 export const addressify = <T extends string | undefined = undefined>(
@@ -24,3 +25,10 @@ export type Address<T extends string = ''> = T extends ''
 export type AddressRecord<V> = {
   [k in Address]: V
 }
+
+export const reifyAddress = <T extends Address<string>>(address: T): Address =>
+  splitAddress(address)[1]
+
+export const addressCategory = <T extends Address<string>>(
+  address: T,
+): AddressCategory<T> => splitAddress(address)[0]

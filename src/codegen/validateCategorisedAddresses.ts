@@ -1,7 +1,6 @@
 import { includes } from 'lodash'
-import { Address } from '../address'
+import { Address, addressCategory } from '../address'
 import { SonraDataModel, SonraModel } from '../schema'
-import { splitCategorisedAddress } from '../utils'
 import { getRootValuesByCategory } from './buildTrie'
 
 export function validateCategorisedAddresses(
@@ -17,7 +16,7 @@ export function validateCategorisedAddresses(
     categorisedAddressesByCategory,
   )) {
     for (const categorisedAddress of categorisedAddresses) {
-      const [refCategory] = splitCategorisedAddress(categorisedAddress)
+      const [refCategory] = addressCategory(categorisedAddress)
       if (!includes(categories, refCategory)) {
         throw new Error(
           `category '${refCategory}' does not exist in your model`,
