@@ -49,7 +49,7 @@ function buildImportsFromCategorisedAddresses(
           ? addressConstant(category)
           : addressConstantWithPostFix(
               category,
-              zx.basicAddress().parse(categorisedAddress),
+              zx.address({ strict: false }).parse(categorisedAddress),
             ),
       )
     }

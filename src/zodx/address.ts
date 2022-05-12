@@ -1,5 +1,5 @@
 import { ethers } from 'ethers'
-import { z } from 'zod'
+import { boolean, z } from 'zod'
 import { withGetType } from 'zod-to-ts'
 import { categoryAddressType } from '../codegen/utils'
 
@@ -47,26 +47,8 @@ export const addressCategory = () =>
     })
     .transform((val) => val.split(':')[0])
 
-/**
- * basicAddress() will attempt to conform any string or a categorised address to
- * a simple address
- * */
-export const basicAddress = (): ZodAddress =>
-  withGetType<ZodAddress>(
-    z
-      .string()
-      .transform((val) => {
-        if (addressCategory().safeParse(val).success) {
-          return val.split(':')[1]
-        }
-        return val
-      })
-      .refine(isAddress),
-    (ts) => ts.factory.createIdentifier('Address'),
-  )
-
 const isCategoryAddressTuple = (x: unknown): x is [string, Address] =>
-  z.tuple([z.string(), basicAddress()]).safeParse(x).success
+  z.tuple([z.string(), address({ strict: false })]).safeParse(x).success
 
 export const categoryAddressTuple = () =>
   z
@@ -75,7 +57,10 @@ export const categoryAddressTuple = () =>
     .transform((val) => val.split(':'))
     .refine(isCategoryAddressTuple)
 
-const isValidAddress = (val: string, category?: string) => {
+const isValidAddress = <T extends string = ''>(
+  val: string,
+  category?: T,
+): val is Address<T> => {
   if (!category && isAddress(val)) {
     return true
   }
@@ -83,53 +68,56 @@ const isValidAddress = (val: string, category?: string) => {
   const parsedAddressCategory = addressCategory().safeParse(val)
 
   return (
-    category &&
+    !!category &&
     parsedAddressCategory.success &&
     parsedAddressCategory.data === category
   )
 }
 
 export const address = <T extends string = ''>(
-  _category?: T,
+  {
+    category,
+    strict,
+  }: {
+    category?: T | undefined
+    strict?: boolean | undefined
+  } = { strict: true },
 ): ZodAddress<T> => {
-  const errorCategoryStr = '"' + `${_category}` + '"'
   const errorFn = (arg: any) => ({
-    message: `Incorrect input to zx.address(${
-      _category ? errorCategoryStr : ''
-    }): ${arg}`,
+    message: `Incorrect input to zx.address({ category: ${
+      category ?? 'undefined'
+    } }): ${arg}`,
   })
 
-  return withGetType<ZodAddress<T>>(
-    z.custom<Address<T>>(
-      (val) => z.string().refine(isValidAddress).safeParse(val).success,
-      errorFn,
-    ),
-    (ts) =>
-      ts.factory.createIdentifier(
-        _category ? categoryAddressType(_category) : 'Address',
-      ),
-  )
-}
+  console.log(category)
+  const schema = strict
+    ? z.custom<Address<T>>(
+        (val) =>
+          z
+            .string()
+            .refine((val) => isValidAddress(val, category))
+            .safeParse(val).success,
+        errorFn,
+      )
+    : z
+        .custom<Address<T>>(
+          (val) =>
+            z
+              .string()
+              .refine((val) => isValidAddress(val, category))
+              .safeParse(val).success,
+          errorFn,
+        )
+        .transform((_address) =>
+          _address.includes(':') ? _address.split(':')[1] : _address,
+        )
+        .refine((_address): _address is Address<T> =>
+          isValidAddress(_address, category),
+        )
 
-export const categorisedAddress = <T extends string>(
-  _category: T,
-): ZodAddress<T> => {
-  const errorCategoryStr = '"' + `${_category}` + '"'
-  const errorFn = (arg: any) => ({
-    message: `Incorrect input to zx.address(${errorCategoryStr}): ${arg}`,
-  })
-
-  return withGetType<ZodAddress<T>>(
-    z.custom<Address<T>>(
-      (val) =>
-        z
-          .string()
-          .refine(isAddress)
-          .transform((address) => `${_category}:${address}`)
-          .refine(isCategorisedAddress)
-          .safeParse(val).success,
-      errorFn,
+  return withGetType<ZodAddress<T>>(schema, (ts) =>
+    ts.factory.createIdentifier(
+      category ? categoryAddressType(category) : 'Address',
     ),
-    (ts) => ts.factory.createIdentifier(categoryAddressType(_category)),
   )
 }
