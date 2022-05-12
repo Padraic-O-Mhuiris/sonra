@@ -1,10 +1,10 @@
 import { includes } from 'lodash'
-import { Address, reifyAddress } from '../address'
 import {
   addressConstant,
   addressConstantWithPostFix,
   categoryAddressType,
 } from './utils'
+import { zx } from '../zodx'
 
 export interface CategorisedAddressImport {
   path: string
@@ -13,13 +13,20 @@ export interface CategorisedAddressImport {
 }
 
 function buildImportsFromCategorisedAddresses(
-  _categorisedAddresses: Address<string>[],
+  _categorisedAddresses: zx.Address<string>[],
   uniqueCategories: string[],
 ) {
   const uniques = Array.from(new Set(_categorisedAddresses))
-  const categories = Array.from(new Set(uniques.map(reifyAddress)))
+  const categories = Array.from<string>(
+    new Set(
+      uniques.map((categorisedAddress) =>
+        zx.addressCategory().parse(categorisedAddress),
+      ),
+    ),
+  )
 
-  const categorisedAddressesByCategory: Record<string, Address<string>[]> = {}
+  const categorisedAddressesByCategory: Record<string, zx.Address<string>[]> =
+    {}
   for (const category of categories) {
     categorisedAddressesByCategory[category] = uniques.filter((c) =>
       c.startsWith(category),
@@ -42,7 +49,7 @@ function buildImportsFromCategorisedAddresses(
           ? addressConstant(category)
           : addressConstantWithPostFix(
               category,
-              reifyAddress(categorisedAddress),
+              zx.basicAddress().parse(categorisedAddress),
             ),
       )
     }
@@ -60,7 +67,7 @@ type CategorisedAddressImportsByCategory = Record<
 export function buildCategorisedAddressImportsByCategory(
   categories: [string, ...string[]],
   uniqueCategories: string[],
-  categorisedAddresses: Record<string, Address<string>[]>,
+  categorisedAddresses: Record<string, zx.Address<string>[]>,
 ): CategorisedAddressImportsByCategory {
   const categorisedAddressImportsByCategory: CategorisedAddressImportsByCategory =
     {}

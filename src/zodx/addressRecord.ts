@@ -1,6 +1,9 @@
 import { z, ZodType, ZodTypeAny } from 'zod'
-import { AddressRecord } from '../address'
-import { address } from './address'
+import { Address, address } from './address'
+
+export type AddressRecord<V> = {
+  [k in Address]: V
+}
 
 export type ZodAddressRecord<Value extends ZodTypeAny = ZodTypeAny> = ZodType<
   AddressRecord<Value['_output']>

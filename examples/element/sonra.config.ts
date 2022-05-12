@@ -1,14 +1,7 @@
 import { ethers } from 'ethers'
 import 'tsconfig-paths/register'
 import { z } from 'zod'
-import {
-  Address,
-  addressify,
-  SonraConfig,
-  SonraFetch,
-  SonraMetadata,
-  zx,
-} from '../../src'
+import { SonraConfig, SonraFetch, SonraMetadata, zx } from '../../src'
 import {
   ERC20__factory,
   TrancheFactory__factory,
@@ -61,7 +54,7 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
     14600000,
   )
 
-  const addressAndCreatedDateInfo: [Address, Date][] = await Promise.all(
+  const addressAndCreatedDateInfo: [zx.Address, Date][] = await Promise.all(
     trancheCreatedEvents.map(async (event) => {
       const address = zx.address().parse(event.args.trancheAddress)
       const termStart = new Date((await event.getBlock()).timestamp * 1000)
@@ -94,12 +87,12 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
       principalToken.decimals(),
       principalToken
         .underlying()
-        .then((address) => addressify(address, 'baseToken')),
+        .then(zx.categorisedAddress('baseToken').parse),
       principalToken
         .unlockTimestamp()
         .then((result) => new Date(result.toNumber() * 1000)),
-      principalToken.interestToken().then((address) => addressify(address)),
-      principalToken.position().then((address) => addressify(address)),
+      principalToken.interestToken().then(zx.address().parse),
+      principalToken.position().then(zx.address().parse),
     ])
 
     principalTokenData[address] = {
@@ -113,22 +106,22 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
       },
       interestToken,
       position,
-      creator: addressify(trancheFactoryAddress, 'trancheFactory'),
+      creator: zx
+        .categorisedAddress('trancheFactory')
+        .parse(trancheFactoryAddress),
     }
   }
 
   const baseTokenData: {
-    [k in Address]: z.infer<ElementModel['baseToken']>
+    [k in zx.Address]: z.infer<ElementModel['baseToken']>
   } = {}
 
   const baseTokenAddresses = zx
-    .address()
+    .basicAddress()
     .array()
     .nonempty()
     .parse(
-      Object.entries(principalTokenData).map(([, { underlying }]) =>
-        zx.address().parse(underlying.split(':')[1]),
-      ),
+      Object.values(principalTokenData).map(({ underlying }) => underlying),
     )
 
   for (const baseTokenAddress of baseTokenAddresses) {

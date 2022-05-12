@@ -1,9 +1,7 @@
 import { BigNumber } from 'ethers'
 import { includes } from 'lodash'
 import { z } from 'zod'
-import { Address } from '../address'
 import { SonraDataModel, SonraModel } from '../schema'
-import { splitAddress } from '../utils'
 import { zx } from '../zodx'
 import { addressConstant, addressConstantWithPostFix } from './utils'
 
@@ -29,8 +27,8 @@ type SonraNodeValue<L extends SonraRootNodeLabel> = {
   BOOLEAN: boolean
   BIGNUMBER: BigNumber
   DATE: Date
-  ADDRESS: Address
-  CATEGORISED_ADDRESS: Address<string>
+  ADDRESS: zx.Address
+  CATEGORISED_ADDRESS: zx.Address<string>
 }[L]
 
 type SonraRootNode<L extends SonraRootNodeLabel> = SonraNode<L>
@@ -102,7 +100,10 @@ function buildSonraTrie(
   }, [] as SonraTrie)
 }
 
-type SonraTrieByCategoryAndAddress = Record<string, Record<Address, SonraTrie>>
+type SonraTrieByCategoryAndAddress = Record<
+  string,
+  Record<zx.Address, SonraTrie>
+>
 
 export const buildSonraTrieByCategoryAndAddress = (
   metadata: SonraDataModel<SonraModel>['metadata'],
@@ -112,7 +113,7 @@ export const buildSonraTrieByCategoryAndAddress = (
     sonraTrieByCategoryAndAddress[category] = {}
 
     for (const [address, addressEntry] of Object.entries(categoryEntry)) {
-      sonraTrieByCategoryAndAddress[category][address as Address] =
+      sonraTrieByCategoryAndAddress[category][address as zx.Address] =
         buildSonraTrie(addressEntry)
     }
   }
@@ -143,7 +144,7 @@ export function sonraRootTrieList(
     sonraTrie,
   )
     .map((v) =>
-      Object.values<SonraTrieByCategoryAndAddress[string][Address]>(v),
+      Object.values<SonraTrieByCategoryAndAddress[string][zx.Address]>(v),
     )
     .flat()
     .flat()
@@ -160,7 +161,7 @@ export function buildSonraRootTrieListByCategory(
 
   for (const [category, categoryEntry] of Object.entries(sonraTrie)) {
     sonraRootsByCategory[category] = mapSonraTrie(
-      Object.values<SonraTrieByCategoryAndAddress[string][Address]>(
+      Object.values<SonraTrieByCategoryAndAddress[string][zx.Address]>(
         categoryEntry,
       ).flat(),
       (x) => x,
@@ -218,7 +219,8 @@ export const reifyTrie = (
         line += `new Date("${(node.value as Date).toISOString()}")`
         break
       case 'CATEGORISED_ADDRESS':
-        const [category, address] = splitAddress(node.value as Address<string>)
+        const [category, address] = zx.categoryAddressTuple().parse(node.value)
+
         if (includes(uniqueCategories, category)) {
           line += addressConstant(category)
         } else {
@@ -242,13 +244,13 @@ export const reifyTrie = (
 }
 
 export const buildMetadataEntriesByAddress = (
-  trieByAddress: Record<Address, SonraTrie>,
+  trieByAddress: Record<zx.Address, SonraTrie>,
   uniqueCategories: string[],
-): Record<Address, string> => {
-  const metadataEntriesByAddress: Record<Address, string> = {}
+): Record<zx.Address, string> => {
+  const metadataEntriesByAddress: Record<zx.Address, string> = {}
 
   for (const [address, trie] of Object.entries(trieByAddress)) {
-    metadataEntriesByAddress[address as Address] = `{\n${reifyTrie(
+    metadataEntriesByAddress[address as zx.Address] = `{\n${reifyTrie(
       trie,
       uniqueCategories,
     )}\n}`
