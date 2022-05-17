@@ -13,8 +13,7 @@
     "noImplicitOverride": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "outDir": "dist",
-    "skipLibCheck": true
+    "outDir": "dist"
   },
   "include": ["src/**/*.ts", "examples/**/*.ts", "test/**/*.ts"],
   "exclude": ["node_modules/**/*"]
