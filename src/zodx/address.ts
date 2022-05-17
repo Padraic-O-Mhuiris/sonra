@@ -48,7 +48,7 @@ export const addressCategory = () =>
     .transform((val) => val.split(':')[0])
 
 const isCategoryAddressTuple = (x: unknown): x is [string, Address] =>
-  z.tuple([z.string(), address({ strict: false })]).safeParse(x).success
+  z.tuple([z.string(), conformAddress()]).safeParse(x).success
 
 export const categoryAddressTuple = () =>
   z
@@ -56,23 +56,6 @@ export const categoryAddressTuple = () =>
     .refine(isCategorisedAddress)
     .transform((val) => val.split(':'))
     .refine(isCategoryAddressTuple)
-
-const isValidAddress = <T extends string = ''>(
-  val: string,
-  category?: T,
-): val is Address<T> => {
-  if (!category && isAddress(val)) {
-    return true
-  }
-
-  const parsedAddressCategory = addressCategory().safeParse(val)
-
-  return (
-    !!category &&
-    parsedAddressCategory.success &&
-    parsedAddressCategory.data === category
-  )
-}
 
 const strictAddressSchema = <T extends string = ''>(
   category?: T,
@@ -146,18 +129,10 @@ const unstrictAddressSchema = <T extends string = ''>(
     })
     .refine((_address): _address is Address<T> => true)
 
-export function address<T extends string = ''>(
-  {
-    category,
-    strict,
-  }: {
-    category?: T | undefined
-    strict?: boolean | undefined
-  } = { strict: true },
-): ZodAddress<T> {
-  // ensure we always default strict to true unless specified
-  strict = strict === undefined ? true : strict
-
+export const address = <T extends string = ''>(
+  category?: T,
+  strict: boolean = true,
+): ZodAddress<T> => {
   return withGetType<ZodAddress<T>>(
     strict ? strictAddressSchema(category) : unstrictAddressSchema(category),
     (ts) =>
@@ -166,3 +141,7 @@ export function address<T extends string = ''>(
       ),
   )
 }
+
+export const conformAddress = <T extends string = ''>(
+  category?: T,
+): ZodAddress<T> => address(category)

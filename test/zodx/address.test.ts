@@ -29,7 +29,7 @@ describe('zx.address', () => {
   })
 
   describe('strict and category', () => {
-    const schema = zx.address({ category: CATEGORY })
+    const schema = zx.address(CATEGORY)
     test('should parse category address', () => {
       const result = schema.safeParse(CATEGORY_ADDRESS)
       expect(result.success).toBe(true)
@@ -47,7 +47,7 @@ describe('zx.address', () => {
   })
 
   describe('not strict and no category', () => {
-    const schema = zx.address({ strict: false })
+    const schema = zx.address(undefined, false)
 
     test('should parse simple address', () => {
       const result = schema.safeParse(ADDRESS)
@@ -67,7 +67,7 @@ describe('zx.address', () => {
   })
 
   describe('not strict and category', () => {
-    const schema = zx.address({ strict: false, category: CATEGORY })
+    const schema = zx.address(CATEGORY, false)
 
     test('should parse category address', () => {
       const result = schema.safeParse(CATEGORY_ADDRESS)
