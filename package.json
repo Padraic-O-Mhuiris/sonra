@@ -13,7 +13,6 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc --build --verbose ./tsconfig.prod.json && chmod 755 ./dist/cli.js",
-    "postbuild": "cp package.json README.md LICENSE ./dist",
     "watch": "tsc --noEmit --watch --project ./tsconfig.json",
     "clean": "rm -rf dist *.tsbuildinfo",
     "format": "prettier --check \".src/**/*.ts\" README.md",
