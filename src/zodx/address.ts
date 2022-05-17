@@ -1,5 +1,5 @@
 import { ethers } from 'ethers'
-import { boolean, z } from 'zod'
+import { z } from 'zod'
 import { withGetType } from 'zod-to-ts'
 import { categoryAddressType } from '../codegen/utils'
 
@@ -74,7 +74,79 @@ const isValidAddress = <T extends string = ''>(
   )
 }
 
-export const address = <T extends string = ''>(
+const strictAddressSchema = <T extends string = ''>(
+  category?: T,
+): ZodAddress<T> =>
+  z
+    .string()
+    .superRefine((input, ctx): input is Address<T> => {
+      const inputIsAddress = isAddress(input)
+      const inputIsCategorisedAddress = isCategorisedAddress(input)
+
+      if (category) {
+        if (inputIsAddress)
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `Input '${input}' is a valid Address but expected categorised Address: '${category}:${input}'`,
+            fatal: true,
+          })
+        if (inputIsCategorisedAddress) {
+          const _inputCategory = input.split(':')[0]
+          if (category !== _inputCategory)
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: `Input '${input}' does not match this address category: ${category}`,
+              fatal: true,
+            })
+        }
+      } else {
+        if (inputIsCategorisedAddress) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `Input '${input}' matches a category Address but no category is expected`,
+            fatal: true,
+          })
+        }
+      }
+
+      if (!inputIsAddress && !inputIsCategorisedAddress)
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Input '${input}' is not a valid Address`,
+          fatal: true,
+        })
+
+      return true
+    })
+    .refine((_address): _address is Address<T> => true)
+
+const unstrictAddressSchema = <T extends string = ''>(
+  category?: T,
+): ZodAddress<T> =>
+  z
+    .string()
+    .superRefine((input, ctx): input is Address<T> => {
+      const inputIsAddress = isAddress(input)
+      const inputIsCategorisedAddress = isCategorisedAddress(input)
+
+      if (!inputIsAddress && !inputIsCategorisedAddress)
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Input '${input}' could not be conformed to an Address`,
+          fatal: true,
+        })
+
+      return true
+    })
+    .transform((_address) => {
+      const normalizedAddress = _address.includes(':')
+        ? _address.split(':')[1]
+        : _address
+      return category ? `${category}:${normalizedAddress}` : normalizedAddress
+    })
+    .refine((_address): _address is Address<T> => true)
+
+export function address<T extends string = ''>(
   {
     category,
     strict,
@@ -82,42 +154,15 @@ export const address = <T extends string = ''>(
     category?: T | undefined
     strict?: boolean | undefined
   } = { strict: true },
-): ZodAddress<T> => {
-  const errorFn = (arg: any) => ({
-    message: `Incorrect input to zx.address({ category: ${
-      category ?? 'undefined'
-    } }): ${arg}`,
-  })
+): ZodAddress<T> {
+  // ensure we always default strict to true unless specified
+  strict = strict === undefined ? true : strict
 
-  console.log(category)
-  const schema = strict
-    ? z.custom<Address<T>>(
-        (val) =>
-          z
-            .string()
-            .refine((val) => isValidAddress(val, category))
-            .safeParse(val).success,
-        errorFn,
-      )
-    : z
-        .custom<Address<T>>(
-          (val) =>
-            z
-              .string()
-              .refine((val) => isValidAddress(val, category))
-              .safeParse(val).success,
-          errorFn,
-        )
-        .transform((_address) =>
-          _address.includes(':') ? _address.split(':')[1] : _address,
-        )
-        .refine((_address): _address is Address<T> =>
-          isValidAddress(_address, category),
-        )
-
-  return withGetType<ZodAddress<T>>(schema, (ts) =>
-    ts.factory.createIdentifier(
-      category ? categoryAddressType(category) : 'Address',
-    ),
+  return withGetType<ZodAddress<T>>(
+    strict ? strictAddressSchema(category) : unstrictAddressSchema(category),
+    (ts) =>
+      ts.factory.createIdentifier(
+        category ? categoryAddressType(category) : 'Address',
+      ),
   )
 }
