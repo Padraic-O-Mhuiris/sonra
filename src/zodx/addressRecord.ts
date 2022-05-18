@@ -17,11 +17,13 @@ export const addressRecord = <T extends z.AnyZodObject>(
       z
         .object({})
         .passthrough()
-        .refine((_val) =>
-          Object.entries(_val).every(
-            ([k, v]) =>
-              address().safeParse(k).success && zObj.safeParse(v).success,
-          ),
+        .refine(
+          (_val) =>
+            Object.entries(_val).every(
+              ([k, v]) =>
+                address().safeParse(k).success && zObj.safeParse(v).success,
+            ),
+          { message: 'Could not parse as address record' },
         )
         .safeParse(val).success,
   )

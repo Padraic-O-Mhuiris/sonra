@@ -19,7 +19,7 @@ const elementModel = {
     name: z.string(),
     symbol: z.string(),
     decimals: z.number(),
-    totalSupply: zx.bigNumber(),
+    totalSupply: zx.bignumber(),
   }),
   principalToken: z.object({
     name: z.string(),
@@ -137,9 +137,13 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
     baseTokenData[baseTokenAddress] = { name, symbol, decimals, totalSupply }
   }
 
-  return {
+  const x = {
     addresses: {
-      trancheFactory: [trancheFactoryAddress],
+      trancheFactory: zx
+        .address()
+        .array()
+        .nonempty()
+        .parse([trancheFactoryAddress]),
       baseToken: baseTokenAddresses,
       principalToken: principalTokenAddresses,
     },
@@ -154,6 +158,7 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
       principalToken: principalTokenData,
     },
   }
+  return x
 }
 
 const config: SonraConfig<ElementModel> = {

@@ -17,7 +17,7 @@ export interface ZodBigNumberDef extends ZodTypeDef {
 
 export class ZodBigNumber extends ZodType<BigNumber, ZodBigNumberDef> {
   _parse(input: ParseInput): ParseReturnType<BigNumber> {
-    if (BigNumber.isBigNumber(input.data)) {
+    if (!BigNumber.isBigNumber(input.data)) {
       const ctx = this._getOrReturnCtx(input)
       addIssueToContext(ctx, {
         code: ZodIssueCode.custom,
@@ -35,7 +35,7 @@ export class ZodBigNumber extends ZodType<BigNumber, ZodBigNumberDef> {
     })
 }
 
-export const bigNumber = () =>
+export const bignumber = () =>
   withGetType<ZodBigNumber>(ZodBigNumber.create(), (ts) =>
     ts.factory.createIdentifier('BigNumber'),
   )
