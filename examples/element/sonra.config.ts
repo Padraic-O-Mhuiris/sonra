@@ -85,7 +85,7 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
       principalToken.name(),
       principalToken.symbol(),
       principalToken.decimals(),
-      principalToken.underlying().then(zx.address('baseToken').parse),
+      principalToken.underlying().then(zx.conformAddress('baseToken').parse),
       principalToken
         .unlockTimestamp()
         .then((result) => new Date(result.toNumber() * 1000)),
@@ -104,7 +104,7 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
       },
       interestToken,
       position,
-      creator: zx.address('trancheFactory').parse(trancheFactoryAddress),
+      creator: zx.conformAddress('trancheFactory').parse(trancheFactoryAddress),
     }
   }
 

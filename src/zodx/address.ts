@@ -144,4 +144,4 @@ export const address = <T extends string = ''>(
 
 export const conformAddress = <T extends string = ''>(
   category?: T,
-): ZodAddress<T> => address(category)
+): ZodAddress<T> => address(category, false)

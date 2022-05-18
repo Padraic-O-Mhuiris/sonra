@@ -2,11 +2,10 @@
   "name": "sonra",
   "version": "0.0.26",
   "main": "./dist/index.js",
-  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": "./dist/cli.js",
   "files": [
-    "dist/**/*"
+    "dist"
   ],
   "repository": "git@github.com:Padraic-O-Mhuiris/sonra.git",
   "author": "Pádraic Ó Mhuiris <patrick.morris.310@gmail.com>",
@@ -46,10 +45,8 @@
     "fs-extra": "^10.1.0",
     "hardhat": "^2.9.3",
     "jest": "^28.0.3",
-    "ts-command-line-args": "^2.3.0",
     "ts-essentials": "^9.1.2",
     "ts-jest": "^28.0.0",
-    "ts-node": "^10.7.0",
     "typechain": "^8.0.0"
   },
   "dependencies": {
@@ -58,6 +55,8 @@
     "lodash": "^4.17.21",
     "prettier": "^2.6.2",
     "rimraf": "^3.0.2",
+    "ts-command-line-args": "^2.3.1",
+    "ts-node": "^10.7.0",
     "tsconfig-paths": "^4.0.0",
     "typescript": "^4.6.4",
     "zod": "^3.14.4",
