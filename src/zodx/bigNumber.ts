@@ -29,12 +29,13 @@ export class ZodBigNumber extends ZodType<BigNumber, ZodBigNumberDef> {
     return OK(input.data)
   }
 
-  static create = (): ZodBigNumber => {
-    return withGetType(
-      new ZodBigNumber({
-        typeName: 'ZodBigNumber',
-      }),
-      (ts) => ts.factory.createIdentifier('BigNumber'),
-    )
-  }
+  static create = (): ZodBigNumber =>
+    new ZodBigNumber({
+      typeName: 'ZodBigNumber',
+    })
 }
+
+export const bigNumber = () =>
+  withGetType<ZodBigNumber>(ZodBigNumber.create(), (ts) =>
+    ts.factory.createIdentifier('BigNumber'),
+  )
