@@ -39,9 +39,12 @@ export async function findTypechainDir(workingDir: string): Promise<string> {
     throw new Error('No contract types could be found')
   }
 
-  const typechainIndexFile = require(typechainDirPath) as { factories?: any }
+  const typechainIndexFile = require(typechainDirPath)
 
-  if (!typechainIndexFile.factories) {
+  if (
+    typechainIndexFile === undefined ||
+    Object.keys(typechainIndexFile).length === 0
+  ) {
     throw new Error('Contract factories were not detected')
   }
 
