@@ -1,5 +1,4 @@
 import { ethers } from 'ethers'
-
 import { z } from 'zod'
 import { SonraConfig, SonraFetch, SonraMetadata, zx } from '../../src'
 import {
@@ -112,9 +111,7 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
     }
   }
 
-  const baseTokenData: {
-    [k in zx.Address]: z.infer<ElementModel['baseToken']>
-  } = {}
+  const baseTokenData: SonraMetadata<ElementModel, 'baseToken'> = {}
 
   const baseTokenAddresses = zx
     .address(true)

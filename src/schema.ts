@@ -26,12 +26,7 @@ export type SonraFetch<M extends SonraModel> = () => Promise<SonraDataModel<M>>
 export type SonraMetadata<
   M extends SonraModel,
   T extends keyof M & string,
-  U extends
-    | keyof SonraDataModel<M>['metadata'][T][zx.Address]
-    | undefined = undefined,
-> = U extends keyof SonraDataModel<M>['metadata'][T][zx.Address]
-  ? SonraDataModel<M>['metadata'][T][zx.Address][U]
-  : SonraDataModel<M>['metadata'][T]
+> = SonraDataModel<M>['metadata'][T]
 
 export const createSonraSchema = <Model extends SonraModel>(
   model: Model,
