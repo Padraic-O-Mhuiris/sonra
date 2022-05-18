@@ -28,7 +28,7 @@ type SonraNodeValue<L extends SonraRootNodeLabel> = {
   BIGNUMBER: BigNumber
   DATE: Date
   ADDRESS: zx.Address
-  CATEGORISED_ADDRESS: zx.Address<string>
+  CATEGORISED_ADDRESS: zx.CategorisedAddress<string>
 }[L]
 
 type SonraRootNode<L extends SonraRootNodeLabel> = SonraNode<L>

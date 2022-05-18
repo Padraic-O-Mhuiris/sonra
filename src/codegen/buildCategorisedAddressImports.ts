@@ -13,7 +13,7 @@ export interface CategorisedAddressImport {
 }
 
 function buildImportsFromCategorisedAddresses(
-  _categorisedAddresses: zx.Address<string>[],
+  _categorisedAddresses: zx.CategorisedAddress<string>[],
   uniqueCategories: string[],
 ) {
   const uniques = Array.from(new Set(_categorisedAddresses))
@@ -25,8 +25,10 @@ function buildImportsFromCategorisedAddresses(
     ),
   )
 
-  const categorisedAddressesByCategory: Record<string, zx.Address<string>[]> =
-    {}
+  const categorisedAddressesByCategory: Record<
+    string,
+    zx.CategorisedAddress<string>[]
+  > = {}
   for (const category of categories) {
     categorisedAddressesByCategory[category] = uniques.filter((c) =>
       c.startsWith(category),
@@ -49,7 +51,7 @@ function buildImportsFromCategorisedAddresses(
           ? addressConstant(category)
           : addressConstantWithPostFix(
               category,
-              zx.conformAddress().parse(categorisedAddress),
+              zx.address(true).parse(categorisedAddress),
             ),
       )
     }
@@ -67,7 +69,7 @@ type CategorisedAddressImportsByCategory = Record<
 export function buildCategorisedAddressImportsByCategory(
   categories: [string, ...string[]],
   uniqueCategories: string[],
-  categorisedAddresses: Record<string, zx.Address<string>[]>,
+  categorisedAddresses: Record<string, zx.CategorisedAddress<string>[]>,
 ): CategorisedAddressImportsByCategory {
   const categorisedAddressImportsByCategory: CategorisedAddressImportsByCategory =
     {}

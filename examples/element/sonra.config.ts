@@ -26,14 +26,14 @@ const elementModel = {
     name: z.string(),
     symbol: z.string(),
     decimals: z.number(),
-    underlying: zx.address('baseToken'),
+    underlying: zx.categorisedAddress('baseToken'),
     interestToken: zx.address(),
     position: zx.address(),
     term: z.object({
       start: z.date(),
       end: z.date(),
     }),
-    creator: zx.address('trancheFactory').or(z.null()),
+    creator: zx.categorisedAddress('trancheFactory').or(z.null()),
   }),
 } as const
 
@@ -85,7 +85,9 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
       principalToken.name(),
       principalToken.symbol(),
       principalToken.decimals(),
-      principalToken.underlying().then(zx.conformAddress('baseToken').parse),
+      principalToken
+        .underlying()
+        .then(zx.categorisedAddress('baseToken', true).parse),
       principalToken
         .unlockTimestamp()
         .then((result) => new Date(result.toNumber() * 1000)),
@@ -104,7 +106,9 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
       },
       interestToken,
       position,
-      creator: zx.conformAddress('trancheFactory').parse(trancheFactoryAddress),
+      creator: zx
+        .categorisedAddress('trancheFactory', true)
+        .parse(trancheFactoryAddress),
     }
   }
 
@@ -113,7 +117,7 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
   } = {}
 
   const baseTokenAddresses = zx
-    .conformAddress()
+    .address(true)
     .array()
     .nonempty()
     .parse(

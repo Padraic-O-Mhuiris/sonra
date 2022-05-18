@@ -9,7 +9,7 @@ export type SonraModel = {
 
 export type SonraSchema<Model extends SonraModel> = z.ZodObject<{
   addresses: z.ZodObject<{
-    [k in keyof Model & string]: z.ZodArray<zx.ZodAddress<''>, 'atleastone'>
+    [k in keyof Model & string]: z.ZodArray<zx.ZodAddress, 'atleastone'>
   }>
   contracts: z.ZodObject<{
     [k in keyof Model & string]: z.ZodString
@@ -53,7 +53,7 @@ export const createSonraSchema = <Model extends SonraModel>(
           })),
       }),
       {} as {
-        [k in keyof Model & string]: z.ZodArray<zx.ZodAddress<''>, 'atleastone'>
+        [k in keyof Model & string]: z.ZodArray<zx.ZodAddress, 'atleastone'>
       },
     ),
   )

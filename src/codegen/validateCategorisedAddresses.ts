@@ -6,7 +6,7 @@ import { getRootValuesByCategory } from './buildTrie'
 export function validateCategorisedAddresses(
   data: SonraDataModel<SonraModel>,
   categories: [string, ...string[]],
-): Record<string, zx.Address<string>[]> {
+): Record<string, zx.CategorisedAddress<string>[]> {
   const categorisedAddressesByCategory = getRootValuesByCategory(
     data,
     'CATEGORISED_ADDRESS',
