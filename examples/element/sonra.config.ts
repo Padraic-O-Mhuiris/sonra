@@ -1,5 +1,4 @@
 import { ethers } from 'ethers'
-import 'tsconfig-paths/register'
 
 import { z } from 'zod'
 import { SonraConfig, SonraFetch, SonraMetadata, zx } from '../../src'
@@ -27,14 +26,14 @@ const elementModel = {
     name: z.string(),
     symbol: z.string(),
     decimals: z.number(),
-    underlying: zx.address({ category: 'baseToken' }),
+    underlying: zx.address('baseToken'),
     interestToken: zx.address(),
     position: zx.address(),
     term: z.object({
       start: z.date(),
       end: z.date(),
     }),
-    creator: zx.address({ category: 'trancheFactory' }).or(z.null()),
+    creator: zx.address('trancheFactory').or(z.null()),
   }),
 } as const
 
@@ -86,9 +85,7 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
       principalToken.name(),
       principalToken.symbol(),
       principalToken.decimals(),
-      principalToken
-        .underlying()
-        .then(zx.address({ category: 'baseToken', strict: false }).parse),
+      principalToken.underlying().then(zx.address('baseToken').parse),
       principalToken
         .unlockTimestamp()
         .then((result) => new Date(result.toNumber() * 1000)),
@@ -107,19 +104,16 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
       },
       interestToken,
       position,
-      creator: zx
-        .address({ category: 'trancheFactory', strict: false })
-        .parse(trancheFactoryAddress),
+      creator: zx.address('trancheFactory').parse(trancheFactoryAddress),
     }
   }
 
-  console.log(principalTokenData)
   const baseTokenData: {
     [k in zx.Address]: z.infer<ElementModel['baseToken']>
   } = {}
 
   const baseTokenAddresses = zx
-    .address({ strict: false })
+    .conformAddress()
     .array()
     .nonempty()
     .parse(
