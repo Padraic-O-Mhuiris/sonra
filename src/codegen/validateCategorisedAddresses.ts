@@ -16,7 +16,7 @@ export function validateCategorisedAddresses(
     categorisedAddressesByCategory,
   )) {
     for (const categorisedAddress of categorisedAddresses) {
-      const refCategory = zx.addressCategory().parse(categorisedAddress)
+      const refCategory = categorisedAddress.split(':')[0]
       if (!includes(categories, refCategory)) {
         throw new Error(
           `category '${refCategory}' does not exist in your model`,

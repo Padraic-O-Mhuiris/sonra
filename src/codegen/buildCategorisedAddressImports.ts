@@ -19,9 +19,7 @@ function buildImportsFromCategorisedAddresses(
   const uniques = Array.from(new Set(_categorisedAddresses))
   const categories = Array.from<string>(
     new Set(
-      uniques.map((categorisedAddress) =>
-        zx.addressCategory().parse(categorisedAddress),
-      ),
+      uniques.map((categorisedAddress) => categorisedAddress.split(':')[0]),
     ),
   )
 
@@ -51,7 +49,7 @@ function buildImportsFromCategorisedAddresses(
           ? addressConstant(category)
           : addressConstantWithPostFix(
               category,
-              zx.address(true).parse(categorisedAddress),
+              zx.address().conform().parse(categorisedAddress),
             ),
       )
     }

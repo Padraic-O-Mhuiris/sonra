@@ -219,8 +219,10 @@ export const reifyTrie = (
         line += `new Date("${(node.value as Date).toISOString()}")`
         break
       case 'CATEGORISED_ADDRESS':
-        const [category, address] = zx.categoryAddressTuple().parse(node.value)
-
+        const [category, address] = (node.value as string).split(':') as [
+          string,
+          zx.Address,
+        ]
         if (includes(uniqueCategories, category)) {
           line += addressConstant(category)
         } else {
