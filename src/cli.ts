@@ -2,6 +2,7 @@
 import { parse as commandLineArgs } from 'ts-command-line-args'
 import { SonraModel, SonraConfig, run } from './'
 import path from 'path'
+import 'tsconfig-paths/register'
 
 export interface ParsedArgs {
   config: SonraConfig<SonraModel>
