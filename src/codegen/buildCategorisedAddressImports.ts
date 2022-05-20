@@ -28,8 +28,8 @@ function buildImportsFromCategorisedAddresses(
     zx.CategorisedAddress<string>[]
   > = {}
   for (const category of categories) {
-    categorisedAddressesByCategory[category] = uniques.filter((c) =>
-      c.startsWith(category),
+    categorisedAddressesByCategory[category] = uniques.filter(
+      (c) => c.split(':')[0] === category,
     )
   }
 
