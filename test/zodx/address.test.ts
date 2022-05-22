@@ -1,6 +1,11 @@
 import { ethers } from 'ethers'
-import { SafeParseSuccess } from 'zod'
-import { address, Address, CategorisedAddress } from '../../src/zodx/address'
+import { SafeParseSuccess, z } from 'zod'
+import {
+  address,
+  Address,
+  AddressRecord,
+  CategorisedAddress,
+} from '../../src/zodx/address'
 
 const CATEGORY = 'category'
 const ADDRESS = ethers.Wallet.createRandom().address
@@ -97,6 +102,38 @@ describe('zx.address().category(<Category>).conform()', () => {
 
   test('should fail to parse string', () => {
     const result = address().category(CATEGORY).safeParse(INVALID_STRING)
+    expect(result.success).toBe(false)
+  })
+})
+
+describe('zx.address().record()', () => {
+  test('should parse record with address strings as keys', () => {
+    const result = address()
+      .record(z.number())
+      .safeParse({ [ADDRESS]: 1 })
+
+    expect(result.success).toBe(true)
+    expect(
+      (result as SafeParseSuccess<AddressRecord<number>>).data,
+    ).toStrictEqual({
+      [ADDRESS]: 1,
+    })
+  })
+
+  test('should fail to parse value that is not an object', () => {
+    const result = address().record(z.number()).safeParse(5)
+    expect(result.success).toBe(false)
+  })
+
+  test('should fail to parse record with non-address keys', () => {
+    const result = address().record(z.number()).safeParse({ key: '1' })
+    expect(result.success).toBe(false)
+  })
+
+  test('should fail to parse record with incorrect value', () => {
+    const result = address()
+      .record(z.number())
+      .safeParse({ [ADDRESS]: '1' })
     expect(result.success).toBe(false)
   })
 })

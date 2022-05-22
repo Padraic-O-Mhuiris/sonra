@@ -5,12 +5,13 @@ import {
   ParseInput,
   ParseReturnType,
   ParseStatus,
+  z,
   ZodIssueCode,
   ZodParsedType,
   ZodType,
+  ZodTypeAny,
   ZodTypeDef,
 } from 'zod'
-
 import { withGetType } from 'zod-to-ts'
 import { categoryAddressType } from '../codegen/utils'
 
@@ -104,11 +105,14 @@ export class ZodAddress extends ZodType<Address, ZodAddressDef, string> {
     return new ZodAddress({ ...this._def, conform: true })
   }
 
-  static create = (): ZodAddress => {
-    return new ZodAddress({
+  record<V extends ZodTypeAny>(valueType: V): ZodAddressRecord<V> {
+    return new ZodAddressRecord({ valueType, typeName: 'ZodAddressRecord' })
+  }
+
+  static create = (): ZodAddress =>
+    new ZodAddress({
       typeName: 'ZodAddress',
     })
-  }
 }
 
 export type CategorisedAddress<T extends string> = Address & {
@@ -134,7 +138,6 @@ export class ZodCategorisedAddress<T extends string> extends ZodType<
 > {
   _parse(input: ParseInput): ParseReturnType<CategorisedAddress<T>> {
     const parsedType = this._getType(input)
-
     const category = this._def.category
 
     if (parsedType !== ZodParsedType.string) {
@@ -197,6 +200,53 @@ export class ZodCategorisedAddress<T extends string> extends ZodType<
 
   conform() {
     return new ZodCategorisedAddress({ ...this._def, conform: true })
+  }
+}
+
+export type AddressRecord<V extends any = any> = {
+  [k in Address]: V
+}
+
+interface ZodAddressRecordDef<Value extends ZodTypeAny = ZodTypeAny>
+  extends ZodTypeDef {
+  typeName: 'ZodAddressRecord'
+  valueType: Value
+}
+
+export class ZodAddressRecord<
+  Value extends ZodTypeAny = ZodTypeAny,
+> extends ZodType<
+  Record<Address, Value['_output']>,
+  ZodAddressRecordDef<Value>
+> {
+  _parse(input: ParseInput): ParseReturnType<this['_output']> {
+    const ctx = this._getOrReturnCtx(input)
+    const result = z
+      .record(z.string(), this._def.valueType)
+      .safeParse(input.data)
+    if (!result.success) {
+      addIssueToContext(ctx, {
+        code: ZodIssueCode.custom,
+        expected: `AddressRecord`,
+        message: result.error.message + ' - not a valid AddressRecord',
+      })
+      return INVALID
+    }
+
+    if (!Object.keys(input.data).every(isAddress)) {
+      addIssueToContext(ctx, {
+        code: ZodIssueCode.custom,
+        expected: `AddressRecord`,
+        message: `Keys in record must be all valid addresses`,
+      })
+      return INVALID
+    }
+
+    const status = new ParseStatus()
+    return {
+      status: status.value,
+      value: input.data as AddressRecord<Value['_output']>,
+    }
   }
 }
 
