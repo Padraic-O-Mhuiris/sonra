@@ -1,12 +1,6 @@
 import { ethers } from 'ethers'
 import { z } from 'zod'
-import {
-  SonraConfig,
-  SonraCategoryModel,
-  SonraFetch,
-  zx,
-  SonraCategoryMetadata,
-} from '../../src'
+import { SonraCategoryModel, SonraConfig, SonraFetch, zx } from '../../src'
 import {
   ERC20__factory,
   TrancheFactory__factory,
@@ -17,8 +11,6 @@ const provider = new ethers.providers.JsonRpcProvider(
   'https://mainnet.infura.io/v3/7b2295eb2ca8443fba441bfd462cd93a',
 )
 
-// TODO Add no object addresses
-// TODO Add nested categories
 const elementModel = {
   trancheFactory: z.object({}),
   baseToken: z.object({

@@ -17,7 +17,7 @@ import { categoryAddressType } from '../codegen/utils'
 
 declare const __address__: unique symbol
 
-type __Address__ = {
+export type __Address__ = {
   readonly [__address__]: void
 }
 
@@ -121,7 +121,7 @@ export class ZodAddress extends ZodType<Address, ZodAddressDef, string> {
 
 declare const __category__: unique symbol
 
-type __Category__<T extends string> = {
+export type __Category__<T extends string> = {
   readonly [__category__]: T
 }
 
