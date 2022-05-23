@@ -15,9 +15,13 @@ import {
 import { withGetType } from 'zod-to-ts'
 import { categoryAddressType } from '../codegen/utils'
 
-export type Address = string & {
-  readonly __brand: 'Address'
+declare const __address__: unique symbol
+
+type __Address__ = {
+  readonly [__address__]: void
 }
+
+export type Address = string & __Address__
 
 const isAddress = (val: string): val is Address => ethers.utils.isAddress(val)
 
@@ -115,9 +119,13 @@ export class ZodAddress extends ZodType<Address, ZodAddressDef, string> {
     })
 }
 
-export type CategorisedAddress<T extends string> = Address & {
-  readonly __category: T
+declare const __category__: unique symbol
+
+type __Category__<T extends string> = {
+  readonly [__category__]: T
 }
+
+export type CategorisedAddress<T extends string> = Address & __Category__<T>
 
 const isCategorisedAddress = (val: string): val is CategorisedAddress<string> =>
   val.includes(':') &&
@@ -203,7 +211,7 @@ export class ZodCategorisedAddress<T extends string> extends ZodType<
   }
 }
 
-export type AddressRecord<V extends any = any> = {
+export type AddressRecord<V> = {
   [k in Address]: V
 }
 
@@ -217,7 +225,8 @@ export class ZodAddressRecord<
   Value extends ZodTypeAny = ZodTypeAny,
 > extends ZodType<
   Record<Address, Value['_output']>,
-  ZodAddressRecordDef<Value>
+  ZodAddressRecordDef<Value>,
+  Record<Address, Value['_output']>
 > {
   _parse(input: ParseInput): ParseReturnType<this['_output']> {
     const ctx = this._getOrReturnCtx(input)

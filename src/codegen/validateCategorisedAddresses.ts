@@ -1,6 +1,6 @@
 import { includes } from 'lodash'
 import { zx } from '../zodx'
-import { SonraDataModel, SonraModel } from '../schema'
+import { SonraDataModel, SonraModel } from '../types'
 import { getRootValuesByCategory } from './buildTrie'
 
 export function validateCategorisedAddresses(

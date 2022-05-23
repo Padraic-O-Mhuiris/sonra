@@ -1,6 +1,7 @@
 import { includes } from 'lodash'
 import { printNode, zodToTs } from 'zod-to-ts'
-import { SonraDataModel, SonraModel } from '../schema'
+import { SonraDataModel, SonraModel } from '../types'
+import { z } from 'zod'
 import { log } from '../utils'
 import {
   buildCategorisedAddressImportsByCategory,
@@ -69,14 +70,19 @@ export function buildFileDescriptions(
 
     const isUnique = includes(uniqueCategories, category)
 
-    const addressConstantsByAddress = Object.fromEntries(
-      addresses.map((address) => [
-        address,
-        isUnique
-          ? addressConstant(category)
-          : addressConstantWithPostFix(category, address),
-      ]),
-    ) as Record<zx.Address, string>
+    const addressConstantsByAddress = zx
+      .address()
+      .record(z.string())
+      .parse(
+        Object.fromEntries(
+          addresses.map((address) => [
+            address,
+            isUnique
+              ? addressConstant(category)
+              : addressConstantWithPostFix(category, address),
+          ]),
+        ),
+      )
 
     const addressImports = categorisedAddressImportsByCategory[category]
 
@@ -84,6 +90,7 @@ export function buildFileDescriptions(
       trieByCategoryAndAddress[category],
       uniqueCategories,
     )
+
     const importBigNumber = !!bigNumbersByCategory[category].length
 
     const addressType = categoryAddressType(category)

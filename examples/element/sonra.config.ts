@@ -1,6 +1,12 @@
 import { ethers } from 'ethers'
 import { z } from 'zod'
-import { SonraConfig, SonraFetch, SonraMetadata, zx } from '../../src'
+import {
+  SonraConfig,
+  SonraCategoryModel,
+  SonraFetch,
+  zx,
+  SonraCategoryMetadata,
+} from '../../src'
 import {
   ERC20__factory,
   TrancheFactory__factory,
@@ -36,6 +42,9 @@ const elementModel = {
   }),
 } as const
 
+const x = zx.address()
+type X = z.infer<typeof x>
+
 type ElementModel = typeof elementModel
 
 const elementFetch: SonraFetch<ElementModel> = async () => {
@@ -67,7 +76,10 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
     .nonempty()
     .parse(addressAndCreatedDateInfo.map(([address]) => address))
 
-  const principalTokenData: SonraMetadata<ElementModel, 'principalToken'> = {}
+  const principalTokenData: SonraCategoryModel<
+    ElementModel,
+    'principalToken'
+  >['metadata'] = {}
 
   for (const [address, termStart] of addressAndCreatedDateInfo) {
     const principalToken = Tranche__factory.connect(address, provider)
@@ -113,7 +125,10 @@ const elementFetch: SonraFetch<ElementModel> = async () => {
     }
   }
 
-  const baseTokenData: SonraMetadata<ElementModel, 'baseToken'> = {}
+  const baseTokenData: SonraCategoryModel<
+    ElementModel,
+    'baseToken'
+  >['metadata'] = {}
 
   const baseTokenAddresses = zx
     .address()

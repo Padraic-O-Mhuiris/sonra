@@ -1,7 +1,7 @@
 import { BigNumber } from 'ethers'
 import { includes } from 'lodash'
 import { z } from 'zod'
-import { SonraDataModel, SonraModel } from '../schema'
+import { SonraDataModel, SonraModel } from '../types'
 import { zx } from '../zodx'
 import { addressConstant, addressConstantWithPostFix } from './utils'
 
@@ -100,10 +100,7 @@ function buildSonraTrie(
   }, [] as SonraTrie)
 }
 
-type SonraTrieByCategoryAndAddress = Record<
-  string,
-  Record<zx.Address, SonraTrie>
->
+type SonraTrieByCategoryAndAddress = Record<string, zx.AddressRecord<SonraTrie>>
 
 export const buildSonraTrieByCategoryAndAddress = (
   metadata: SonraDataModel<SonraModel>['metadata'],
@@ -111,10 +108,10 @@ export const buildSonraTrieByCategoryAndAddress = (
   const sonraTrieByCategoryAndAddress: SonraTrieByCategoryAndAddress = {}
   for (const [category, categoryEntry] of Object.entries(metadata)) {
     sonraTrieByCategoryAndAddress[category] = {}
-
     for (const [address, addressEntry] of Object.entries(categoryEntry)) {
-      sonraTrieByCategoryAndAddress[category][address as zx.Address] =
-        buildSonraTrie(addressEntry)
+      sonraTrieByCategoryAndAddress[category] = {
+        [address as zx.Address]: buildSonraTrie(addressEntry),
+      }
     }
   }
   return sonraTrieByCategoryAndAddress
@@ -248,8 +245,8 @@ export const reifyTrie = (
 export const buildMetadataEntriesByAddress = (
   trieByAddress: Record<zx.Address, SonraTrie>,
   uniqueCategories: string[],
-): Record<zx.Address, string> => {
-  const metadataEntriesByAddress: Record<zx.Address, string> = {}
+): zx.AddressRecord<string> => {
+  const metadataEntriesByAddress: zx.AddressRecord<string> = {}
 
   for (const [address, trie] of Object.entries(trieByAddress)) {
     metadataEntriesByAddress[address as zx.Address] = `{\n${reifyTrie(

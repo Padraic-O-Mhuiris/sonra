@@ -1,4 +1,4 @@
-import { SonraDataModel, SonraModel } from '../schema'
+import { SonraDataModel, SonraModel } from '../types'
 
 export function buildUniqueCategories(
   data: SonraDataModel<SonraModel>,

@@ -1,5 +1,5 @@
 import { includes } from 'lodash'
-import { SonraDataModel, SonraModel } from '../schema'
+import { SonraDataModel, SonraModel } from '../types'
 import { capitalize } from '../utils'
 import { log } from '../utils'
 

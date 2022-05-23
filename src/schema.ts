@@ -2,34 +2,7 @@ import { keys } from 'lodash'
 import { z } from 'zod'
 import { zx } from './zodx'
 import { isUniqueArray, log } from './utils'
-
-export type SonraModel = {
-  readonly [k in string]: z.AnyZodObject
-}
-
-export type SonraSchema<Model extends SonraModel> = z.ZodObject<{
-  addresses: z.ZodObject<{
-    [k in keyof Model & string]: z.ZodArray<zx.ZodAddress, 'atleastone'>
-  }>
-  contracts: z.ZodObject<{
-    [k in keyof Model & string]: z.ZodString
-  }>
-  metadata: z.ZodObject<{
-    [k in keyof Model & string]: zx.ZodAddressRecord<Model[k]>
-  }>
-}>
-
-export type SonraDataModel<M extends SonraModel> = z.infer<SonraSchema<M>>
-
-export type SonraFetch<M extends SonraModel> = () => Promise<SonraDataModel<M>>
-
-export interface SonraCategoryInfo<
-  M extends SonraModel,
-  Category extends keyof M & string,
-> {
-  addresses: [zx.Address, ...zx.Address[]]
-  metadata: SonraDataModel<M>['metadata'][Category]
-}
+import { SonraDataModel, SonraFetch, SonraModel, SonraSchema } from './types'
 
 export const createSonraSchema = <Model extends SonraModel>(
   model: Model,
@@ -72,7 +45,7 @@ export const createSonraSchema = <Model extends SonraModel>(
     modelKeys.reduce(
       (acc, arg) => ({
         ...acc,
-        [arg]: zx.addressRecord(model[arg]),
+        [arg]: zx.address().record(model[arg]),
       }),
       {} as {
         [k in keyof Model & string]: zx.ZodAddressRecord<Model[k]>

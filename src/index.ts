@@ -1,5 +1,10 @@
 export { zx } from './zodx'
 export { run } from './codegen'
-export { SonraConfig } from './config'
-export { SonraModel, SonraFetch, SonraCategoryInfo } from './schema'
+export {
+  SonraModel,
+  SonraFetch,
+  SonraCategoryModel,
+  SonraCategoryMetadata,
+  SonraConfig,
+} from './types'
 export { z } from 'zod'
