@@ -34,9 +34,6 @@ const elementModel = {
   }),
 } as const
 
-const x = zx.address()
-type X = z.infer<typeof x>
-
 type ElementModel = typeof elementModel
 
 const elementFetch: SonraFetch<ElementModel> = async () => {
