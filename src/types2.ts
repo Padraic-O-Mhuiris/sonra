@@ -1,6 +1,4 @@
-import { Dictionary } from 'ts-essentials'
 import { z } from 'zod'
-import { NestedPaths } from './utils'
 import { zx } from './zodx'
 
 type SonraCategorySchema =
@@ -56,15 +54,23 @@ export type SonraConfig<Schema extends SonraSchema> = {
   /**
    * Output directory for all files relative to process.cwd()
    * */
-  dir: string
+  outDir: string
+
+  /**
+   * Path to typechain file, defaults to "typechain-types"
+   * */
+  typechainDir?: string
+
   /**
    * Sonra model which is used to validate the SonraDataModel
    * */
   schema: Schema
+
   /**
    * List of contracts which must associated to a declared category
    * */
   contracts: SonraContracts<Schema>
+
   /**
    * Async function which returns a list of addresses, contracts and metadata
    * corresponding to the input model and each keyed by a specific "category"
