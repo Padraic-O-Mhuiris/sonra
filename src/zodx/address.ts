@@ -23,6 +23,8 @@ export type __Address__ = {
 
 export type Address = string & __Address__
 
+type ZodXTypeAny = ZodTypeAny | ZodAddress
+
 const isAddress = (val: string): val is Address => ethers.utils.isAddress(val)
 
 interface ZodAddressDef extends ZodTypeDef {
@@ -109,7 +111,7 @@ export class ZodAddress extends ZodType<Address, ZodAddressDef, string> {
     return new ZodAddress({ ...this._def, conform: true })
   }
 
-  record<V extends ZodTypeAny>(valueType: V): ZodAddressRecord<V> {
+  record<V extends ZodXTypeAny>(valueType: V): ZodAddressRecord<V> {
     return new ZodAddressRecord({ valueType, typeName: 'ZodAddressRecord' })
   }
 
@@ -215,14 +217,14 @@ export type AddressRecord<V> = {
   [k in Address]: V
 }
 
-interface ZodAddressRecordDef<Value extends ZodTypeAny = ZodTypeAny>
+interface ZodAddressRecordDef<Value extends ZodXTypeAny = ZodXTypeAny>
   extends ZodTypeDef {
   typeName: 'ZodAddressRecord'
   valueType: Value
 }
 
 export class ZodAddressRecord<
-  Value extends ZodTypeAny = ZodTypeAny,
+  Value extends ZodXTypeAny = ZodXTypeAny,
 > extends ZodType<
   Record<Address, Value['_output']>,
   ZodAddressRecordDef<Value>,

@@ -6,9 +6,10 @@ import {
   AddressRecord,
   CategorisedAddress,
 } from '../../src/zodx/address'
+import { randomAddress } from '../utils'
 
 const CATEGORY = 'category'
-const ADDRESS = ethers.Wallet.createRandom().address
+const ADDRESS = randomAddress()
 const CATEGORY_ADDRESS = `${CATEGORY}:${ADDRESS}`
 const INVALID_STRING = 'INVALID_STRING'
 

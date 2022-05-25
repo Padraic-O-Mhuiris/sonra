@@ -1,6 +1,12 @@
 import { z } from 'zod'
-
 import { zx } from './zodx'
+import {
+  SonraContracts,
+  SonraDataModelSchema,
+  SonraSchema,
+  SonraSchemaCategoryKeys,
+  SonraSchemaKeys,
+} from './types2'
 
 const schema = {
   DAI: z.object({}),
@@ -15,7 +21,7 @@ const schema = {
     },
   },
   YYY: {
-    UUU: z.object({}),
+    UUU: zx.address(),
     ZZZ: {
       XXX: z.object({}),
     },
@@ -24,60 +30,57 @@ const schema = {
 
 type UserSchema = typeof schema
 
-type SonraSchemaLeafValue = z.AnyZodObject
+type XXX = SonraContracts<UserSchema>
 
-export type SonraSchema = {
-  readonly [k in string]: SonraSchema | SonraSchemaLeafValue
+const x: XXX = {
+  DAI: 'sss',
+  USDC: 'sss',
+  principalToken: 'sss',
+  AAA: 'sss',
+  BBB: 'sss',
+  CCC: 'sss',
+  DDD: 'sss',
+  YYY: 'sss',
+  UUU: 'sss',
+  ZZZ: 'sss',
+  XXX: 'sss',
 }
 
-// Recursively descends nested object and selects all values with keys
-type SonraSchemaKeys<T> = T extends object
-  ? T extends SonraSchemaLeafValue
-    ? never
-    : keyof T | SonraSchemaKeys<T[keyof T]>
-  : never
+function isZodObjectSchema(v: any): v is z.AnyZodObject {
+  return v?._def?.typeName === z.ZodFirstPartyTypeKind.ZodObject
+}
 
-export type testSonraSchemaKeys = SonraSchemaKeys<UserSchema>
+function isAddressSchema(v: any): v is zx.ZodAddress {
+  return v?._def?.typeName === 'ZodAddress'
+}
 
-type SonraSchemaLeafKeys<T> = T extends object
-  ? T extends SonraSchemaLeafValue
-    ? never
-    :
-        | {
-            [K in keyof T]: T[K] extends SonraSchemaLeafValue ? K : never
-          }[keyof T]
-        | SonraSchemaLeafKeys<T[keyof T]>
-  : never
+function isNonEmptyAddressArraySchema(
+  v: any,
+): v is z.ZodArray<zx.ZodAddress, 'atleastone'> {
+  return (
+    v?._def?.typeName === z.ZodFirstPartyTypeKind.ZodArray &&
+    v?._def?.minLength?.value === 1 &&
+    isAddressSchema(v?._def?.type)
+  )
+}
 
-export type testSonraSchemaLeafKeys = SonraSchemaLeafKeys<UserSchema>
-
-type SonraSchemaRootKeys<T> = T extends object
-  ? T extends SonraSchemaLeafValue
-    ? never
-    :
-        | {
-            [K in keyof T]: T[K] extends SonraSchemaLeafValue ? never : K
-          }[keyof T]
-        | SonraSchemaRootKeys<T[keyof T]>
-  : never
-
-export type testSonraSchemaRootKeys = SonraSchemaRootKeys<UserSchema>
-
-export type DataModelSchemaLeafValue<Value extends SonraSchemaLeafValue> =
-  zx.ZodAddressRecord<Value>
-
-type SonraDataModelSchema<T extends SonraSchema> =
-  T extends SonraSchemaLeafValue
-    ? never
-    : z.ZodObject<{
-        [K in keyof T]: T[K] extends SonraSchemaLeafValue
-          ? DataModelSchemaLeafValue<T[K]>
-          : T[K] extends SonraSchema
-          ? SonraDataModelSchema<T[K]>
-          : never
-      }>
-
-export type testSonraDataModelSchema = SonraDataModelSchema<UserSchema>
-export type testSonraDataModelSchema2 = z.infer<
-  SonraDataModelSchema<UserSchema>
->['AAA']
+export function genDataModelSchema<Schema extends SonraSchema>(
+  schema: Schema,
+): SonraDataModelSchema<Schema> {
+  return z
+    .object(
+      Object.keys(schema).reduce((acc, category) => {
+        const schemaValue = schema[category]
+        return {
+          ...acc,
+          [category]: isZodObjectSchema(schemaValue)
+            ? zx.address().record(schemaValue)
+            : isAddressSchema(schemaValue) ||
+              isNonEmptyAddressArraySchema(schemaValue)
+            ? schemaValue
+            : genDataModelSchema(schemaValue),
+        }
+      }, {} as SonraDataModelSchema<Schema>['_shape']),
+    )
+    .strict()
+}
