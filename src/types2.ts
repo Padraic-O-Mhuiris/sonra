@@ -12,33 +12,6 @@ export type SonraSchema = {
   readonly [k in string]: SonraSchema | SonraCategorySchema
 }
 
-// Recursively descends nested object and selects all values with keys
-export type SonraSchemaKeys<T> = T extends object
-  ? T extends SonraCategorySchema
-    ? never
-    : keyof T | SonraSchemaKeys<T[keyof T]>
-  : never
-
-export type SonraSchemaCategoryKeys<T> = T extends object
-  ? T extends SonraCategorySchema
-    ? never
-    :
-        | {
-            [K in keyof T]: T[K] extends SonraCategorySchema ? K : never
-          }[keyof T]
-        | SonraSchemaCategoryKeys<T[keyof T]>
-  : never
-
-export type SonraSchemaRootKeys<T> = T extends object
-  ? T extends SonraCategorySchema
-    ? never
-    :
-        | {
-            [K in keyof T]: T[K] extends SonraCategorySchema ? never : K
-          }[keyof T]
-        | SonraSchemaRootKeys<T[keyof T]>
-  : never
-
 export type SonraDataModelSchemaValue<Value extends SonraCategorySchema> =
   Value extends z.AnyZodObject ? zx.ZodAddressRecord<Value> : Value
 
@@ -61,12 +34,23 @@ export type SonraFetch<Schema extends SonraSchema> = () => Promise<
   SonraDataModel<Schema>
 >
 
-// export type SonraContracts<Schema extends SonraSchema> = Dictionary<
-//   string,
-//   SonraSchemaKeys<Schema>
-// > // {
-// //   [K: NestedPaths<Schema>]: string
-// // }
+type SonraSchemaKeyTree<T extends SonraSchema> = {
+  [P in keyof T]-?: T[P] extends SonraCategorySchema
+    ? [P]
+    : [P] | [P, ...(T[P] extends SonraSchema ? SonraSchemaKeyPaths<T[P]> : [])]
+}
+
+type SonraSchemaKeyPaths<T extends SonraSchema> =
+  SonraSchemaKeyTree<T>[keyof SonraSchemaKeyTree<T>]
+
+export type SonraSchemaKeys<T> = T extends SonraSchema
+  ? SonraSchemaKeyPaths<T>[number]
+  : never
+
+export type SonraContracts<T extends SonraSchema> = Record<
+  SonraSchemaKeys<T>,
+  `${string}.sol`
+>
 
 export type SonraConfig<Schema extends SonraSchema> = {
   /**
@@ -77,6 +61,10 @@ export type SonraConfig<Schema extends SonraSchema> = {
    * Sonra model which is used to validate the SonraDataModel
    * */
   schema: Schema
+  /**
+   * List of contracts which must associated to a declared category
+   * */
+  contracts: SonraContracts<Schema>
   /**
    * Async function which returns a list of addresses, contracts and metadata
    * corresponding to the input model and each keyed by a specific "category"

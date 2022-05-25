@@ -1,50 +1,6 @@
 import { z } from 'zod'
+import { SonraDataModelSchema, SonraSchema } from './types2'
 import { zx } from './zodx'
-import {
-  SonraContracts,
-  SonraDataModelSchema,
-  SonraSchema,
-  SonraSchemaCategoryKeys,
-  SonraSchemaKeys,
-} from './types2'
-
-const schema = {
-  DAI: z.object({}),
-  USDC: z.object({}),
-  principalToken: z.object({}),
-  AAA: {
-    BBB: z.object({}),
-    CCC: {
-      DDD: z.object({
-        aaa: z.literal('1'),
-      }),
-    },
-  },
-  YYY: {
-    UUU: zx.address(),
-    ZZZ: {
-      XXX: z.object({}),
-    },
-  },
-} as const
-
-type UserSchema = typeof schema
-
-type XXX = SonraContracts<UserSchema>
-
-const x: XXX = {
-  DAI: 'sss',
-  USDC: 'sss',
-  principalToken: 'sss',
-  AAA: 'sss',
-  BBB: 'sss',
-  CCC: 'sss',
-  DDD: 'sss',
-  YYY: 'sss',
-  UUU: 'sss',
-  ZZZ: 'sss',
-  XXX: 'sss',
-}
 
 function isZodObjectSchema(v: any): v is z.AnyZodObject {
   return v?._def?.typeName === z.ZodFirstPartyTypeKind.ZodObject
