@@ -1,80 +1,42 @@
-import { keys } from 'lodash'
 import { z } from 'zod'
+import { SonraDataModelSchema, SonraSchema } from './types'
 import { zx } from './zodx'
-import { isUniqueArray, log } from './utils'
-import { SonraDataModel, SonraFetch, SonraModel, SonraSchema } from './types'
 
-export const createSonraSchema = <Model extends SonraModel>(
-  model: Model,
-): SonraSchema<Model> => {
-  const modelKeys = keys(model)
-
-  const addresses = z.object(
-    modelKeys.reduce(
-      (acc, arg) => ({
-        ...acc,
-        [arg]: zx
-          .address()
-          .array()
-          .nonempty()
-          .refine(isUniqueArray, (arg) => ({
-            message: `Address array must be unique - input: ${JSON.stringify(
-              arg,
-            )}`,
-          })),
-      }),
-      {} as {
-        [k in keyof Model & string]: z.ZodArray<zx.ZodAddress, 'atleastone'>
-      },
-    ),
-  )
-
-  const contracts = z.object(
-    modelKeys.reduce(
-      (acc, arg) => ({
-        ...acc,
-        [arg]: z.string(),
-      }),
-      {} as {
-        [k in keyof Model & string]: z.ZodString
-      },
-    ),
-  )
-
-  const metadata = z.object(
-    modelKeys.reduce(
-      (acc, arg) => ({
-        ...acc,
-        [arg]: zx.address().record(model[arg]),
-      }),
-      {} as {
-        [k in keyof Model & string]: zx.ZodAddressRecord<Model[k]>
-      },
-    ),
-  )
-
-  return z.object({
-    addresses,
-    contracts,
-    metadata,
-  })
+function isZodObjectSchema(v: any): v is z.AnyZodObject {
+  return v?._def?.typeName === z.ZodFirstPartyTypeKind.ZodObject
 }
 
-export const fetchAndValidate = async (
-  model: SonraModel,
-  fetch: SonraFetch<SonraModel>,
-): Promise<SonraDataModel<SonraModel>> => {
-  log('Creating schema and validating fetch result')
-  const schema = createSonraSchema<SonraModel>(model)
-  const fetchResult = await fetch()
+function isAddressSchema(v: any): v is zx.ZodAddress {
+  return v?._def?.typeName === 'ZodAddress'
+}
 
-  const schemaResult = schema.safeParse(fetchResult)
+function isNonEmptyAddressArraySchema(
+  v: any,
+): v is z.ZodArray<zx.ZodAddress, 'atleastone'> {
+  return (
+    v?._def?.typeName === z.ZodFirstPartyTypeKind.ZodArray &&
+    v?._def?.minLength?.value === 1 &&
+    isAddressSchema(v?._def?.type)
+  )
+}
 
-  if (!schemaResult.success) {
-    log('Fetch result failed validation by schema:')
-    throw new Error(schemaResult.error.toString())
-  }
-
-  log('Schema parse success')
-  return schemaResult.data
+export function genDataModelSchema<Schema extends SonraSchema>(
+  schema: Schema,
+): SonraDataModelSchema<Schema> {
+  return z
+    .object(
+      Object.keys(schema).reduce((acc, category) => {
+        const schemaValue = schema[category]
+        return {
+          ...acc,
+          [category]: isZodObjectSchema(schemaValue)
+            ? zx.address().record(schemaValue)
+            : isAddressSchema(schemaValue) ||
+              isNonEmptyAddressArraySchema(schemaValue)
+            ? schemaValue
+            : genDataModelSchema(schemaValue),
+        }
+      }, {} as SonraDataModelSchema<Schema>['_shape']),
+    )
+    .strict()
 }

@@ -1,5 +1,5 @@
 import { AppConfig } from '../run'
-import { SonraConfig, SonraSchema } from '../types2'
+import { SonraConfig, SonraSchema } from '../types'
 
 interface Environment {
   configPath: string

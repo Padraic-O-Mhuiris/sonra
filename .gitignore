@@ -11,3 +11,7 @@ artifacts
 cache
 typechain
 sonra-types
+examples/**/contracts
+examples/**/artifacts
+examples/**/typechain
+examples/**/sonra-types

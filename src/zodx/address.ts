@@ -13,7 +13,7 @@ import {
   ZodTypeDef,
 } from 'zod'
 import { withGetType } from 'zod-to-ts'
-import { categoryAddressType } from '../codegen/utils'
+import { capitalize } from '../utils'
 
 declare const __address__: unique symbol
 
@@ -103,7 +103,7 @@ export class ZodAddress extends ZodType<Address, ZodAddressDef, string> {
         category,
       }),
 
-      (ts) => ts.factory.createIdentifier(categoryAddressType(category)),
+      (ts) => ts.factory.createIdentifier(`${capitalize(category)}Address`),
     )
   }
 
