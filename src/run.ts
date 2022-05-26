@@ -1,14 +1,8 @@
 import { validateEnvironment } from './environment/validateEnvironment'
-import { SonraConfig, SonraSchema } from './types'
+import { AppConfig } from './config'
 
-export interface AppConfig {
-  config: SonraConfig<SonraSchema>
-  configPath: string
-  typechainDirPath: string
-}
-
-export async function run({ config, configPath }: AppConfig) {
-  await validateEnvironment({ config, configPath })
+export async function run(x: AppConfig) {
+  await validateEnvironment(x)
   // validateEnvironment
   // validateConfiguration
   // generateCategoryDescriptions

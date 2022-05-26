@@ -1,4 +1,4 @@
-export { zx } from './zodx'
-export { run } from './run'
-export { SonraFetch, SonraConfig } from './types'
 export { z } from 'zod'
+export { SonraFetch } from './types'
+export { SonraConfig } from './config'
+export { zx } from './zodx'
