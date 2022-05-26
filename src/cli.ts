@@ -1,51 +1,47 @@
 #!/usr/bin/env node
 import path from 'path'
 import yargs from 'yargs'
-import { CliConfig, sonraConfigSchema } from './config'
+import { SonraConfig, sonraConfigSchema } from './config'
 import { run } from './run'
+import { setupTsEnv } from './setupTsEnv'
+import { SonraSchema } from './types'
 import { isTypescriptFile, logger } from './utils'
 
-export function loadTsNode(tsConfigPath: string, strict: boolean) {
+const importSonraConfig = (config: string): SonraConfig<SonraSchema> => {
+  const configPath = path.join(process.cwd(), config)
+
+  let configObj
   try {
-    require.resolve('typescript')
-  } catch {
-    throw new Error('Could not resolve typescript')
+    configObj = require(path.join(process.cwd(), config)).default
+  } catch (e) {
+    logger.error(`Could not resolve sonra config from path: ${configPath}`)
+    throw new Error((e as unknown as Error).message)
   }
+  const sonraConfig = sonraConfigSchema.safeParse(configObj)
 
-  try {
-    require.resolve('ts-node')
-  } catch {
-    throw new Error('Could not resolve ts-node')
-  }
-
-  process.env.TS_NODE_PROJECT = tsConfigPath
-
-  if (process.env.TS_NODE_FILES === undefined) {
-    process.env.TS_NODE_FILES = 'true'
-  }
-
-  if (strict) {
-    require('ts-node/register')
+  if (sonraConfig.success) {
+    logger.info('Sonra started!')
+    return sonraConfig.data
   } else {
-    require('ts-node/register/transpile-only')
+    throw new Error('Exported config is not valid')
   }
 }
 
 async function main() {
-  const { config, silent, typechain, dryRun, outDir, strict } = await yargs(
+  const { config, silent, typechain, dryRun, outDir, tsconfig } = await yargs(
     process.argv,
   )
-    .scriptName('sonra')
+    .scriptName('Sonra:')
     .option('config', {
       alias: 'c',
       default: './sonra.config.ts',
       describe: 'Path to sonra configuration',
       type: 'string',
     })
-    .option('strict', {
-      default: true,
-      describe: 'When true will typecheck your config and dependent scripts',
-      type: 'boolean',
+    .option('tsconfig', {
+      default: './tsconfig.json',
+      describe: 'Path to tsconfig.json',
+      type: 'string',
     })
     .option('silent', {
       alias: 's',
@@ -69,35 +65,18 @@ async function main() {
       describe: 'Path to directory generated types will be built in',
       type: 'string',
     })
-    .usage(
-      '$0\n\nSonra is a codegen library for Ethereum web applications for a better type driven development experience. It solves a coordination problem between contract addresses, metadata and interfaces enabling users to have a cleaner api to build their web application on. It also introduces a rigourous type first approach which is exemplified by the custom ~Address~ type which uses type branding to guard as a constrained string. Sonra extends the granularity in which developers can describe smart contract systems and how they can relate to each other.',
-    )
+    .usage(`$0`)
+    .wrap(yargs.terminalWidth())
     .help().argv
 
   if (!isTypescriptFile(config))
     throw new Error(`Path to sonra configuration is not a typescript file`)
-  loadTsNode(config, strict)
 
-  const cliConfig: CliConfig = { config, silent, typechain, dryRun, outDir }
-  let configObj
-  const configPath = path.join(process.cwd(), config)
+  setupTsEnv(path.join(process.cwd(), tsconfig))
+  const sonraConfig = importSonraConfig(config)
 
-  try {
-    configObj = require(path.join(process.cwd(), config)).default
-  } catch (e) {
-    logger.error(`Could not resolve sonra config from path: ${configPath}`)
-    throw new Error((e as unknown as Error).message)
-  }
-  const sonraConfig = sonraConfigSchema.safeParse(configObj)
-
-  if (sonraConfig.success) {
-    logger.info('Sonra started!')
-    await run({ ...cliConfig, ...sonraConfig.data })
-  } else {
-    logger.error('Exported config is not valid')
-    return
-  }
-
+  logger.info('Sonra started!')
+  await run({ outDir, typechain, config, silent, dryRun, ...sonraConfig })
   logger.info('Sonra finished!')
 }
 
