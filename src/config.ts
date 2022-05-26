@@ -29,6 +29,9 @@ export type SonraConfig<Schema extends SonraSchema> = {
   fetch: SonraFetch<Schema>
 }
 
+// This could be better refined but put simply this is just a layer of
+// validation over the config file. Is somewhat unneccessary at runtime as we
+// do typechecking over the config file when it is dynamically imported
 export const sonraConfigSchema = z
   .object({
     outDir: z.string().optional(),
@@ -38,8 +41,6 @@ export const sonraConfigSchema = z
     fetch: z.function(z.tuple([])).returns(z.record(z.any())),
   })
   .refine((x): x is SonraConfig<SonraSchema> => true)
-
-type x = z.infer<typeof sonraConfigSchema>
 
 export interface CliConfig {
   outDir: string
