@@ -10,7 +10,7 @@ export type SonraConfig<Schema extends SonraSchema> = {
   /**
    * Path to typechain file, defaults to "typechain-types"
    * */
-  typechain?: string
+  typechainPath?: string
 
   /**
    * Sonra model which is used to validate the SonraDataModel
@@ -35,7 +35,7 @@ export type SonraConfig<Schema extends SonraSchema> = {
 export const sonraConfigSchema = z
   .object({
     outDir: z.string().optional(),
-    typechain: z.string().optional(),
+    typechainPath: z.string().optional(),
     schema: z.record(z.any()),
     contracts: z.record(z.string()),
     fetch: z.function(z.tuple([])).returns(z.record(z.any())),
@@ -44,8 +44,8 @@ export const sonraConfigSchema = z
 
 export interface CliConfig {
   outDir: string
-  typechain: string
-  config: string
+  typechainPath: string
+  configPath: string
   silent: boolean
   dryRun: boolean
 }

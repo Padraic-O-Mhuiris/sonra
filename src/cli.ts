@@ -28,55 +28,61 @@ const importSonraConfig = (config: string): SonraConfig<SonraSchema> => {
 }
 
 async function main() {
-  const { config, silent, typechain, dryRun, outDir, tsconfig } = await yargs(
-    process.argv,
-  )
-    .scriptName('Sonra:')
-    .option('config', {
-      alias: 'c',
-      default: './sonra.config.ts',
-      describe: 'Path to sonra configuration',
-      type: 'string',
-    })
-    .option('tsconfig', {
-      default: './tsconfig.json',
-      describe: 'Path to tsconfig.json',
-      type: 'string',
-    })
-    .option('silent', {
-      alias: 's',
-      default: false,
-      describe: 'Show debug information',
-      type: 'boolean',
-    })
-    .option('typechain', {
-      default: './typechain-types',
-      describe: 'Path to generated typechain types',
-      type: 'string',
-    })
-    .option('dry-run', {
-      default: false,
-      describe: 'Will not generate types',
-      type: 'boolean',
-    })
-    .option('outDir', {
-      alias: 'o',
-      default: './sonra-types',
-      describe: 'Path to directory generated types will be built in',
-      type: 'string',
-    })
-    .usage(`$0`)
-    .wrap(yargs.terminalWidth())
-    .help().argv
+  const { configPath, silent, typechainPath, dryRun, outDir, tsconfig } =
+    await yargs(process.argv)
+      .scriptName('Sonra:')
+      .option('configPath', {
+        alias: 'c',
+        default: './sonra.config.ts',
+        describe: 'Path to sonra configuration',
+        type: 'string',
+      })
+      .option('tsconfig', {
+        default: './tsconfig.json',
+        describe: 'Path to tsconfig.json',
+        type: 'string',
+      })
+      .option('silent', {
+        alias: 's',
+        default: false,
+        describe: 'Show debug information',
+        type: 'boolean',
+      })
+      .option('typechainPath', {
+        default: './typechain-types',
+        describe: 'Path to generated typechain types',
+        type: 'string',
+      })
+      .option('dry-run', {
+        default: false,
+        describe: 'Will not generate types',
+        type: 'boolean',
+      })
+      .option('outDir', {
+        alias: 'o',
+        default: './sonra-types',
+        describe: 'Path to directory generated types will be built in',
+        type: 'string',
+      })
+      .usage(`$0`)
+      .wrap(yargs.terminalWidth())
+      .help().argv
 
-  if (!isTypescriptFile(config))
+  if (!isTypescriptFile(configPath))
     throw new Error(`Path to sonra configuration is not a typescript file`)
 
   setupTsEnv(path.join(process.cwd(), tsconfig))
-  const sonraConfig = importSonraConfig(config)
+  const sonraConfig = importSonraConfig(configPath)
 
   logger.info('Sonra started!')
-  await run({ outDir, typechain, config, silent, dryRun, ...sonraConfig })
+  await run({
+    outDir,
+    typechainPath,
+    configPath,
+    silent,
+    dryRun,
+    ...sonraConfig,
+  })
   logger.info('Sonra finished!')
 }
 
