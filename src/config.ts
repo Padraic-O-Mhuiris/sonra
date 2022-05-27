@@ -1,5 +1,5 @@
-import { SonraSchema, SonraContracts, SonraFetch } from './types'
 import { z } from 'zod'
+import { SonraContracts, SonraFetch, SonraSchema } from './types'
 
 export type SonraConfig<Schema extends SonraSchema> = {
   /**
@@ -18,9 +18,9 @@ export type SonraConfig<Schema extends SonraSchema> = {
   schema: Schema
 
   /**
-   * List of contracts which must associated to a declared category
+   * Assign a contract factory to the
    * */
-  contracts: SonraContracts<Schema>
+  contracts?: SonraContracts<Schema>
 
   /**
    * Async function which returns a list of addresses, contracts and metadata
@@ -37,7 +37,7 @@ export const sonraConfigSchema = z
     outDir: z.string().optional(),
     typechainPath: z.string().optional(),
     schema: z.record(z.any()),
-    contracts: z.record(z.string()),
+    contracts: z.record(z.string().optional()).optional(),
     fetch: z.function(z.tuple([])).returns(z.record(z.any())),
   })
   .refine((x): x is SonraConfig<SonraSchema> => true)
@@ -50,4 +50,4 @@ export interface CliConfig {
   dryRun: boolean
 }
 
-export type AppConfig = Required<SonraConfig<SonraSchema> & CliConfig>
+export type AppConfig = SonraConfig<SonraSchema> & CliConfig

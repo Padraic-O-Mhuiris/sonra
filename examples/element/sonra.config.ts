@@ -6,7 +6,14 @@ const provider = new ethers.providers.JsonRpcProvider(
 )
 
 const schema = {
-  token: zx.erc20(),
+  factory: zx.address(),
+  token: {
+    DAI: zx.erc20(),
+    principalToken: {
+      simplePrincipalToken: zx.erc20(),
+      curvePrincipalToken: zx.erc20(),
+    },
+  },
 } as const
 
 type ElementSchema = typeof schema
@@ -17,9 +24,15 @@ const elementFetch: SonraFetch<ElementSchema> = async () => {
     symbol: 'TKN',
     decimals: 18,
   }
+  const address = zx.address().parse(ethers.Wallet.createRandom().address)
   return {
+    factory: address,
     token: {
-      [zx.address().parse(ethers.Wallet.createRandom().address)]: erc20,
+      DAI: erc20,
+      principalToken: {
+        simplePrincipalToken: erc20,
+        curvePrincipalToken: erc20,
+      },
     },
   }
 }

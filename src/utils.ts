@@ -1,3 +1,4 @@
+import path from 'path'
 import pino from 'pino'
 
 export const logger = pino({
@@ -14,4 +15,12 @@ export const isUniqueArray = <F extends unknown, T extends F[] | [F, ...F[]]>(
 
 export function isTypescriptFile(path: string): boolean {
   return path.endsWith('.ts')
+}
+
+export const normalizeAbsPath = (_path: string): string => {
+  const cwd = process.cwd()
+  if (_path.startsWith(cwd)) {
+    return _path
+  }
+  return path.join(cwd, _path)
 }

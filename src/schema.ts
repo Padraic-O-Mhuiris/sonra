@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { SonraDataModelSchema, SonraSchema } from './types'
+import { SonraCategorySchema, SonraDataModelSchema, SonraSchema } from './types'
 import { zx } from './zodx'
 
 function isZodObjectSchema(v: any): v is z.AnyZodObject {
@@ -19,6 +19,9 @@ function isNonEmptyAddressArraySchema(
     isAddressSchema(v?._def?.type)
   )
 }
+
+export const isCategorySchemaValue = (v: any): v is SonraCategorySchema =>
+  isNonEmptyAddressArraySchema(v) || isAddressSchema(v) || isZodObjectSchema(v)
 
 export function genDataModelSchema<Schema extends SonraSchema>(
   schema: Schema,

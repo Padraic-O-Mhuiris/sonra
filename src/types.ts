@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { zx } from './zodx'
 
-type SonraCategorySchema =
+export type SonraCategorySchema =
   | z.AnyZodObject // arbitrary metadata which will be transformed into an address record
   | zx.ZodAddress // unique address, no metadata
   | z.ZodArray<zx.ZodAddress, 'atleastone'> // address list, no metadata
@@ -45,35 +45,6 @@ export type SonraSchemaKeys<T> = T extends SonraSchema
   ? SonraSchemaKeyPaths<T>[number]
   : never
 
-export type SonraContracts<T extends SonraSchema> = Record<
-  SonraSchemaKeys<T>,
-  `${string}.sol`
+export type SonraContracts<T extends SonraSchema> = Partial<
+  Record<SonraSchemaKeys<T>, string>
 >
-
-export type SonraConfig<Schema extends SonraSchema> = {
-  /**
-   * Output directory for all files relative to process.cwd()
-   * */
-  outDir: string
-
-  /**
-   * Path to typechain file, defaults to "typechain-types"
-   * */
-  typechainDir?: string
-
-  /**
-   * Sonra model which is used to validate the SonraDataModel
-   * */
-  schema: Schema
-
-  /**
-   * List of contracts which must associated to a declared category
-   * */
-  contracts: SonraContracts<Schema>
-
-  /**
-   * Async function which returns a list of addresses, contracts and metadata
-   * corresponding to the input model and each keyed by a specific "category"
-   * */
-  fetch: SonraFetch<Schema>
-}

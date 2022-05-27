@@ -1,26 +1,22 @@
 #!/usr/bin/env node
-import path from 'path'
 import yargs from 'yargs'
 import { SonraConfig, sonraConfigSchema } from './config'
 import { run } from './run'
 import { setupTsEnv } from './setupTsEnv'
 import { SonraSchema } from './types'
-import { isTypescriptFile, logger } from './utils'
+import { isTypescriptFile, logger, normalizeAbsPath } from './utils'
 
-const importSonraConfig = (config: string): SonraConfig<SonraSchema> => {
-  const configPath = path.join(process.cwd(), config)
-
-  let configObj
+const importSonraConfig = (configPath: string): SonraConfig<SonraSchema> => {
+  let config
   try {
-    configObj = require(path.join(process.cwd(), config)).default
+    config = require(configPath).default
   } catch (e) {
     logger.error(`Could not resolve sonra config from path: ${configPath}`)
     throw new Error((e as unknown as Error).message)
   }
-  const sonraConfig = sonraConfigSchema.safeParse(configObj)
+  const sonraConfig = sonraConfigSchema.safeParse(config)
 
   if (sonraConfig.success) {
-    logger.info('Sonra started!')
     return sonraConfig.data
   } else {
     throw new Error('Exported config is not valid')
@@ -28,7 +24,7 @@ const importSonraConfig = (config: string): SonraConfig<SonraSchema> => {
 }
 
 async function main() {
-  const { configPath, silent, typechainPath, dryRun, outDir, tsconfig } =
+  let { configPath, silent, typechainPath, dryRun, outDir, tsconfig } =
     await yargs(process.argv)
       .scriptName('Sonra:')
       .option('configPath', {
@@ -71,10 +67,12 @@ async function main() {
   if (!isTypescriptFile(configPath))
     throw new Error(`Path to sonra configuration is not a typescript file`)
 
-  setupTsEnv(path.join(process.cwd(), tsconfig))
+  configPath = normalizeAbsPath(configPath)
+  typechainPath = normalizeAbsPath(typechainPath)
+
+  setupTsEnv(normalizeAbsPath(tsconfig))
   const sonraConfig = importSonraConfig(configPath)
 
-  logger.info('Sonra started!')
   await run({
     outDir,
     typechainPath,
@@ -83,7 +81,6 @@ async function main() {
     dryRun,
     ...sonraConfig,
   })
-  logger.info('Sonra finished!')
 }
 
 main()
