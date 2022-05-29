@@ -13,13 +13,18 @@ export type SonraSchema = {
 export type SonraDataModelSchemaValue<Value extends SonraCategorySchema> =
   Value extends z.AnyZodObject ? zx.ZodAddressRecord<Value> : Value
 
+export type SonraDataModelSchemaValues =
+  | zx.ZodAddressRecord
+  | zx.ZodAddress
+  | z.ZodArray<zx.ZodAddress, 'atleastone'>
+
 export type SonraDataModelSchema<T extends SonraSchema> = z.ZodObject<
   {
-    [K in keyof T]: T[K] extends SonraCategorySchema
-      ? SonraDataModelSchemaValue<T[K]>
-      : T[K] extends SonraSchema
+    [K in keyof T]: T[K] extends SonraSchema
       ? SonraDataModelSchema<T[K]>
-      : never
+      : T[K] extends SonraCategorySchema
+      ? SonraDataModelSchemaValue<T[K]>
+      : zx.ZodXTypeAny // assume recursive when generic
   },
   'strict'
 >

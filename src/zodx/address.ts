@@ -23,7 +23,7 @@ export type __Address__ = {
 
 export type Address = string & __Address__
 
-type ZodXTypeAny = ZodTypeAny | ZodAddress
+export type ZodXTypeAny = ZodTypeAny | ZodAddress | ZodAddressRecord
 
 const isAddress = (val: string): val is Address => ethers.utils.isAddress(val)
 

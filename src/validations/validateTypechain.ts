@@ -33,7 +33,7 @@ export type CategoryContractFactoryRecord = Record<
   string
 >
 
-type TypechainValidationResult =
+export type TypechainValidationResult =
   | {
       usingTypechain: true
       contractFactoriesByCategory: CategoryContractFactoryRecord

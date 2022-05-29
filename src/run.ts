@@ -1,23 +1,44 @@
 import { AppConfig } from './config'
-import { logger } from './utils'
+import { fetchDataModel } from './dataModel'
+import { createCategoryDirs } from './dir'
+import { logger, normalizeAbsPath } from './utils'
 import { validateCategories } from './validations/validateCategories'
 import { validateTypechain } from './validations/validateTypechain'
 
-export async function run({ typechainPath, contracts, schema }: AppConfig) {
+const normalizeAppConfig = ({
+  configPath,
+  typechainPath,
+  outDir,
+  ...rest
+}: AppConfig): AppConfig => ({
+  configPath: normalizeAbsPath(configPath),
+  typechainPath: normalizeAbsPath(typechainPath),
+  outDir: normalizeAbsPath(outDir),
+  ...rest,
+})
+
+export async function run(appConfig: AppConfig) {
+  const { schema, typechainPath, contracts, outDir, fetch } =
+    normalizeAppConfig(appConfig)
+
   logger.info({ typechainPath, contracts }, 'Sonra started!')
 
   const [categories, categoryHierarchy] = validateCategories(schema)
 
   const typechainValidationResult = validateTypechain(typechainPath, contracts)
 
-  console.log(categoryHierarchy)
+  const categoryDirectoryPaths = await createCategoryDirs({
+    categoryHierarchy,
+    typechainValidationResult,
+    typechainPath,
+    outDir,
+  })
 
-  // TODO Build category filepaths obj keyed by each individual category + whether it is a parent or child category
-  // TODO rm -rf previous directory at outDir
-  // TODO Build directory structure hierarchy and copy typechain directory under <outdir>/contracts
-  //
+  const dataModel = await fetchDataModel({ schema, fetch })
+
   // TODO build category descriptions array
-  // TODO out put to files
+  // TODO output to files
+  //
   //
   //
   // validateEnvironment

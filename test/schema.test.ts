@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { zx } from '../src'
 import { genDataModelSchema } from '../src/schema'
-import { SonraDataModel } from '../src/types'
+import { SonraDataModel, SonraFetch } from '../src/types'
 import { randomAddress } from './utils'
 
 const schema = {

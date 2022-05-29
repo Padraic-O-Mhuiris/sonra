@@ -5,6 +5,7 @@ import { run } from './run'
 import { setupTsEnv } from './setupTsEnv'
 import { SonraSchema } from './types'
 import { isTypescriptFile, logger, normalizeAbsPath } from './utils'
+import path from 'path'
 
 const importSonraConfig = (configPath: string): SonraConfig<SonraSchema> => {
   let config
@@ -12,7 +13,7 @@ const importSonraConfig = (configPath: string): SonraConfig<SonraSchema> => {
     config = require(configPath).default
   } catch (e) {
     logger.error(`Could not resolve sonra config from path: ${configPath}`)
-    throw new Error((e as unknown as Error).message)
+    throw e
   }
   const sonraConfig = sonraConfigSchema.safeParse(config)
 
@@ -67,19 +68,22 @@ async function main() {
   if (!isTypescriptFile(configPath))
     throw new Error(`Path to sonra configuration is not a typescript file`)
 
-  configPath = normalizeAbsPath(configPath)
-  typechainPath = normalizeAbsPath(typechainPath)
-
   setupTsEnv(normalizeAbsPath(tsconfig))
-  const sonraConfig = importSonraConfig(configPath)
+  const sonraConfig = importSonraConfig(normalizeAbsPath(configPath))
+
+  // If we define the outDir in the sonra config, it should be generated
+  // relative to the directory that file exists in
+  if (sonraConfig.outDir) {
+    outDir = path.join(path.dirname(configPath), sonraConfig.outDir)
+  }
 
   await run({
-    outDir,
     typechainPath,
     configPath,
     silent,
     dryRun,
     ...sonraConfig,
+    outDir,
   })
 }
 

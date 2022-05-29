@@ -11,7 +11,7 @@ const RESERVED_WORDS = [
   'contracts',
 ]
 
-type CategoryHierarchy = Record<string, string>
+export type CategoryHierarchy = Record<string, string>
 
 // The result of this function will transform an arbitrary nested schema and
 // produce a non-nested object with values representing the nested path in
