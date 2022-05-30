@@ -38,7 +38,7 @@ export const sonraConfigSchema = z
     typechainPath: z.string().optional(),
     schema: z.record(z.any()),
     contracts: z.record(z.string().optional()).optional(),
-    fetch: z.function(z.tuple([])).returns(z.record(z.any())),
+    fetch: z.function(z.tuple([])).returns(z.promise(z.record(z.any()))),
   })
   .refine((x): x is SonraConfig<SonraSchema> => true)
 

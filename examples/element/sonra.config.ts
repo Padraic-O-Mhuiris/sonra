@@ -1,17 +1,24 @@
 import { ethers } from 'ethers'
 import { SonraConfig, SonraFetch, zx } from '../../src'
 
-const provider = new ethers.providers.JsonRpcProvider(
-  'https://mainnet.infura.io/v3/7b2295eb2ca8443fba441bfd462cd93a',
-)
+// const provider = new ethers.providers.JsonRpcProvider(
+//   'https://mainnet.infura.io/v3/7b2295eb2ca8443fba441bfd462cd93a',
+// )
 
 const schema = {
   factory: zx.address(),
   token: {
-    DAI: zx.erc20(),
+    baseToken: {
+      DAI: zx.erc20(),
+      curveLpToken: {
+        LUSD_3CRV: zx.erc20(),
+      },
+    },
     principalToken: {
       simplePrincipalToken: zx.erc20(),
-      curvePrincipalToken: zx.erc20(),
+      curvePrincipalToken: zx.erc20().extend({
+        underlying: zx.address().category('curveLpToken'),
+      }),
     },
   },
 } as const
@@ -25,16 +32,34 @@ const elementFetch: SonraFetch<ElementSchema> = async () => {
     decimals: 18,
   }
   const address = zx.address().parse(ethers.Wallet.createRandom().address)
-  return {
+
+  const erc20AddressRec = { [address]: erc20 }
+  const x = {
     factory: address,
     token: {
-      DAI: erc20,
+      baseToken: {
+        DAI: erc20AddressRec,
+        curveLpToken: {
+          LUSD_3CRV: erc20AddressRec,
+        },
+      },
       principalToken: {
-        simplePrincipalToken: erc20,
-        curvePrincipalToken: erc20,
+        simplePrincipalToken: erc20AddressRec,
+        curvePrincipalToken: {
+          [address]: {
+            ...erc20,
+            underlying: zx
+              .address()
+              .category('curveLpToken')
+              .conform()
+              .parse(address),
+          },
+        },
       },
     },
   }
+
+  return x
 }
 
 const config: SonraConfig<ElementSchema> = {

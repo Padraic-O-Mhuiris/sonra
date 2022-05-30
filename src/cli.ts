@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import yargs from 'yargs'
-import { SonraConfig, sonraConfigSchema } from './config'
+import { AppConfig, SonraConfig, sonraConfigSchema } from './config'
 import { run } from './run'
 import { setupTsEnv } from './setupTsEnv'
 import { SonraSchema } from './types'
@@ -18,7 +18,7 @@ const importSonraConfig = (configPath: string): SonraConfig<SonraSchema> => {
   const sonraConfig = sonraConfigSchema.safeParse(config)
 
   if (sonraConfig.success) {
-    return sonraConfig.data
+    return { ...sonraConfig.data }
   } else {
     throw new Error('Exported config is not valid')
   }
@@ -77,14 +77,16 @@ async function main() {
     outDir = path.join(path.dirname(configPath), sonraConfig.outDir)
   }
 
-  await run({
+  const appConfig: AppConfig = {
     typechainPath,
     configPath,
     silent,
     dryRun,
     ...sonraConfig,
     outDir,
-  })
+  }
+
+  await run(appConfig)
 }
 
 main()

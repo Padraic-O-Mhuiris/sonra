@@ -37,7 +37,7 @@ export function buildCategoryHierarchy(schema: SonraSchema) {
       const currentPath = parentPath === '' ? k : `${parentPath}.${k}`
       if (prev[k] !== undefined) {
         throw new Error(
-          `Category ${k} with path ${currentPath} already exists at ${prev[k]}`,
+          `Category ${k} is not unique, path ${currentPath} already exists at ${prev[k]}`,
         )
       }
 
