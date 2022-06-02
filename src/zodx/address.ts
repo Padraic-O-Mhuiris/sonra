@@ -15,10 +15,8 @@ import {
 import { withGetType } from 'zod-to-ts'
 import { capitalize } from '../utils'
 
-declare const __address__: unique symbol
-
 export type __Address__ = {
-  readonly [__address__]: void
+  readonly __address__: void
 }
 
 export type Address = string & __Address__
@@ -126,10 +124,8 @@ export class ZodAddress extends ZodType<Address, ZodAddressDef, string> {
     })
 }
 
-declare const __category__: unique symbol
-
 export type __Category__<T extends string> = {
-  readonly [__category__]: T
+  readonly __category__: T
 }
 
 export type CategorisedAddress<T extends string = string> = Address &

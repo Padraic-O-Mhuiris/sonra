@@ -1,5 +1,7 @@
 # Sonra
 
+> Wovon man nicht sprechen kann, darüber muss man schweigen
+
 Sonra is a codegen library for Ethereum web applications for a better type
 driven development experience. It solves a coordination problem between contract
 addresses, metadata and interfaces enabling users to have a cleaner api to build

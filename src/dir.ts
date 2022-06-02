@@ -38,7 +38,7 @@ export async function createCategoryDirs({
   const categoryDirectoryPaths = Object.fromEntries(
     Object.entries(categoryHierarchy).map(([k, v]) => [
       k,
-      path.join(outDir, v.split('.').join('/')),
+      path.join(outDir, v.split('.').join('/'), '..'),
     ]),
   )
 

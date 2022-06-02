@@ -1,19 +1,20 @@
 import { printNode, zodToTs } from 'zod-to-ts'
 import { CategoryDirectoryPaths } from '../dir'
 import { SonraCategorySchema } from '../types'
-import { logger, mkCategoryAddressType, mkCategoryFilePath } from '../utils'
+import { logger } from '../utils'
 import { zx } from '../zodx'
 import {
   CategoryKindAndData,
   CFDKind,
   SharedCFD,
 } from './categoryFileDescription'
+import { mkFileContent } from './fileContent'
+import { mkCategoryPaths } from './paths'
 import { AddressCategoryImportDefRecord, serialize } from './serialize'
 
 export interface MetadataSingleAddressCFD extends SharedCFD {
   kind: CFDKind.METADATA_SINGLE
   address: zx.Address
-  addressType: string
   metadataEntry: string
   metadataType: string
   importBigNumber: boolean
@@ -27,6 +28,7 @@ interface IMkMetadataSingleAddressCFD {
   schema: SonraCategorySchema
   categoryKindAndData: Record<string, CategoryKindAndData>
   categoryDirectoryPaths: CategoryDirectoryPaths
+  outDir: string
 }
 
 export const mkMetadataSingleAddressCFD = ({
@@ -34,6 +36,7 @@ export const mkMetadataSingleAddressCFD = ({
   entry,
   schema,
   categoryDir,
+  outDir,
   categoryKindAndData,
   categoryDirectoryPaths,
 }: IMkMetadataSingleAddressCFD): MetadataSingleAddressCFD => {
@@ -42,19 +45,15 @@ export const mkMetadataSingleAddressCFD = ({
   const { serializedEntries, importDefRecord, importBigNumber, addresses } =
     serialize(category, entry, categoryKindAndData, categoryDirectoryPaths)
 
-  logger.info(
-    serializedEntries,
-    `Resulting serialized entry for category '${category}'`,
-  )
   return {
     kind: CFDKind.METADATA_SINGLE,
     address: addresses[0],
     metadataEntry: serializedEntries[addresses[0]],
-    addressType: mkCategoryAddressType(category),
     metadataType: printNode(zodToTs(schema).node),
     addressImports: importDefRecord,
     importBigNumber,
     category,
-    filePath: mkCategoryFilePath(categoryDir, category),
+    categoryFileContent: mkFileContent(category),
+    paths: mkCategoryPaths({ category, categoryDir, outDir }),
   }
 }

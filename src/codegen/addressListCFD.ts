@@ -1,6 +1,8 @@
-import { logger, mkCategoryAddressType, mkCategoryFilePath } from '../utils'
+import { logger } from '../utils'
 import { zx } from '../zodx'
 import { CFDKind, SharedCFD } from './categoryFileDescription'
+import { mkFileContent } from './fileContent'
+import { mkCategoryPaths } from './paths'
 
 export interface AddressListCFD extends SharedCFD {
   kind: CFDKind.ADDRESS_LIST
@@ -11,19 +13,21 @@ interface IMkAddressListCFD {
   category: string
   addresses: [zx.Address, ...zx.Address[]]
   categoryDir: string
+  outDir: string
 }
 
 export const mkAddressListCFD = ({
   category,
   addresses,
   categoryDir,
+  outDir,
 }: IMkAddressListCFD): AddressListCFD => {
   logger.info(`Category kind for '${category}': ${CFDKind.ADDRESS_LIST}`)
   return {
     kind: CFDKind.ADDRESS_LIST,
     addresses,
-    addressType: mkCategoryAddressType(category),
-    filePath: mkCategoryFilePath(categoryDir, category),
     category,
+    categoryFileContent: mkFileContent(category),
+    paths: mkCategoryPaths({ category, categoryDir, outDir }),
   }
 }

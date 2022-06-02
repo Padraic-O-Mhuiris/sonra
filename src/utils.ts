@@ -26,14 +26,6 @@ export const normalizeAbsPath = (_path: string): string => {
   return path.join(cwd, _path)
 }
 
-export const mkCategoryAddressType = (category: string): string =>
-  `${capitalize(category)}Address`
-
-export const mkCategoryFilePath = (
-  categoryDir: string,
-  category: string,
-): string => path.join(categoryDir, `${category}.ts`)
-
 export function mkAddressConstant(
   category: string,
   address: zx.Address | undefined = undefined,

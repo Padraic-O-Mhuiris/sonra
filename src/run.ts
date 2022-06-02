@@ -1,4 +1,4 @@
-import { categoryFileDescriptions } from './codegen/categoryFileDescription'
+import { codegen } from './codegen'
 import { AppConfig } from './config'
 import { fetchDataModel } from './dataModel'
 import { createCategoryDirs } from './dir'
@@ -43,15 +43,15 @@ export async function run(appConfig: AppConfig) {
 
   const dataModel = await fetchDataModel({ schema, fetch })
 
-  const categoryDescriptions = categoryFileDescriptions(
+  await codegen(
     categories,
     categoryHierarchy,
     categoryDirectoryPaths,
     schema,
     dataModel,
+    outDir,
   )
 
-  logger.info(categoryDescriptions, 'Category Descriptions:')
   // generateCategoryDescriptions
   // generateCategoryFiles
 

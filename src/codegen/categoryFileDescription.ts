@@ -1,4 +1,3 @@
-import { logger } from '../utils'
 import { get, includes } from 'lodash'
 import { z } from 'zod'
 import { CategoryDirectoryPaths } from '../dir'
@@ -6,6 +5,7 @@ import { SonraCategorySchema, SonraDataModel, SonraSchema } from '../types'
 import { CategoryHierarchy } from '../validations/validateCategories'
 import { zx } from '../zodx'
 import { AddressListCFD, mkAddressListCFD } from './addressListCFD'
+import { CategoryFileContent } from './fileContent'
 import {
   GenericParent,
   GenericParentCFD,
@@ -19,6 +19,7 @@ import {
   MetadataSingleAddressCFD,
   mkMetadataSingleAddressCFD,
 } from './metadataSingleAddressCFD'
+import { CategoryPaths } from './paths'
 import { mkUniqueAddressCFD, UniqueAddressCFD } from './uniqueAddressCFD'
 
 export enum CFDKind {
@@ -30,11 +31,12 @@ export enum CFDKind {
 }
 
 export interface SharedCFD {
+  kind: CFDKind
   category: string
-  filePath: string
   contract?: string // if there is a contract correspondance
   contractFactory?: string // if there is a contract correspondance
-  addressType: string
+  categoryFileContent: CategoryFileContent
+  paths: CategoryPaths
 }
 
 export type CategoryFileDescription =
@@ -140,9 +142,10 @@ export function categoryFileDescriptions<T extends SonraSchema>(
   categories: string[],
   categoryHierarchy: CategoryHierarchy,
   categoryDirectoryPaths: CategoryDirectoryPaths,
-  schema: SonraSchema,
+  schema: T,
   dataModel: SonraDataModel<T>,
-): (CategoryFileDescription | {})[] {
+  outDir: string,
+): CategoryFileDescription[] {
   const categoryKindAndData: Record<string, CategoryKindAndData> =
     buildCategoryKindAndDataRecord(categories, dataModel, categoryHierarchy)
   return categories.map((category) => {
@@ -153,14 +156,25 @@ export function categoryFileDescriptions<T extends SonraSchema>(
 
     switch (kind) {
       case CFDKind.UNIQUE_ADDRESS:
-        return mkUniqueAddressCFD({ address: data, category, categoryDir })
+        return mkUniqueAddressCFD({
+          address: data,
+          category,
+          categoryDir,
+          outDir,
+        })
       case CFDKind.ADDRESS_LIST:
-        return mkAddressListCFD({ addresses: data, category, categoryDir })
+        return mkAddressListCFD({
+          addresses: data,
+          category,
+          categoryDir,
+          outDir,
+        })
       case CFDKind.METADATA_SINGLE:
         return mkMetadataSingleAddressCFD({
           entry: data,
           category,
           categoryDir,
+          outDir,
           schema: categorySchema as SonraCategorySchema,
           categoryKindAndData,
           categoryDirectoryPaths,
@@ -170,12 +184,18 @@ export function categoryFileDescriptions<T extends SonraSchema>(
           entry: data,
           category,
           categoryDir,
+          outDir,
           schema: categorySchema as SonraCategorySchema,
           categoryKindAndData,
           categoryDirectoryPaths,
         })
       case CFDKind.GENERIC_PARENT:
-        return mkGenericParentCFD({ entry: data, category, categoryDir })
+        return mkGenericParentCFD({
+          entry: data,
+          category,
+          categoryDir,
+          outDir,
+        })
     }
   })
 }
