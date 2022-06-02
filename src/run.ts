@@ -1,7 +1,7 @@
+import { categoryFileDescriptions } from './codegen/categoryFileDescription'
 import { AppConfig } from './config'
 import { fetchDataModel } from './dataModel'
 import { createCategoryDirs } from './dir'
-import { SonraSchema } from './types'
 import { logger, normalizeAbsPath } from './utils'
 import { validateCategories } from './validations/validateCategories'
 import { validateTypechain } from './validations/validateTypechain'
@@ -18,14 +18,14 @@ const normalizeAppConfig = ({
   ...rest,
 })
 
-export async function run<T extends SonraSchema>(appConfig: AppConfig) {
+export async function run(appConfig: AppConfig) {
   const { schema, typechainPath, contracts, outDir, fetch, dryRun } =
     normalizeAppConfig(appConfig)
 
   if (dryRun) {
     logger.info('Dry run, fetching and validating data model only')
     validateCategories(schema)
-    const dataModelDryRun = await fetchDataModel({ schema, fetch })
+    await fetchDataModel({ schema, fetch })
     return
   }
 
@@ -34,6 +34,7 @@ export async function run<T extends SonraSchema>(appConfig: AppConfig) {
   const [categories, categoryHierarchy] = validateCategories(schema)
   const typechainValidationResult = validateTypechain(typechainPath, contracts)
 
+  console.log(categories)
   const categoryDirectoryPaths = await createCategoryDirs({
     categoryHierarchy,
     typechainValidationResult,
@@ -43,6 +44,15 @@ export async function run<T extends SonraSchema>(appConfig: AppConfig) {
 
   const dataModel = await fetchDataModel({ schema, fetch })
 
+  const categoryDescriptions = categoryFileDescriptions(
+    categories,
+    categoryHierarchy,
+    categoryDirectoryPaths,
+    schema,
+    dataModel,
+  )
+
+  logger.info(categoryDescriptions, 'Category Descriptions:')
   // generateCategoryDescriptions
   // generateCategoryFiles
 

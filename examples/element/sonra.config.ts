@@ -1,18 +1,17 @@
-import { ethers } from 'ethers'
-import { SonraConfig, SonraFetch, zx } from '../../src'
+import { SonraConfig, SonraFetch, z, zx } from '../../src'
+import { SonraDataModel } from '../../src/types'
 
 // const provider = new ethers.providers.JsonRpcProvider(
 //   'https://mainnet.infura.io/v3/7b2295eb2ca8443fba441bfd462cd93a',
 // )
 
 const schema = {
-  factory: zx.address(),
+  trancheFactory: zx.address(),
+  ccPoolFactory: zx.address().array().nonempty(),
   token: {
     baseToken: {
       DAI: zx.erc20(),
-      curveLpToken: {
-        LUSD_3CRV: zx.erc20(),
-      },
+      curveLpToken: zx.erc20(),
     },
     principalToken: {
       simplePrincipalToken: zx.erc20(),
@@ -20,6 +19,17 @@ const schema = {
         underlying: zx.address().category('curveLpToken'),
       }),
     },
+  },
+  otherToken: {
+    daiRef: z.object({
+      ref: zx.address().category('DAI'),
+    }),
+    lusd3CrvRef: z.object({
+      ref: zx.address().category('curveLpToken'),
+    }),
+    threeCrvRef: z.object({
+      ref: zx.address().category('curveLpToken'),
+    }),
   },
 } as const
 
@@ -31,29 +41,75 @@ const elementFetch: SonraFetch<ElementSchema> = async () => {
     symbol: 'TKN',
     decimals: 18,
   }
-  const address = zx.address().parse(ethers.Wallet.createRandom().address)
 
-  const erc20AddressRec = { [address]: erc20 }
-  const x = {
-    factory: address,
+  const randomERC20Entry = () => ({ [zx.address().random()]: erc20 })
+
+  const DAIAddress = zx.address().random()
+  const LUSD_3CRVAddress = zx.address().random()
+  const THREE_CRVAddress = zx.address().random()
+
+  const x: SonraDataModel<ElementSchema> = {
+    trancheFactory: zx.address().random(),
+    ccPoolFactory: zx
+      .address()
+      .array()
+      .nonempty()
+      .parse([zx.address().random(), zx.address().random()]),
     token: {
       baseToken: {
-        DAI: erc20AddressRec,
+        DAI: { [DAIAddress]: erc20 },
         curveLpToken: {
-          LUSD_3CRV: erc20AddressRec,
+          [LUSD_3CRVAddress]: erc20,
+          [THREE_CRVAddress]: erc20,
         },
       },
       principalToken: {
-        simplePrincipalToken: erc20AddressRec,
+        simplePrincipalToken: {
+          ...randomERC20Entry(),
+          ...randomERC20Entry(),
+        },
         curvePrincipalToken: {
-          [address]: {
+          [zx.address().random()]: {
             ...erc20,
             underlying: zx
               .address()
               .category('curveLpToken')
               .conform()
-              .parse(address),
+              .parse(LUSD_3CRVAddress),
           },
+          [zx.address().random()]: {
+            ...erc20,
+            underlying: zx
+              .address()
+              .category('curveLpToken')
+              .conform()
+              .parse(THREE_CRVAddress),
+          },
+        },
+      },
+    },
+    otherToken: {
+      daiRef: {
+        [zx.address().random()]: {
+          ref: zx.address().category('DAI').conform().parse(DAIAddress),
+        },
+      },
+      lusd3CrvRef: {
+        [zx.address().random()]: {
+          ref: zx
+            .address()
+            .category('curveLpToken')
+            .conform()
+            .parse(LUSD_3CRVAddress),
+        },
+      },
+      threeCrvRef: {
+        [zx.address().random()]: {
+          ref: zx
+            .address()
+            .category('curveLpToken')
+            .conform()
+            .parse(THREE_CRVAddress),
         },
       },
     },

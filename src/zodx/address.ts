@@ -47,7 +47,8 @@ export class ZodAddress extends ZodType<Address, ZodAddressDef, string> {
     }
 
     const inputIsAddress = isAddress(input.data)
-    const inputIsCategorisedAddress = isCategorisedAddress(input.data)
+    const inputIsCategorisedAddress =
+      ZodCategorisedAddress.isCategorisedAddress(input.data)
     if (this._def.conform) {
       if (!inputIsAddress && !inputIsCategorisedAddress) {
         const ctx = this._getOrReturnCtx(input)
@@ -115,6 +116,10 @@ export class ZodAddress extends ZodType<Address, ZodAddressDef, string> {
     return new ZodAddressRecord({ valueType, typeName: 'ZodAddressRecord' })
   }
 
+  random(): Address {
+    return ethers.Wallet.createRandom().address as Address
+  }
+
   static create = (): ZodAddress =>
     new ZodAddress({
       typeName: 'ZodAddress',
@@ -127,13 +132,8 @@ export type __Category__<T extends string> = {
   readonly [__category__]: T
 }
 
-export type CategorisedAddress<T extends string> = Address & __Category__<T>
-
-const isCategorisedAddress = (val: string): val is CategorisedAddress<string> =>
-  val.includes(':') &&
-  val.split(':')[0].length !== 0 &&
-  isAddress(val.split(':')[1]) &&
-  val.split(':').length === 2
+export type CategorisedAddress<T extends string = string> = Address &
+  __Category__<T>
 
 interface ZodCategorisedAddressDef<T extends string> extends ZodTypeDef {
   typeName: 'ZodCategorisedAddress'
@@ -161,7 +161,8 @@ export class ZodCategorisedAddress<T extends string> extends ZodType<
     }
 
     const inputIsAddress = isAddress(input.data)
-    const inputIsCategorisedAddress = isCategorisedAddress(input.data)
+    const inputIsCategorisedAddress =
+      ZodCategorisedAddress.isCategorisedAddress(input.data)
     if (this._def.conform) {
       if (!inputIsAddress && !inputIsCategorisedAddress) {
         const ctx = this._getOrReturnCtx(input)
@@ -206,6 +207,21 @@ export class ZodCategorisedAddress<T extends string> extends ZodType<
 
     const status = new ParseStatus()
     return { status: status.value, value: input.data as CategorisedAddress<T> }
+  }
+
+  static isCategorisedAddress = (val: unknown): val is CategorisedAddress => {
+    const v = z.string().safeParse(val)
+    return (
+      v.success &&
+      v.data.includes(':') &&
+      v.data.split(':')[0].length !== 0 &&
+      isAddress(v.data.split(':')[1]) &&
+      v.data.split(':').length === 2
+    )
+  }
+
+  static split(val: CategorisedAddress): [string, Address] {
+    return val.split(':') as [string, Address]
   }
 
   conform() {
