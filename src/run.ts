@@ -34,7 +34,6 @@ export async function run(appConfig: AppConfig) {
   const [categories, categoryHierarchy] = validateCategories(schema)
   const typechainValidationResult = validateTypechain(typechainPath, contracts)
 
-  console.log(categories)
   const categoryDirectoryPaths = await createCategoryDirs({
     categoryHierarchy,
     typechainValidationResult,

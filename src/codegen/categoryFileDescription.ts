@@ -150,10 +150,6 @@ export function categoryFileDescriptions<T extends SonraSchema>(
     const categorySchema = get(schema, categoryHierarchy[category])
 
     const { kind, data } = categoryKindAndData[category]
-    logger.info(
-      { kind, data },
-      `categoryKindAndData for category: '${category}'`,
-    )
 
     switch (kind) {
       case CFDKind.UNIQUE_ADDRESS:

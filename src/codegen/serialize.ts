@@ -38,11 +38,6 @@ export function serialize(
   categoryKindAndData: Record<string, CategoryKindAndData>,
   categoryDirectoryPaths: CategoryDirectoryPaths,
 ): SerializedResult {
-  logger.info(
-    obj,
-    `Serializing metadata entry/entries for category: '${category}'`,
-  )
-
   const importDefRecord: AddressCategoryImportDefRecord = {}
   let importBigNumber = false
   const addressConstants: string[] = []
@@ -112,7 +107,6 @@ export function serialize(
               return v
             })
 
-            console.log(addressKey)
             return [zx.address().parse(addressKey), entry]
           },
         ),
