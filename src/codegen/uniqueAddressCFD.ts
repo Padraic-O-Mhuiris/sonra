@@ -33,15 +33,18 @@ export const mkUniqueAddressCFD = ({
   }
 }
 
-export function codegenUniqueAddress(
-  fileDescription: UniqueAddressCFD,
-): string {
-  const categoryAddressTypeContent = mkCategoryAddressTypeContent(
-    fileDescription.categoryFileContent,
-  )
+export function codegenUniqueAddress({
+  categoryFileContent,
+  paths,
+  address,
+}: UniqueAddressCFD): string {
+  const categoryAddressTypeContent =
+    mkCategoryAddressTypeContent(categoryFileContent)
   return `
-import { Address } from '${fileDescription.paths.address}'
+import { Address } from '${paths.address}'
 
 ${categoryAddressTypeContent}
+
+export const ${categoryFileContent.addressConstant} = "${address}" as ${categoryFileContent.addressType}
 `
 }

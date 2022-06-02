@@ -1,4 +1,5 @@
 import { capitalize } from '../utils'
+import { zx } from '../zodx'
 
 export type CategoryFileContent = {
   addressTypeBrand: string // __CategoryAddress__
@@ -10,7 +11,13 @@ export type CategoryFileContent = {
 export const mkAddressTypeBrand = (c: string) => `__${capitalize(c)}Address__`
 export const mkAddressTypeBrandKey = (c: string) => `__${c}Address__`
 export const mkAddressType = (c: string) => `${capitalize(c)}Address`
-export const mkAddressConstant = (c: string) => `${c}Address`
+export const mkAddressConstant = (
+  category: string,
+  address: zx.Address | undefined = undefined,
+): string =>
+  !address
+    ? `${category}Address`
+    : `${mkAddressConstant(category)}_${address.slice(0, 6)}`
 
 export const mkFileContent = (c: string) => ({
   addressTypeBrand: mkAddressTypeBrand(c),
@@ -29,6 +36,47 @@ type ${addressTypeBrand} = {
 }
 export type ${addressType} = Address & ${addressTypeBrand}
 `
+
+export const mkCategoryAddressConstant = ({
+  address,
+  addressType,
+  addressConstant,
+}: {
+  address: zx.Address
+  addressType: string
+  addressConstant: string
+}) => `export const ${addressConstant} = "${address}" as ${addressType}`
+
+export const mkCategoryAddressListContent = ({
+  category,
+  addressType,
+  addressConstant,
+  addresses,
+}: {
+  category: string
+  addressType: string
+  addressConstant: string
+  addresses: [zx.Address, ...zx.Address[]]
+}) => {
+  const addressConstants = addresses.map((address) =>
+    mkAddressConstant(category, address),
+  )
+
+  const addressConstantEntries = addresses.map((address, idx) =>
+    mkCategoryAddressConstant({
+      address,
+      addressType,
+      addressConstant: addressConstants[idx],
+    }),
+  )
+  return `
+${addressConstantEntries.join('\n')}
+
+export const ${addressConstant}List: ${addressType}[] = [${addressConstants.join(
+    ',\n',
+  )}]
+`
+}
 
 export const ADDRESS_FILE_CONTENT = `
 import { ethers } from 'ethers'

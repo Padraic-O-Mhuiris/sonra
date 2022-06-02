@@ -3,9 +3,9 @@ import { has } from 'lodash'
 import path from 'path'
 import { z } from 'zod'
 import { CategoryDirectoryPaths } from '../dir'
-import { mkAddressConstant } from '../utils'
 import { zx } from '../zodx'
 import { CategoryKindAndData, CFDKind } from './categoryFileDescription'
+import { mkAddressConstant } from './fileContent'
 import { relativePath } from './paths'
 
 // The AddressCategoryImportDef is used for building the relative imports between files

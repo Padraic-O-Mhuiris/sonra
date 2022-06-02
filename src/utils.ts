@@ -25,13 +25,3 @@ export const normalizeAbsPath = (_path: string): string => {
   }
   return path.join(cwd, _path)
 }
-
-export function mkAddressConstant(
-  category: string,
-  address: zx.Address | undefined = undefined,
-): string {
-  if (!address) {
-    return `${category}Address`
-  }
-  return `${mkAddressConstant(category)}_${address.slice(0, 6)}`
-}

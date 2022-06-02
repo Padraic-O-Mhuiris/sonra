@@ -20,7 +20,7 @@ export const relativePath = (from: string, to: string) => {
   from = fromIsFile ? path.dirname(from) : from
   to = toIsFile ? to.slice(0, -3) : to
   const _path = path.relative(from, to)
-  return _path.startsWith('../') ? _path : `./${_path}`
+  return _path.startsWith('..') ? _path : `./${_path}`
 }
 
 export const mkCategoryPaths = ({

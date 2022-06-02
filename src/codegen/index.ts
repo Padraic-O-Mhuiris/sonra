@@ -4,6 +4,7 @@ import { CategoryDirectoryPaths } from '../dir'
 import { SonraDataModel, SonraSchema } from '../types'
 import { logger } from '../utils'
 import { CategoryHierarchy } from '../validations/validateCategories'
+import { codegenAddressList } from './addressListCFD'
 import { categoryFileDescriptions, CFDKind } from './categoryFileDescription'
 import { ADDRESS_FILE_CONTENT } from './fileContent'
 import { format } from './format'
@@ -38,6 +39,9 @@ export async function codegen<T extends SonraSchema>(
     switch (fd.kind) {
       case CFDKind.UNIQUE_ADDRESS:
         file = codegenUniqueAddress(fd)
+        break
+      case CFDKind.ADDRESS_LIST:
+        file = codegenAddressList(fd)
         break
     }
 
