@@ -58,38 +58,42 @@ export function serialize(
 
             const entry = JSON.stringify(categoryEntry, (_, v) => {
               if (zx.ZodCategorisedAddress.isCategorisedAddress(v)) {
-                const [_category, address] = zx.ZodCategorisedAddress.split(v)
-                const { kind } = categoryKindAndData[_category]
+                const [importCategory, address] =
+                  zx.ZodCategorisedAddress.split(v)
+                const { kind } = categoryKindAndData[importCategory]
 
                 let addressConstant
-                if (kind === CFDKind.UNIQUE_ADDRESS) {
-                  addressConstant = mkAddressConstant(_category)
+                if (
+                  kind === CFDKind.UNIQUE_ADDRESS ||
+                  kind === CFDKind.METADATA_SINGLE
+                ) {
+                  addressConstant = mkAddressConstant(importCategory)
                 } else {
-                  addressConstant = mkAddressConstant(_category, address)
+                  addressConstant = mkAddressConstant(importCategory, address)
                 }
 
                 if (!has(importDefRecord, category)) {
-                  importDefRecord[_category] = {
-                    category,
+                  importDefRecord[importCategory] = {
+                    category: importCategory,
                     path: relativePath(
                       path.join(
                         categoryDirectoryPaths[category],
                         `${category}.ts`,
                       ),
                       path.join(
-                        categoryDirectoryPaths[_category],
-                        `${_category}.ts`,
+                        categoryDirectoryPaths[importCategory],
+                        `${importCategory}.ts`,
                       ),
                     ),
                     addressConstants: [addressConstant],
                   }
                 } else {
-                  importDefRecord[_category].addressConstants.push(
+                  importDefRecord[importCategory].addressConstants.push(
                     addressConstant,
                   )
                 }
 
-                return `${addressConstant}`
+                return addressConstant
               }
 
               const addressValidation = zx.address().safeParse(v)

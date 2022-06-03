@@ -13,7 +13,7 @@ import {
   ZodTypeDef,
 } from 'zod'
 import { withGetType } from 'zod-to-ts'
-import { capitalize } from '../utils'
+import { mkAddressType } from '../codegen/fileContent'
 
 export type __Address__ = {
   readonly __address__: void
@@ -102,7 +102,7 @@ export class ZodAddress extends ZodType<Address, ZodAddressDef, string> {
         category,
       }),
 
-      (ts) => ts.factory.createIdentifier(`${capitalize(category)}Address`),
+      (ts) => ts.factory.createIdentifier(mkAddressType(category)),
     )
   }
 

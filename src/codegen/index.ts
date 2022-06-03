@@ -8,6 +8,8 @@ import { codegenAddressList } from './addressListCFD'
 import { categoryFileDescriptions, CFDKind } from './categoryFileDescription'
 import { ADDRESS_FILE_CONTENT } from './fileContent'
 import { format } from './format'
+import { codegenMetadataMultiAddress } from './metadataMultiAddressCFD'
+import { codegenMetadataSingleAddress } from './metadataSingleAddressCFD'
 import { codegenUniqueAddress } from './uniqueAddressCFD'
 
 export async function codegen<T extends SonraSchema>(
@@ -42,6 +44,12 @@ export async function codegen<T extends SonraSchema>(
         break
       case CFDKind.ADDRESS_LIST:
         file = codegenAddressList(fd)
+        break
+      case CFDKind.METADATA_SINGLE:
+        file = codegenMetadataSingleAddress(fd)
+        break
+      case CFDKind.METADATA_MULTI:
+        file = codegenMetadataMultiAddress(fd)
         break
     }
 

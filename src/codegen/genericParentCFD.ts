@@ -1,8 +1,9 @@
+import path from 'path'
 import z from 'zod'
 import { zx } from '../zodx'
 import { CFDKind, SharedCFD } from './categoryFileDescription'
 import { mkFileContent } from './fileContent'
-import { mkCategoryPaths } from './paths'
+import { relativePath } from './paths'
 
 export interface GenericParentCFD extends SharedCFD {
   kind: CFDKind.GENERIC_PARENT
@@ -36,11 +37,16 @@ export const mkGenericParentCFD = ({
     .nonempty()
     .parse(Object.keys(entry))
 
+  const file = path.join(categoryDir, category, 'index.ts')
+  const root = relativePath(file, outDir)
+  const address = relativePath(file, path.join(outDir, 'address.ts'))
+  const contracts = relativePath(file, path.join(outDir, 'contracts'))
+
   return {
     kind: CFDKind.GENERIC_PARENT,
     category,
     childCategories,
     categoryFileContent: mkFileContent(category),
-    paths: mkCategoryPaths({ category, categoryDir, outDir }),
+    paths: { file, root, address, contracts },
   }
 }
