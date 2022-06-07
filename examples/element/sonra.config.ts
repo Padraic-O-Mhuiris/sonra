@@ -17,6 +17,7 @@ const schema = {
       simplePrincipalToken: zx.erc20(),
       curvePrincipalToken: zx.erc20().extend({
         underlying: zx.address().category('curveLpToken'),
+        date: z.date(),
       }),
     },
   },
@@ -76,6 +77,7 @@ const elementFetch: SonraFetch<ElementSchema> = async () => {
               .category('curveLpToken')
               .conform()
               .parse(LUSD_3CRVAddress),
+            date: new Date(1111111),
           },
           [zx.address().random()]: {
             ...erc20,
@@ -84,6 +86,7 @@ const elementFetch: SonraFetch<ElementSchema> = async () => {
               .category('curveLpToken')
               .conform()
               .parse(THREE_CRVAddress),
+            date: new Date(1111111),
           },
         },
       },

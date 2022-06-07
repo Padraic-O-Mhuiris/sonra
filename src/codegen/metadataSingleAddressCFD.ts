@@ -81,6 +81,7 @@ export function codegenMetadataSingleAddress({
     metadataType: categoryFileContent.metadataType,
     metadataEntryType,
   })
+  console.log(addressImports)
   const addressImportContent = Object.values(addressImports)
     .map(mkAddressImportContent)
     .join('\n')

@@ -7,6 +7,7 @@ import { zx } from '../zodx'
 import { CategoryKindAndData, CFDKind } from './categoryFileDescription'
 import { mkAddressConstant } from './fileContent'
 import { relativePath } from './paths'
+import { UnreachableCaseError } from 'ts-essentials'
 
 // The AddressCategoryImportDef is used for building the relative imports between files
 export interface AddressCategoryImportDef {
@@ -56,23 +57,37 @@ export function serialize(
               ),
             )
 
-            const entry = JSON.stringify(categoryEntry, (_, v) => {
-              if (zx.ZodCategorisedAddress.isCategorisedAddress(v)) {
+            const stringify = (node: unknown): string => {
+              const objectValidation = z.record(z.any()).safeParse(node)
+              if (objectValidation.success) {
+                const entries = Object.entries(objectValidation.data).reduce(
+                  (acc, [k, v]) => `${acc}\n  ${k}: ${stringify(v)},`,
+                  '',
+                )
+                return `{ ${entries}\n }`
+              }
+
+              const arrayValidation = z.array(z.any()).safeParse(node)
+              if (arrayValidation.success) {
+                const entries = arrayValidation.data.reduce(
+                  (acc, v) => `${acc}\n ${stringify(v)},`,
+                  '',
+                )
+                return `[ ${entries}\n ]`
+              }
+
+              if (zx.ZodCategorisedAddress.isCategorisedAddress(node)) {
                 const [importCategory, address] =
-                  zx.ZodCategorisedAddress.split(v)
+                  zx.ZodCategorisedAddress.split(node)
                 const { kind } = categoryKindAndData[importCategory]
 
-                let addressConstant
-                if (
+                const addressConstant =
                   kind === CFDKind.UNIQUE_ADDRESS ||
                   kind === CFDKind.METADATA_SINGLE
-                ) {
-                  addressConstant = mkAddressConstant(importCategory)
-                } else {
-                  addressConstant = mkAddressConstant(importCategory, address)
-                }
+                    ? mkAddressConstant(importCategory)
+                    : mkAddressConstant(importCategory, address)
 
-                if (!has(importDefRecord, category)) {
+                if (!has(importDefRecord, importCategory)) {
                   importDefRecord[importCategory] = {
                     category: importCategory,
                     path: relativePath(
@@ -88,33 +103,35 @@ export function serialize(
                     addressConstants: [addressConstant],
                   }
                 } else {
-                  importDefRecord[importCategory].addressConstants.push(
+                  importDefRecord[importCategory].addressConstants = [
+                    ...importDefRecord[importCategory].addressConstants,
                     addressConstant,
-                  )
+                  ]
                 }
 
                 return addressConstant
               }
 
-              const addressValidation = zx.address().safeParse(v)
+              const addressValidation = zx.address().safeParse(node)
               if (addressValidation.success) {
-                return `${addressValidation.data} as Address`
+                return `'${addressValidation.data}' as Address`
               }
 
-              if (BigNumber.isBigNumber(v)) {
+              const bigNumberValidation = BigNumber.isBigNumber(node)
+              if (bigNumberValidation) {
                 importBigNumber = true
-                return `BigNumber.from('${v.toString()}')`
+                return `BigNumber.from('${node.toString()}')`
               }
 
-              const dateValidation = z.date().safeParse(v)
+              const dateValidation = z.date().safeParse(node)
               if (dateValidation.success) {
                 return `new Date('${dateValidation.data.toISOString()}')`
               }
 
-              return v
-            })
+              return JSON.stringify(node)
+            }
 
-            return [zx.address().parse(addressKey), entry]
+            return [zx.address().parse(addressKey), stringify(categoryEntry)]
           },
         ),
       ),
