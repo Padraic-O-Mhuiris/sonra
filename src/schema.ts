@@ -28,8 +28,10 @@ export function genDataModelSchema<Schema extends SonraSchema>(
 ): SonraDataModelSchema<Schema> {
   return z
     .object(
-      Object.keys(schema).reduce((acc, category) => {
-        const schemaValue = schema[category]
+      Object.keys(schema).reduce((acc, category: keyof Schema) => {
+        const schemaValue = schema[category] as
+          | SonraSchema
+          | SonraCategorySchema
         return {
           ...acc,
           [category]: isZodObjectSchema(schemaValue)

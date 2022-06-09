@@ -15,11 +15,11 @@ import {
 import { withGetType } from 'zod-to-ts'
 import { mkAddressType } from '../codegen/fileContent'
 
-export type __Address__ = {
-  readonly __address__: void
+export type _Address_ = {
+  readonly _address_: void
 }
 
-export type Address = string & __Address__
+export type Address = string & _Address_
 
 export type ZodXTypeAny = ZodTypeAny | ZodAddress | ZodAddressRecord
 
@@ -207,13 +207,14 @@ export class ZodCategorisedAddress<T extends string> extends ZodType<
 
   static isCategorisedAddress = (val: unknown): val is CategorisedAddress => {
     const v = z.string().safeParse(val)
-    return (
-      v.success &&
-      v.data.includes(':') &&
-      v.data.split(':')[0].length !== 0 &&
-      isAddress(v.data.split(':')[1]) &&
-      v.data.split(':').length === 2
-    )
+    if (v.success && v.data.includes(':')) {
+      const vSplit = v.data.split(':')
+      if (vSplit.length !== 2) return false
+      const [category, address] = vSplit
+      if (!category || !address) return false
+      return category.length !== 0 && isAddress(address)
+    }
+    return false
   }
 
   static split(val: CategorisedAddress): [string, Address] {

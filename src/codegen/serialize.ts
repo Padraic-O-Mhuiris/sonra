@@ -1,5 +1,4 @@
 import { BigNumber } from 'ethers'
-import { has } from 'lodash'
 import path from 'path'
 import { z } from 'zod'
 import { CategoryDirectoryPaths } from '../dir'
@@ -7,7 +6,6 @@ import { zx } from '../zodx'
 import { CategoryKindAndData, CFDKind } from './categoryFileDescription'
 import { mkAddressConstant } from './fileContent'
 import { relativePath } from './paths'
-import { UnreachableCaseError } from 'ts-essentials'
 
 // The AddressCategoryImportDef is used for building the relative imports between files
 export interface AddressCategoryImportDef {
@@ -48,10 +46,11 @@ export function serialize(
         Object.entries(obj).map(
           ([addressKey, categoryEntry]: [string, Record<string, any>]) => {
             addresses.push(zx.address().parse(addressKey))
+
             addressConstants.push(
               mkAddressConstant(
                 category,
-                categoryKindAndData[category].kind === CFDKind.METADATA_MULTI
+                categoryKindAndData[category]?.kind! === CFDKind.METADATA_MULTI
                   ? zx.address().parse(addressKey)
                   : undefined,
               ),
@@ -79,7 +78,7 @@ export function serialize(
               if (zx.ZodCategorisedAddress.isCategorisedAddress(node)) {
                 const [importCategory, address] =
                   zx.ZodCategorisedAddress.split(node)
-                const { kind } = categoryKindAndData[importCategory]
+                const { kind } = categoryKindAndData[importCategory]!
 
                 const addressConstant =
                   kind === CFDKind.UNIQUE_ADDRESS ||
@@ -87,26 +86,26 @@ export function serialize(
                     ? mkAddressConstant(importCategory)
                     : mkAddressConstant(importCategory, address)
 
-                if (!has(importDefRecord, importCategory)) {
+                if (importDefRecord[importCategory]) {
+                  importDefRecord[importCategory]!.addressConstants = [
+                    ...importDefRecord[importCategory]!.addressConstants,
+                    addressConstant,
+                  ]
+                } else {
                   importDefRecord[importCategory] = {
                     category: importCategory,
                     path: relativePath(
                       path.join(
-                        categoryDirectoryPaths[category],
+                        categoryDirectoryPaths[category]!,
                         `${category}.ts`,
                       ),
                       path.join(
-                        categoryDirectoryPaths[importCategory],
+                        categoryDirectoryPaths[importCategory]!,
                         `${importCategory}.ts`,
                       ),
                     ),
                     addressConstants: [addressConstant],
                   }
-                } else {
-                  importDefRecord[importCategory].addressConstants = [
-                    ...importDefRecord[importCategory].addressConstants,
-                    addressConstant,
-                  ]
                 }
 
                 return addressConstant

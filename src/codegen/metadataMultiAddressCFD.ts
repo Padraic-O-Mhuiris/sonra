@@ -15,6 +15,7 @@ import {
   mkCategoryMetadataContent,
   mkCategoryMetadataTypeContent,
   mkFileContent,
+  mkGuardFnContent,
 } from './fileContent'
 import { mkCategoryPaths } from './paths'
 import { AddressCategoryImportDefRecord, serialize } from './serialize'
@@ -66,7 +67,14 @@ export const mkMetadataMultiAddressCFD = ({
 }
 
 export function codegenMetadataMultiAddress({
-  categoryFileContent,
+  categoryFileContent: {
+    addressConstant,
+    addressType,
+    addressTypeBrand,
+    addressTypeBrandKey,
+    metadataConstant,
+    metadataType,
+  },
   paths,
   addresses,
   category,
@@ -75,16 +83,19 @@ export function codegenMetadataMultiAddress({
   addressImports,
   kind,
 }: MetadataMultiAddressCFD): string {
-  const categoryAddressTypeContent =
-    mkCategoryAddressTypeContent(categoryFileContent)
+  const categoryAddressTypeContent = mkCategoryAddressTypeContent({
+    addressType,
+    addressTypeBrand,
+    addressTypeBrandKey,
+  })
   const categoryAddressListContent = mkCategoryAddressListContent({
     category,
     addresses,
-    addressConstant: categoryFileContent.addressConstant,
-    addressType: categoryFileContent.addressType,
+    addressConstant,
+    addressType,
   })
   const categoryMetadataTypeContent = mkCategoryMetadataTypeContent({
-    metadataType: categoryFileContent.metadataType,
+    metadataType,
     metadataEntryType,
   })
   const addressImportContent = Object.values(addressImports)
@@ -94,17 +105,27 @@ export function codegenMetadataMultiAddress({
   const categoryMetadataContent = mkCategoryMetadataContent({
     kind,
     category,
-    addressType: categoryFileContent.addressType,
-    metadataConstant: categoryFileContent.metadataConstant,
-    metadataType: categoryFileContent.metadataType,
+    addressType,
+    metadataConstant,
+    metadataType,
     serializedEntries,
   })
+
+  const guardFnContent = mkGuardFnContent({
+    addressType,
+    kind,
+    addressConstant,
+  })
+
   return `
 import { Address } from '${paths.address}'
 ${addressImportContent}
 
 ${categoryAddressTypeContent}
 ${categoryAddressListContent}
+
+${guardFnContent}
+
 ${categoryMetadataTypeContent}
 ${categoryMetadataContent}
 `

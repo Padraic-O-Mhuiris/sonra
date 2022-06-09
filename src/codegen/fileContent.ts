@@ -16,8 +16,8 @@ const isUpperCase = (s: string) => /^[A-Z]*$/.test(s)
 const normalize = (s: string) => (isUpperCase(s) ? s.toLowerCase() : s)
 
 export const mkAddressTypeBrand = (c: string) =>
-  `__${capitalize(normalize(c))}Address__`
-export const mkAddressTypeBrandKey = (c: string) => `__${normalize(c)}Address__`
+  `_${capitalize(normalize(c))}Address_`
+export const mkAddressTypeBrandKey = (c: string) => `_${normalize(c)}Address_`
 export const mkAddressType = (c: string) => `${capitalize(normalize(c))}Address`
 export const mkAddressConstant = (
   category: string,
@@ -25,7 +25,7 @@ export const mkAddressConstant = (
 ): string =>
   !address
     ? `${normalize(category)}Address`
-    : `${mkAddressConstant(category)}_${address.slice(0, 6)}`
+    : `_${address.slice(0, 10)}_${mkAddressConstant(category)}`
 export const mkMetadataType = (c: string) =>
   `${capitalize(normalize(c))}Metadata`
 export const mkMetadataConstant = (c: string) => `${c}Metadata`
@@ -43,7 +43,11 @@ export const mkCategoryAddressTypeContent = ({
   addressTypeBrand,
   addressTypeBrandKey,
   addressType,
-}: CategoryFileContent) => `
+}: {
+  addressTypeBrand: string
+  addressTypeBrandKey: string
+  addressType: string
+}) => `
 type ${addressTypeBrand} = {
   readonly ${addressTypeBrandKey}: void
 }
@@ -79,7 +83,7 @@ export const mkCategoryAddressListContent = ({
     mkCategoryAddressConstant({
       address,
       addressType,
-      addressConstant: addressConstants[idx],
+      addressConstant: addressConstants[idx]!,
     }),
   )
   return `
@@ -144,14 +148,47 @@ export const ${metadataConstant}Record: ${metadataType}Record = {\n ${entries} \
 `
 }
 
+export const mkGuardFnHeaderContent = ({
+  addressType,
+}: {
+  addressType: string
+}) =>
+  `export const is${addressType} = (_address: string): _address is ${addressType} =>`
+
+export const mkGuardFnContent = ({
+  kind,
+  addressType,
+  addressConstant,
+}: {
+  kind: CFDKind
+  addressType: string
+  addressConstant: string
+}) => {
+  const header = mkGuardFnHeaderContent({ addressType })
+  if (kind === CFDKind.METADATA_SINGLE || kind === CFDKind.UNIQUE_ADDRESS) {
+    return `${header} _address === ${addressConstant}`
+  }
+  return `${header} ${addressConstant}es.some((${addressConstant}) => ${addressConstant} === _address)`
+}
+
+export const mkContractImportContent = ({
+  contract,
+  contractFactory,
+  contractsPath,
+}: {
+  contract: string
+  contractFactory: string
+  contractsPath: string
+}) => `import { ${contract}, ${contractFactory} } from "${contractsPath}"`
+
 export const ADDRESS_FILE_CONTENT = `
 import { ethers } from 'ethers'
 
-export type __Address__ = {
-  readonly __address__: void
+export type _Address_ = {
+  readonly _address_: void
 }
 
-export type Address = string & __Address__
+export type Address = string & _Address_
 
 export const isAddress = (address: string): address is Address => ethers.utils.isAddress(address)
 `

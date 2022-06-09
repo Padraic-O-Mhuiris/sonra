@@ -1,6 +1,6 @@
 import { ContractFactory } from 'ethers'
 import fs from 'fs'
-import { SonraContracts, SonraSchema, SonraSchemaKeys } from '../types'
+import { SonraContracts, SonraSchema } from '../types'
 import { capitalize, logger } from '../utils'
 
 function validateTypechainPathExists(typechainPath: string): void {
@@ -28,25 +28,21 @@ const normalizeContractName = (contractName: string): string => {
   return capitalize(contractName)
 }
 
-export type CategoryContractFactoryRecord = Record<
-  SonraSchemaKeys<SonraSchema>,
-  string
+export type CategoryContractInfo = Record<
+  string,
+  {
+    contractFactory: string
+    contract: string
+  }
 >
-
-export type TypechainValidationResult =
-  | {
-      usingTypechain: true
-      contractFactoriesByCategory: CategoryContractFactoryRecord
-    }
-  | { usingTypechain: false }
 
 export function validateTypechain(
   typechainPath: string,
   contracts?: SonraContracts<SonraSchema>,
-): TypechainValidationResult {
+): CategoryContractInfo {
   if (!contracts || !Object.keys(contracts).length) {
     logger.info('No contract factories specified')
-    return { usingTypechain: false }
+    return {}
   }
 
   validateTypechainPathExists(typechainPath)
@@ -68,24 +64,28 @@ export function validateTypechain(
   const contractFactoriesKeys = Object.keys(contractFactories)
   logger.info(`Found ${contractFactoriesKeys.length} contract factories`)
 
-  const contractFactoriesByCategory: CategoryContractFactoryRecord = {}
+  const categoryContractInfo: CategoryContractInfo = {}
 
   logger.info('Validating all categories can be paired with a category')
 
   for (const category of Object.keys(contracts)) {
-    const name = `${normalizeContractName(contracts[category]!)}__factory`
+    const contract = `${normalizeContractName(contracts[category]!)}`
+
+    const contractFactory = `${normalizeContractName(
+      contracts[category]!,
+    )}__factory`
 
     const contractFactoryKey = contractFactoriesKeys.find(
-      (contractFactoryName) => contractFactoryName === name,
+      (contractFactoryName) => contractFactoryName === contractFactory,
     )
     if (!contractFactoryKey) {
       throw new Error(
         `No contract factory found for category: '${category}' : contract: '${contracts[category]}'`,
       )
     }
-    contractFactoriesByCategory[category] = contractFactoryKey
+    categoryContractInfo[category] = { contract, contractFactory }
   }
 
-  logger.info(contractFactoriesByCategory, 'Paired contract factories:')
-  return { usingTypechain: true, contractFactoriesByCategory }
+  logger.info(categoryContractInfo, 'Paired contract factories:')
+  return categoryContractInfo
 }

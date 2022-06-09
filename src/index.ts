@@ -1,4 +1,4 @@
 export { z } from 'zod'
-export { SonraFetch } from './types'
+export { SonraFetch, SonraDataModelSchema } from './types'
 export { SonraConfig } from './config'
 export { zx } from './zodx'

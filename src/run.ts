@@ -32,11 +32,11 @@ export async function run(appConfig: AppConfig) {
   logger.info({ typechainPath, contracts }, 'Sonra started!')
 
   const [categories, categoryHierarchy] = validateCategories(schema)
-  const typechainValidationResult = validateTypechain(typechainPath, contracts)
+  const categoryContractInfo = validateTypechain(typechainPath, contracts)
 
   const categoryDirectoryPaths = await createCategoryDirs({
     categoryHierarchy,
-    typechainValidationResult,
+    categoryContractInfo,
     typechainPath,
     outDir,
   })
@@ -49,6 +49,7 @@ export async function run(appConfig: AppConfig) {
     categoryDirectoryPaths,
     schema,
     dataModel,
+    categoryContractInfo,
     outDir,
   )
 

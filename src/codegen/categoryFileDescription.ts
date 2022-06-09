@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { CategoryDirectoryPaths } from '../dir'
 import { SonraCategorySchema, SonraDataModel, SonraSchema } from '../types'
 import { CategoryHierarchy } from '../validations/validateCategories'
+import { CategoryContractInfo } from '../validations/validateTypechain'
 import { zx } from '../zodx'
 import { AddressListCFD, mkAddressListCFD } from './addressListCFD'
 import { CategoryFileContent } from './fileContent'
@@ -68,7 +69,8 @@ const buildCategoryKindAndDataRecord = <T extends SonraSchema>(
   categoryHierarchy: CategoryHierarchy,
 ): Record<string, CategoryKindAndData> =>
   categories.reduce((acc, category) => {
-    const categoryData = get(dataModel, categoryHierarchy[category])
+    const categoryDataPath = categoryHierarchy[category]!
+    const categoryData = get(dataModel, categoryDataPath)
 
     const addressValidation = zx.address().safeParse(categoryData)
     if (addressValidation.success)
@@ -138,64 +140,82 @@ const buildCategoryKindAndDataRecord = <T extends SonraSchema>(
     )
   }, {} as Record<string, CategoryKindAndData>)
 
+export type CategoryFileDescriptionRecord = Record<
+  string,
+  CategoryFileDescription
+>
+
 export function categoryFileDescriptions<T extends SonraSchema>(
   categories: string[],
   categoryHierarchy: CategoryHierarchy,
   categoryDirectoryPaths: CategoryDirectoryPaths,
   schema: T,
   dataModel: SonraDataModel<T>,
+  categoryContractInfo: CategoryContractInfo,
   outDir: string,
-): CategoryFileDescription[] {
+): CategoryFileDescriptionRecord {
   const categoryKindAndData: Record<string, CategoryKindAndData> =
     buildCategoryKindAndDataRecord(categories, dataModel, categoryHierarchy)
-  return categories.map((category) => {
-    const categoryDir = categoryDirectoryPaths[category]
-    const categorySchema = get(schema, categoryHierarchy[category])
 
-    const { kind, data } = categoryKindAndData[category]
+  return categories
+    .map((category) => {
+      const categoryDir = categoryDirectoryPaths[category]!
+      const categorySchema = get(schema, categoryHierarchy[category]!)
 
-    switch (kind) {
-      case CFDKind.UNIQUE_ADDRESS:
-        return mkUniqueAddressCFD({
-          address: data,
-          category,
-          categoryDir,
-          outDir,
-        })
-      case CFDKind.ADDRESS_LIST:
-        return mkAddressListCFD({
-          addresses: data,
-          category,
-          categoryDir,
-          outDir,
-        })
-      case CFDKind.METADATA_SINGLE:
-        return mkMetadataSingleAddressCFD({
-          entry: data,
-          category,
-          categoryDir,
-          outDir,
-          schema: categorySchema as SonraCategorySchema,
-          categoryKindAndData,
-          categoryDirectoryPaths,
-        })
-      case CFDKind.METADATA_MULTI:
-        return mkMetadataMultiAddressCFD({
-          entry: data,
-          category,
-          categoryDir,
-          outDir,
-          schema: categorySchema as SonraCategorySchema,
-          categoryKindAndData,
-          categoryDirectoryPaths,
-        })
-      case CFDKind.GENERIC_PARENT:
-        return mkGenericParentCFD({
-          entry: data,
-          category,
-          categoryDir,
-          outDir,
-        })
-    }
-  })
+      const { kind, data } = categoryKindAndData[category]!
+
+      switch (kind) {
+        case CFDKind.UNIQUE_ADDRESS:
+          return mkUniqueAddressCFD({
+            address: data,
+            category,
+            categoryDir,
+            outDir,
+          })
+        case CFDKind.ADDRESS_LIST:
+          return mkAddressListCFD({
+            addresses: data,
+            category,
+            categoryDir,
+            outDir,
+          })
+        case CFDKind.METADATA_SINGLE:
+          return mkMetadataSingleAddressCFD({
+            entry: data,
+            category,
+            categoryDir,
+            outDir,
+            schema: categorySchema as SonraCategorySchema,
+            categoryKindAndData,
+            categoryDirectoryPaths,
+          })
+        case CFDKind.METADATA_MULTI:
+          return mkMetadataMultiAddressCFD({
+            entry: data,
+            category,
+            categoryDir,
+            outDir,
+            schema: categorySchema as SonraCategorySchema,
+            categoryKindAndData,
+            categoryDirectoryPaths,
+          })
+        case CFDKind.GENERIC_PARENT:
+          return mkGenericParentCFD({
+            entry: data,
+            category,
+            categoryDir,
+            outDir,
+          })
+      }
+    })
+    .reduce((acc, c) => {
+      // If contract details exist for any category type we include in definition
+      if (categoryContractInfo[c.category] !== undefined) {
+        return {
+          ...acc,
+          [c.category]: { ...c, ...categoryContractInfo[c.category] },
+        }
+      }
+      return { ...acc, [c.category]: c }
+    }, {} as CategoryFileDescriptionRecord)
 }

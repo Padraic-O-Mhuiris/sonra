@@ -5,6 +5,7 @@ import {
   mkCategoryAddressListContent,
   mkCategoryAddressTypeContent,
   mkFileContent,
+  mkGuardFnContent,
 } from './fileContent'
 import { mkCategoryPaths } from './paths'
 
@@ -38,23 +39,39 @@ export const mkAddressListCFD = ({
 }
 
 export function codegenAddressList({
-  categoryFileContent,
+  categoryFileContent: {
+    addressType,
+    addressTypeBrand,
+    addressConstant,
+    addressTypeBrandKey,
+  },
+  kind,
   paths,
   addresses,
   category,
 }: AddressListCFD): string {
-  const categoryAddressTypeContent =
-    mkCategoryAddressTypeContent(categoryFileContent)
+  const categoryAddressTypeContent = mkCategoryAddressTypeContent({
+    addressType,
+    addressTypeBrand,
+    addressTypeBrandKey,
+  })
   const categoryAddressListContent = mkCategoryAddressListContent({
     category,
     addresses,
-    addressConstant: categoryFileContent.addressConstant,
-    addressType: categoryFileContent.addressType,
+    addressConstant,
+    addressType,
   })
+  const guardFnContent = mkGuardFnContent({
+    kind,
+    addressType,
+    addressConstant,
+  })
+
   return `
 import { Address } from '${paths.address}'
 
 ${categoryAddressTypeContent}
 ${categoryAddressListContent}
+${guardFnContent}
 `
 }

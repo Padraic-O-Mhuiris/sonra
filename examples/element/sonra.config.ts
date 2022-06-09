@@ -1,4 +1,4 @@
-import { SonraConfig, SonraFetch, z, zx } from '../../src'
+import { SonraConfig, SonraDataModelSchema, SonraFetch, z, zx } from '../../src'
 import { SonraDataModel } from '../../src/types'
 
 // const provider = new ethers.providers.JsonRpcProvider(
@@ -34,7 +34,7 @@ const schema = {
   },
 } as const
 
-type ElementSchema = typeof schema
+export type ElementSchema = typeof schema
 
 const elementFetch: SonraFetch<ElementSchema> = async () => {
   const erc20 = {
@@ -126,6 +126,7 @@ const config: SonraConfig<ElementSchema> = {
   schema,
   contracts: {
     token: 'ERC20.sol',
+    trancheFactory: 'TrancheFactory.sol',
   },
   fetch: elementFetch,
 }

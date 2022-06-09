@@ -1,8 +1,12 @@
 import path from 'path'
 import z from 'zod'
 import { zx } from '../zodx'
-import { CFDKind, SharedCFD } from './categoryFileDescription'
-import { mkFileContent } from './fileContent'
+import {
+  CategoryFileDescriptionRecord,
+  CFDKind,
+  SharedCFD,
+} from './categoryFileDescription'
+import { mkFileContent, mkGuardFnHeaderContent } from './fileContent'
 import { relativePath } from './paths'
 
 export interface GenericParentCFD extends SharedCFD {
@@ -49,4 +53,56 @@ export const mkGenericParentCFD = ({
     categoryFileContent: mkFileContent(category),
     paths: { file, root, address, contracts },
   }
+}
+
+export function codegenGenericParent({
+  categoryFileContent: { addressType, addressConstant },
+  childCategories,
+  cfds,
+}: GenericParentCFD & { cfds: CategoryFileDescriptionRecord }): string {
+  const childCategoryInfo = childCategories.map((category) => cfds[category]!)
+
+  const addressTypeUnion = childCategoryInfo
+    .map(({ categoryFileContent: { addressType } }) => addressType)
+    .join(' | ')
+
+  const importContent = childCategoryInfo
+    .map(
+      ({
+        kind,
+        categoryFileContent: { addressType, addressConstant },
+        category,
+      }) => {
+        addressConstant =
+          kind === CFDKind.UNIQUE_ADDRESS || kind === CFDKind.METADATA_SINGLE
+            ? `${addressConstant}`
+            : `${addressConstant}es`
+        return `import { ${addressType}, ${addressConstant}, is${addressType} } from './${category}'`
+      },
+    )
+    .join('\n')
+
+  const addressesContent = childCategoryInfo
+    .map(({ kind, categoryFileContent: { addressConstant } }) =>
+      kind === CFDKind.UNIQUE_ADDRESS || kind === CFDKind.METADATA_SINGLE
+        ? `${addressConstant},`
+        : `...${addressConstant}es,`,
+    )
+    .join('\n')
+
+  const guardFnBodyContent = childCategoryInfo
+    .map(
+      ({ categoryFileContent: { addressType } }) =>
+        `is${addressType}(_address)`,
+    )
+    .join(' || ')
+  return `
+${importContent}
+
+export type ${addressType} = ${addressTypeUnion}
+
+export const ${addressConstant}es: ${addressType}[] = [\n${addressesContent}]
+
+${mkGuardFnHeaderContent({ addressType })} ${guardFnBodyContent}
+`
 }

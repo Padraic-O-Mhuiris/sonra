@@ -1,7 +1,12 @@
 import { logger } from '../utils'
 import { zx } from '../zodx'
 import { CFDKind, SharedCFD } from './categoryFileDescription'
-import { mkCategoryAddressTypeContent, mkFileContent } from './fileContent'
+import {
+  mkCategoryAddressTypeContent,
+  mkContractImportContent,
+  mkFileContent,
+  mkGuardFnContent,
+} from './fileContent'
 import { mkCategoryPaths } from './paths'
 
 export interface UniqueAddressCFD extends SharedCFD {
@@ -34,17 +39,42 @@ export const mkUniqueAddressCFD = ({
 }
 
 export function codegenUniqueAddress({
-  categoryFileContent,
+  categoryFileContent: {
+    addressType,
+    addressTypeBrand,
+    addressTypeBrandKey,
+    addressConstant,
+  },
+  kind,
   paths,
   address,
+  contract,
+  contractFactory,
 }: UniqueAddressCFD): string {
-  const categoryAddressTypeContent =
-    mkCategoryAddressTypeContent(categoryFileContent)
+  const categoryAddressTypeContent = mkCategoryAddressTypeContent({
+    addressType,
+    addressTypeBrand,
+    addressTypeBrandKey,
+  })
+  const guardFnContent = mkGuardFnContent({
+    addressType,
+    kind,
+    addressConstant,
+  })
+
+  const contractImportContent = contractFactory
+    ? mkContractImportContent({
+        contract: contract!,
+        contractFactory,
+        contractsPath: paths.contracts,
+      })
+    : ''
+
   return `
 import { Address } from '${paths.address}'
-
+${contractImportContent}
 ${categoryAddressTypeContent}
-
-export const ${categoryFileContent.addressConstant} = "${address}" as ${categoryFileContent.addressType}
+export const ${addressConstant} = "${address}" as ${addressType}
+${guardFnContent}
 `
 }

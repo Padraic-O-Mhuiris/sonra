@@ -14,6 +14,7 @@ import {
   mkCategoryMetadataContent,
   mkCategoryMetadataTypeContent,
   mkFileContent,
+  mkGuardFnContent,
 } from './fileContent'
 import { mkCategoryPaths } from './paths'
 import { AddressCategoryImportDefRecord, serialize } from './serialize'
@@ -65,7 +66,14 @@ export const mkMetadataSingleAddressCFD = ({
 }
 
 export function codegenMetadataSingleAddress({
-  categoryFileContent,
+  categoryFileContent: {
+    addressConstant,
+    addressType,
+    addressTypeBrand,
+    addressTypeBrandKey,
+    metadataConstant,
+    metadataType,
+  },
   paths,
   address,
   metadataEntryType,
@@ -74,14 +82,17 @@ export function codegenMetadataSingleAddress({
   category,
   serializedEntries,
 }: MetadataSingleAddressCFD): string {
-  const categoryAddressTypeContent =
-    mkCategoryAddressTypeContent(categoryFileContent)
+  const categoryAddressTypeContent = mkCategoryAddressTypeContent({
+    addressType,
+    addressTypeBrand,
+    addressTypeBrandKey,
+  })
 
   const categoryMetadataTypeContent = mkCategoryMetadataTypeContent({
-    metadataType: categoryFileContent.metadataType,
+    metadataType,
     metadataEntryType,
   })
-  console.log(addressImports)
+
   const addressImportContent = Object.values(addressImports)
     .map(mkAddressImportContent)
     .join('\n')
@@ -89,10 +100,16 @@ export function codegenMetadataSingleAddress({
   const categoryMetadataContent = mkCategoryMetadataContent({
     kind,
     category,
-    addressType: categoryFileContent.addressType,
-    metadataConstant: categoryFileContent.metadataConstant,
-    metadataType: categoryFileContent.metadataType,
+    addressType,
+    metadataConstant,
+    metadataType,
     serializedEntries,
+  })
+
+  const guardFnContent = mkGuardFnContent({
+    addressType,
+    kind,
+    addressConstant,
   })
 
   return `
@@ -101,7 +118,9 @@ ${addressImportContent}
 
 ${categoryAddressTypeContent}
 
-export const ${categoryFileContent.addressConstant} = "${address}" as ${categoryFileContent.addressType}
+export const ${addressConstant} = "${address}" as ${addressType}
+
+${guardFnContent}
 
 ${categoryMetadataTypeContent}
 ${categoryMetadataContent}

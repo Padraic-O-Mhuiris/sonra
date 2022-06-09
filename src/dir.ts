@@ -1,5 +1,5 @@
 import { CategoryHierarchy } from './validations/validateCategories'
-import { TypechainValidationResult } from './validations/validateTypechain'
+import { CategoryContractInfo } from './validations/validateTypechain'
 import rimraf from 'rimraf'
 import fs from 'fs'
 import fse from 'fs-extra'
@@ -11,12 +11,12 @@ export type CategoryDirectoryPaths = Record<string, string>
 
 export async function createCategoryDirs({
   categoryHierarchy,
-  typechainValidationResult,
+  categoryContractInfo,
   typechainPath,
   outDir,
 }: {
   categoryHierarchy: CategoryHierarchy
-  typechainValidationResult: TypechainValidationResult
+  categoryContractInfo: CategoryContractInfo
   typechainPath: string
   outDir: string
 }): Promise<CategoryDirectoryPaths> {
@@ -52,7 +52,7 @@ export async function createCategoryDirs({
     })
   }
 
-  if (typechainValidationResult.usingTypechain) {
+  if (Object.keys(categoryContractInfo).length) {
     logger.info(
       `User has specified category - contracts correspondance, copying typechain dir`,
     )

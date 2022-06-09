@@ -4,10 +4,12 @@ import { CategoryDirectoryPaths } from '../dir'
 import { SonraDataModel, SonraSchema } from '../types'
 import { logger } from '../utils'
 import { CategoryHierarchy } from '../validations/validateCategories'
+import { CategoryContractInfo } from '../validations/validateTypechain'
 import { codegenAddressList } from './addressListCFD'
 import { categoryFileDescriptions, CFDKind } from './categoryFileDescription'
 import { ADDRESS_FILE_CONTENT } from './fileContent'
 import { format } from './format'
+import { codegenGenericParent } from './genericParentCFD'
 import { codegenMetadataMultiAddress } from './metadataMultiAddressCFD'
 import { codegenMetadataSingleAddress } from './metadataSingleAddressCFD'
 import { codegenUniqueAddress } from './uniqueAddressCFD'
@@ -18,6 +20,7 @@ export async function codegen<T extends SonraSchema>(
   categoryDirectoryPaths: CategoryDirectoryPaths,
   schema: T,
   dataModel: SonraDataModel<T>,
+  categoryContractInfo: CategoryContractInfo,
   outDir: string,
 ) {
   const cfds = categoryFileDescriptions(
@@ -26,6 +29,7 @@ export async function codegen<T extends SonraSchema>(
     categoryDirectoryPaths,
     schema,
     dataModel,
+    categoryContractInfo,
     outDir,
   )
 
@@ -36,7 +40,7 @@ export async function codegen<T extends SonraSchema>(
     format(ADDRESS_FILE_CONTENT),
   )
 
-  for (const fd of cfds) {
+  for (const fd of Object.values(cfds)) {
     let file: string = ''
     switch (fd.kind) {
       case CFDKind.UNIQUE_ADDRESS:
@@ -51,6 +55,8 @@ export async function codegen<T extends SonraSchema>(
       case CFDKind.METADATA_MULTI:
         file = codegenMetadataMultiAddress(fd)
         break
+      case CFDKind.GENERIC_PARENT:
+        file = codegenGenericParent({ ...fd, cfds })
     }
 
     file = format(file)

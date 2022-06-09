@@ -7,7 +7,7 @@ export type SonraCategorySchema =
   | z.ZodArray<zx.ZodAddress, 'atleastone'> // address list, no metadata
 
 export type SonraSchema = {
-  readonly [k in string]: SonraSchema | SonraCategorySchema
+  readonly [x: string]: SonraSchema | SonraCategorySchema
 }
 
 export type SonraDataModelSchemaValue<Value extends SonraCategorySchema> =
@@ -20,11 +20,11 @@ export type SonraDataModelSchemaValues =
 
 export type SonraDataModelSchema<T extends SonraSchema> = z.ZodObject<
   {
-    [K in keyof T]: T[K] extends SonraSchema
-      ? SonraDataModelSchema<T[K]>
-      : T[K] extends SonraCategorySchema
-      ? SonraDataModelSchemaValue<T[K]>
-      : zx.ZodXTypeAny // assume recursive when generic
+    [K in keyof T]:
+      | (T[K] extends SonraSchema ? SonraDataModelSchema<T[K]> : never)
+      | (T[K] extends SonraCategorySchema
+          ? SonraDataModelSchemaValue<T[K]>
+          : never)
   },
   'strict'
 >
