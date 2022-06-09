@@ -1,4 +1,4 @@
-import { SonraConfig, SonraDataModelSchema, SonraFetch, z, zx } from '../../src'
+import { SonraConfig, SonraFetch, z, zx } from '../../src'
 import { SonraDataModel } from '../../src/types'
 
 // const provider = new ethers.providers.JsonRpcProvider(
@@ -8,7 +8,7 @@ import { SonraDataModel } from '../../src/types'
 const schema = {
   trancheFactory: zx.address(),
   ccPoolFactory: zx.address().array().nonempty(),
-  token: {
+  erc20: {
     baseToken: {
       DAI: zx.erc20(),
       curveLpToken: zx.erc20(),
@@ -56,7 +56,7 @@ const elementFetch: SonraFetch<ElementSchema> = async () => {
       .array()
       .nonempty()
       .parse([zx.address().random(), zx.address().random()]),
-    token: {
+    erc20: {
       baseToken: {
         DAI: { [DAIAddress]: erc20 },
         curveLpToken: {
@@ -125,8 +125,9 @@ const config: SonraConfig<ElementSchema> = {
   outDir: 'sonra-types',
   schema,
   contracts: {
-    token: 'ERC20.sol',
+    erc20: 'ERC20.sol',
     trancheFactory: 'TrancheFactory.sol',
+    principalToken: 'Tranche.sol',
   },
   fetch: elementFetch,
 }

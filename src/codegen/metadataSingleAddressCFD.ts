@@ -13,6 +13,8 @@ import {
   mkCategoryAddressTypeContent,
   mkCategoryMetadataContent,
   mkCategoryMetadataTypeContent,
+  mkContractContent,
+  mkContractImportContent,
   mkFileContent,
   mkGuardFnContent,
 } from './fileContent'
@@ -73,6 +75,12 @@ export function codegenMetadataSingleAddress({
     addressTypeBrandKey,
     metadataConstant,
     metadataType,
+    contractConstant,
+    infoConstant,
+    infoListConstant,
+    infoListType,
+    infoRecordConstant,
+    infoRecordType,
   },
   paths,
   address,
@@ -81,6 +89,8 @@ export function codegenMetadataSingleAddress({
   kind,
   category,
   serializedEntries,
+  contract,
+  contractFactory,
 }: MetadataSingleAddressCFD): string {
   const categoryAddressTypeContent = mkCategoryAddressTypeContent({
     addressType,
@@ -104,6 +114,11 @@ export function codegenMetadataSingleAddress({
     metadataConstant,
     metadataType,
     serializedEntries,
+    infoConstant,
+    infoListConstant,
+    infoListType,
+    infoRecordConstant,
+    infoRecordType,
   })
 
   const guardFnContent = mkGuardFnContent({
@@ -112,9 +127,28 @@ export function codegenMetadataSingleAddress({
     addressConstant,
   })
 
+  const contractImportContent = contractFactory
+    ? mkContractImportContent({
+        contract: contract!,
+        contractFactory,
+        contractsPath: paths.contracts,
+      })
+    : ''
+
+  const contractContent = contractFactory
+    ? mkContractContent({
+        contract: contract!,
+        contractFactory,
+        contractConstant,
+        addressConstant,
+        addressType,
+      })
+    : ''
+
   return `
 import { Address } from '${paths.address}'
 ${addressImportContent}
+${contractImportContent}
 
 ${categoryAddressTypeContent}
 
@@ -123,6 +157,9 @@ export const ${addressConstant} = "${address}" as ${addressType}
 ${guardFnContent}
 
 ${categoryMetadataTypeContent}
+
 ${categoryMetadataContent}
+
+${contractContent}
 `
 }

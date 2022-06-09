@@ -14,6 +14,8 @@ import {
   mkCategoryAddressTypeContent,
   mkCategoryMetadataContent,
   mkCategoryMetadataTypeContent,
+  mkContractContent,
+  mkContractImportContent,
   mkFileContent,
   mkGuardFnContent,
 } from './fileContent'
@@ -74,6 +76,12 @@ export function codegenMetadataMultiAddress({
     addressTypeBrandKey,
     metadataConstant,
     metadataType,
+    contractConstant,
+    infoConstant,
+    infoListConstant,
+    infoListType,
+    infoRecordConstant,
+    infoRecordType,
   },
   paths,
   addresses,
@@ -82,6 +90,8 @@ export function codegenMetadataMultiAddress({
   serializedEntries,
   addressImports,
   kind,
+  contract,
+  contractFactory,
 }: MetadataMultiAddressCFD): string {
   const categoryAddressTypeContent = mkCategoryAddressTypeContent({
     addressType,
@@ -109,6 +119,11 @@ export function codegenMetadataMultiAddress({
     metadataConstant,
     metadataType,
     serializedEntries,
+    infoConstant,
+    infoListConstant,
+    infoListType,
+    infoRecordConstant,
+    infoRecordType,
   })
 
   const guardFnContent = mkGuardFnContent({
@@ -117,16 +132,39 @@ export function codegenMetadataMultiAddress({
     addressConstant,
   })
 
+  const contractImportContent = contractFactory
+    ? mkContractImportContent({
+        contract: contract!,
+        contractFactory,
+        contractsPath: paths.contracts,
+      })
+    : ''
+
+  const contractContent = contractFactory
+    ? mkContractContent({
+        contract: contract!,
+        contractFactory,
+        contractConstant,
+        addressConstant,
+        addressType,
+      })
+    : ''
+
   return `
 import { Address } from '${paths.address}'
 ${addressImportContent}
+${contractImportContent}
 
 ${categoryAddressTypeContent}
+
 ${categoryAddressListContent}
 
 ${guardFnContent}
 
 ${categoryMetadataTypeContent}
+
 ${categoryMetadataContent}
+
+${contractContent}
 `
 }

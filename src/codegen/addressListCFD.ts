@@ -4,6 +4,8 @@ import { CFDKind, SharedCFD } from './categoryFileDescription'
 import {
   mkCategoryAddressListContent,
   mkCategoryAddressTypeContent,
+  mkContractContent,
+  mkContractImportContent,
   mkFileContent,
   mkGuardFnContent,
 } from './fileContent'
@@ -44,11 +46,14 @@ export function codegenAddressList({
     addressTypeBrand,
     addressConstant,
     addressTypeBrandKey,
+    contractConstant,
   },
   kind,
   paths,
   addresses,
   category,
+  contract,
+  contractFactory,
 }: AddressListCFD): string {
   const categoryAddressTypeContent = mkCategoryAddressTypeContent({
     addressType,
@@ -67,11 +72,34 @@ export function codegenAddressList({
     addressConstant,
   })
 
+  const contractImportContent = contractFactory
+    ? mkContractImportContent({
+        contract: contract!,
+        contractFactory,
+        contractsPath: paths.contracts,
+      })
+    : ''
+
+  const contractContent = contractFactory
+    ? mkContractContent({
+        contract: contract!,
+        contractFactory,
+        contractConstant,
+        addressConstant,
+        addressType,
+      })
+    : ''
+
   return `
 import { Address } from '${paths.address}'
+${contractImportContent}
 
 ${categoryAddressTypeContent}
+
 ${categoryAddressListContent}
+
 ${guardFnContent}
+
+${contractContent}
 `
 }

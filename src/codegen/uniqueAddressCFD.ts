@@ -3,6 +3,7 @@ import { zx } from '../zodx'
 import { CFDKind, SharedCFD } from './categoryFileDescription'
 import {
   mkCategoryAddressTypeContent,
+  mkContractContent,
   mkContractImportContent,
   mkFileContent,
   mkGuardFnContent,
@@ -44,6 +45,7 @@ export function codegenUniqueAddress({
     addressTypeBrand,
     addressTypeBrandKey,
     addressConstant,
+    contractConstant,
   },
   kind,
   paths,
@@ -70,11 +72,26 @@ export function codegenUniqueAddress({
       })
     : ''
 
+  const contractContent = contractFactory
+    ? mkContractContent({
+        contract: contract!,
+        contractFactory,
+        contractConstant,
+        addressConstant,
+        addressType,
+      })
+    : ''
+
   return `
 import { Address } from '${paths.address}'
 ${contractImportContent}
+
 ${categoryAddressTypeContent}
+
 export const ${addressConstant} = "${address}" as ${addressType}
+
 ${guardFnContent}
+
+${contractContent}
 `
 }

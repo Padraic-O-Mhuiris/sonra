@@ -6,7 +6,12 @@ import {
   CFDKind,
   SharedCFD,
 } from './categoryFileDescription'
-import { mkFileContent, mkGuardFnHeaderContent } from './fileContent'
+import {
+  mkContractContent,
+  mkContractImportContent,
+  mkFileContent,
+  mkGuardFnHeaderContent,
+} from './fileContent'
 import { relativePath } from './paths'
 
 export interface GenericParentCFD extends SharedCFD {
@@ -56,9 +61,21 @@ export const mkGenericParentCFD = ({
 }
 
 export function codegenGenericParent({
-  categoryFileContent: { addressType, addressConstant },
+  categoryFileContent: {
+    addressType,
+    addressConstant,
+    contractConstant,
+    metadataType,
+    infoRecordType,
+    infoRecordConstant,
+    infoListConstant,
+    infoListType,
+  },
   childCategories,
   cfds,
+  contract,
+  contractFactory,
+  paths,
 }: GenericParentCFD & { cfds: CategoryFileDescriptionRecord }): string {
   const childCategoryInfo = childCategories.map((category) => cfds[category]!)
 
@@ -70,14 +87,35 @@ export function codegenGenericParent({
     .map(
       ({
         kind,
-        categoryFileContent: { addressType, addressConstant },
+        categoryFileContent: {
+          addressType,
+          addressConstant,
+          metadataType,
+          infoRecordConstant,
+          infoListConstant,
+          infoConstant,
+        },
         category,
       }) => {
         addressConstant =
           kind === CFDKind.UNIQUE_ADDRESS || kind === CFDKind.METADATA_SINGLE
             ? `${addressConstant}`
             : `${addressConstant}es`
-        return `import { ${addressType}, ${addressConstant}, is${addressType} } from './${category}'`
+
+        const metadataImports =
+          kind === CFDKind.METADATA_MULTI ||
+          kind === CFDKind.METADATA_SINGLE ||
+          kind === CFDKind.GENERIC_PARENT
+            ? `${metadataType}, ${
+                kind === CFDKind.METADATA_SINGLE
+                  ? infoConstant
+                  : infoRecordConstant
+              } ${
+                kind === CFDKind.METADATA_SINGLE ? '' : `,${infoListConstant}`
+              }`
+            : ''
+
+        return `import { ${addressType}, ${addressConstant}, is${addressType}, ${metadataImports} } from './${category}'`
       },
     )
     .join('\n')
@@ -96,13 +134,109 @@ export function codegenGenericParent({
         `is${addressType}(_address)`,
     )
     .join(' || ')
+
+  const contractImportContent = contractFactory
+    ? mkContractImportContent({
+        contract: contract!,
+        contractFactory,
+        contractsPath: paths.contracts,
+      })
+    : ''
+
+  const contractContent = contractFactory
+    ? mkContractContent({
+        contract: contract!,
+        contractFactory,
+        contractConstant,
+        addressConstant,
+        addressType,
+      })
+    : ''
+
+  const metadataCategoryChildInfo = childCategoryInfo.filter(
+    ({ kind }) =>
+      kind === CFDKind.METADATA_MULTI ||
+      kind === CFDKind.METADATA_SINGLE ||
+      kind === CFDKind.GENERIC_PARENT,
+  )
+
+  const metadataTypeUnion = metadataCategoryChildInfo
+    .map(({ categoryFileContent: { metadataType } }) => metadataType)
+    .join(' | ')
+
+  const recordTypeContent = childCategoryInfo.every(
+    ({ kind }) =>
+      kind === CFDKind.METADATA_MULTI ||
+      kind === CFDKind.METADATA_SINGLE ||
+      kind === CFDKind.GENERIC_PARENT,
+  )
+    ? `Record<${addressType}, ${metadataType}>`
+    : `Record<${addressType}, ${metadataType} | undefined>`
+
+  const metadataRecordContent = metadataCategoryChildInfo
+    .map(
+      ({
+        kind,
+        categoryFileContent: {
+          infoRecordConstant,
+          infoConstant,
+          addressConstant,
+        },
+      }) =>
+        kind === CFDKind.METADATA_MULTI || kind === CFDKind.GENERIC_PARENT
+          ? `  ...${infoRecordConstant},`
+          : `  [${addressConstant}]: ${infoConstant},`,
+    )
+    .join('\n')
+
+  const metadataListTypeUnion = metadataCategoryChildInfo
+    .map(({ kind, categoryFileContent: { metadataType, addressType } }) => {
+      if (kind === CFDKind.METADATA_SINGLE) {
+        return `(${metadataType} & { address: ${addressType} })`
+      }
+
+      return metadataType
+    })
+    .join(' | ')
+
+  const metadataListContent = metadataCategoryChildInfo
+    .map(
+      ({
+        kind,
+        categoryFileContent: {
+          infoConstant,
+          infoListConstant,
+          addressConstant,
+        },
+      }) => {
+        if (kind === CFDKind.METADATA_SINGLE) {
+          return `{ ...${infoConstant}, address: ${addressConstant} },`
+        }
+        return `  ...${infoListConstant},`
+      },
+    )
+    .join('\n')
+
   return `
 ${importContent}
+${contractImportContent}
 
 export type ${addressType} = ${addressTypeUnion}
 
 export const ${addressConstant}es: ${addressType}[] = [\n${addressesContent}]
 
 ${mkGuardFnHeaderContent({ addressType })} ${guardFnBodyContent}
+
+${contractContent}
+
+export type ${metadataType} = ${metadataTypeUnion}
+
+export type ${infoRecordType} = ${recordTypeContent}
+
+export const ${infoRecordConstant}: ${infoRecordType} = {\n ${metadataRecordContent} \n}
+
+export type ${infoListType} =  (${metadataListTypeUnion})[]
+
+export const ${infoListConstant}: ${infoListType} = [\n ${metadataListContent} \n]
 `
 }

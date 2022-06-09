@@ -10,6 +10,12 @@ export type CategoryFileContent = {
   addressConstant: string // categoryAddress -> would be appended to in the case of multiple addresses
   metadataType: string
   metadataConstant: string
+  contractConstant: string
+  infoConstant: string
+  infoRecordConstant: string
+  infoListConstant: string
+  infoRecordType: string
+  infoListType: string
 }
 
 const isUpperCase = (s: string) => /^[A-Z]*$/.test(s)
@@ -28,15 +34,31 @@ export const mkAddressConstant = (
     : `_${address.slice(0, 10)}_${mkAddressConstant(category)}`
 export const mkMetadataType = (c: string) =>
   `${capitalize(normalize(c))}Metadata`
-export const mkMetadataConstant = (c: string) => `${c}Metadata`
+export const mkMetadataConstant = (c: string) => `${normalize(c)}Metadata`
+export const mkContractConstant = (c: string) => `${normalize(c)}Contract`
 
-export const mkFileContent = (c: string) => ({
+export const mkInfoConstant = (c: string) => `${normalize(c)}Info`
+export const mkInfoRecordConstant = (c: string) => `${normalize(c)}InfoRecord`
+export const mkInfoListConstant = (c: string) => `${normalize(c)}InfoList`
+
+export const mkInfoRecordType = (c: string) =>
+  `${capitalize(normalize(c))}InfoRecord`
+export const mkInfoListType = (c: string) =>
+  `${capitalize(normalize(c))}InfoList`
+
+export const mkFileContent = (c: string): CategoryFileContent => ({
   addressTypeBrand: mkAddressTypeBrand(c),
   addressTypeBrandKey: mkAddressTypeBrandKey(c),
   addressType: mkAddressType(c),
   addressConstant: mkAddressConstant(c),
   metadataType: mkMetadataType(c),
   metadataConstant: mkMetadataConstant(c),
+  contractConstant: mkContractConstant(c),
+  infoConstant: mkInfoConstant(c),
+  infoRecordConstant: mkInfoRecordConstant(c),
+  infoListConstant: mkInfoListConstant(c),
+  infoRecordType: mkInfoRecordType(c),
+  infoListType: mkInfoListType(c),
 })
 
 export const mkCategoryAddressTypeContent = ({
@@ -116,9 +138,13 @@ export const mkCategoryMetadataContent = ({
   kind,
   category,
   addressType,
-  metadataConstant,
   metadataType,
   serializedEntries,
+  infoConstant,
+  infoRecordConstant,
+  infoListConstant,
+  infoRecordType,
+  infoListType,
 }: {
   kind: CFDKind.METADATA_SINGLE | CFDKind.METADATA_MULTI
   category: string
@@ -126,14 +152,19 @@ export const mkCategoryMetadataContent = ({
   metadataConstant: string
   metadataType: string
   serializedEntries: zx.AddressRecord<string>
+  infoConstant: string
+  infoRecordConstant: string
+  infoListConstant: string
+  infoRecordType: string
+  infoListType: string
 }) => {
   if (kind === CFDKind.METADATA_SINGLE) {
     const entry = Object.values(serializedEntries)[0]
 
-    return `export const ${metadataConstant}: ${metadataType} = ${entry}`
+    return `export const ${infoConstant}: ${metadataType} = ${entry}`
   }
 
-  const entries = Object.entries(serializedEntries)
+  const recordEntries = Object.entries(serializedEntries)
     .map(([address, entry]) => {
       const addressConstantKey = mkAddressConstant(
         category,
@@ -143,8 +174,24 @@ export const mkCategoryMetadataContent = ({
     })
     .join(',\n')
 
-  return `export type ${metadataType}Record = Record<${addressType}, ${metadataType}>
-export const ${metadataConstant}Record: ${metadataType}Record = {\n ${entries} \n}
+  const listEntries = Object.keys(serializedEntries)
+    .map((address) => {
+      const addressConstantKey = mkAddressConstant(
+        category,
+        address as zx.Address,
+      )
+      return `{ ...${infoRecordConstant}[${addressConstantKey}]!, address: ${addressConstantKey} }`
+    })
+    .join(',\n')
+
+  return `
+export type ${infoRecordType} =  Record<${addressType}, ${metadataType}>
+
+export const ${infoRecordConstant}: ${infoRecordType} = {\n ${recordEntries} \n}
+
+export type ${infoListType} =  (${metadataType} & { address: ${addressType} })[]
+
+export const ${infoListConstant}: ${infoListType} = [\n ${listEntries} \n]
 `
 }
 
@@ -179,7 +226,24 @@ export const mkContractImportContent = ({
   contract: string
   contractFactory: string
   contractsPath: string
-}) => `import { ${contract}, ${contractFactory} } from "${contractsPath}"`
+}) => `import type { Signer } from "ethers";
+import type { Provider } from "@ethersproject/providers"
+import { ${contract}, ${contractFactory} } from "${contractsPath}"`
+
+export const mkContractContent = ({
+  contract,
+  contractFactory,
+  contractConstant,
+  addressConstant,
+  addressType,
+}: {
+  contract: string
+  contractFactory: string
+  contractConstant: string
+  addressConstant: string
+  addressType: string
+}) =>
+  `export const ${contractConstant} = (_${addressConstant}: ${addressType}, _signerOrProvider: Signer | Provider): ${contract} => ${contractFactory}.connect(_${addressConstant}, _signerOrProvider)`
 
 export const ADDRESS_FILE_CONTENT = `
 import { ethers } from 'ethers'
