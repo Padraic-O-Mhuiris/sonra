@@ -1,18 +1,14 @@
 import { ContractFactory } from 'ethers'
 import fs from 'fs'
 import { SonraContracts, SonraSchema } from '../types'
-import { capitalize, logger } from '../utils'
+import { capitalize } from '../utils'
 
 function validateTypechainPathExists(typechainPath: string): void {
-  logger.info(`Validating typechain path: ${typechainPath}`)
-
   if (!fs.existsSync(typechainPath)) {
     throw new Error(
       `Could not find typechain directory at path: ${typechainPath}`,
     )
   }
-
-  logger.info(`Typechain path: ${typechainPath} exists`)
 }
 
 const normalizeContractName = (contractName: string): string => {
@@ -41,13 +37,11 @@ export function validateTypechain(
   contracts?: SonraContracts<SonraSchema>,
 ): CategoryContractInfo {
   if (!contracts || !Object.keys(contracts).length) {
-    logger.info('No contract factories specified')
     return {}
   }
 
   validateTypechainPathExists(typechainPath)
 
-  logger.info('Importing typechain index file containing contract factories')
   let contractFactories
   try {
     const { factories, ...rest } = require(typechainPath) as Record<
@@ -62,11 +56,8 @@ export function validateTypechain(
   }
 
   const contractFactoriesKeys = Object.keys(contractFactories)
-  logger.info(`Found ${contractFactoriesKeys.length} contract factories`)
 
   const categoryContractInfo: CategoryContractInfo = {}
-
-  logger.info('Validating all categories can be paired with a category')
 
   for (const category of Object.keys(contracts)) {
     const contract = `${normalizeContractName(contracts[category]!)}`
@@ -86,6 +77,5 @@ export function validateTypechain(
     categoryContractInfo[category] = { contract, contractFactory }
   }
 
-  logger.info(categoryContractInfo, 'Paired contract factories:')
   return categoryContractInfo
 }

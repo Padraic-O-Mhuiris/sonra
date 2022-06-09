@@ -1,4 +1,3 @@
-import { logger } from '../utils'
 import { zx } from '../zodx'
 import { CFDKind, SharedCFD } from './categoryFileDescription'
 import {
@@ -28,8 +27,6 @@ export const mkUniqueAddressCFD = ({
   categoryDir,
   outDir,
 }: IMkUniqueAddressCFD): UniqueAddressCFD => {
-  logger.info(`Category kind for '${category}': ${CFDKind.UNIQUE_ADDRESS}`)
-
   return {
     kind: CFDKind.UNIQUE_ADDRESS,
     address,

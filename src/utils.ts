@@ -1,10 +1,4 @@
 import path from 'path'
-import pino from 'pino'
-import { zx } from './zodx'
-
-export const logger = pino({
-  transport: { target: 'pino-pretty', options: { colorize: true } },
-})
 
 export function capitalize(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1)

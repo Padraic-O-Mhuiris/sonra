@@ -1,4 +1,3 @@
-import { logger } from '../utils'
 import { zx } from '../zodx'
 import { CFDKind, SharedCFD } from './categoryFileDescription'
 import {
@@ -29,8 +28,6 @@ export const mkAddressListCFD = ({
   categoryDir,
   outDir,
 }: IMkAddressListCFD): AddressListCFD => {
-  logger.info(`Category kind for '${category}': ${CFDKind.ADDRESS_LIST}`)
-
   return {
     kind: CFDKind.ADDRESS_LIST,
     addresses,

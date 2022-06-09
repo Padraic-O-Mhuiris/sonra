@@ -1,7 +1,6 @@
 import { printNode, zodToTs } from 'zod-to-ts'
 import { CategoryDirectoryPaths } from '../dir'
 import { SonraCategorySchema } from '../types'
-import { logger } from '../utils'
 import { zx } from '../zodx'
 import {
   CategoryKindAndData,
@@ -50,8 +49,6 @@ export const mkMetadataMultiAddressCFD = ({
   categoryDirectoryPaths,
   outDir,
 }: IMkMetadataMultiAddressCFD): MetadataMultiAddressCFD => {
-  logger.info(`Category kind for '${category}': ${CFDKind.METADATA_SINGLE}`)
-
   const { serializedEntries, importDefRecord, importBigNumber, addresses } =
     serialize(category, entry, categoryKindAndData, categoryDirectoryPaths)
 

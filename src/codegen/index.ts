@@ -2,7 +2,6 @@ import fs from 'fs'
 import path from 'path'
 import { CategoryDirectoryPaths } from '../dir'
 import { SonraDataModel, SonraSchema } from '../types'
-import { logger } from '../utils'
 import { CategoryHierarchy } from '../validations/validateCategories'
 import { CategoryContractInfo } from '../validations/validateTypechain'
 import { codegenAddressList } from './addressListCFD'
@@ -12,6 +11,7 @@ import { format } from './format'
 import { codegenGenericParent } from './genericParentCFD'
 import { codegenMetadataMultiAddress } from './metadataMultiAddressCFD'
 import { codegenMetadataSingleAddress } from './metadataSingleAddressCFD'
+import { relativePath } from './paths'
 import { codegenUniqueAddress } from './uniqueAddressCFD'
 
 export async function codegen<T extends SonraSchema>(
@@ -33,13 +33,12 @@ export async function codegen<T extends SonraSchema>(
     outDir,
   )
 
-  logger.info(cfds, 'Category Descriptions:')
-
   await fs.promises.writeFile(
     path.join(outDir, 'address.ts'),
     format(ADDRESS_FILE_CONTENT),
   )
 
+  let indexFile: string = 'export * from "./address"\n'
   for (const fd of Object.values(cfds)) {
     let file: string = ''
     switch (fd.kind) {
@@ -59,7 +58,20 @@ export async function codegen<T extends SonraSchema>(
         file = codegenGenericParent({ ...fd, cfds })
     }
 
+    let indexPathToCategoryFile = relativePath(
+      `${outDir}/index.ts`,
+      fd.paths.file,
+    )
+
+    indexPathToCategoryFile = indexPathToCategoryFile.endsWith('index')
+      ? indexPathToCategoryFile.slice(0, -'index'.length)
+      : indexPathToCategoryFile
+
+    indexFile += `export * from "${indexPathToCategoryFile}"\n`
     file = format(file)
     await fs.promises.writeFile(fd.paths.file, file)
   }
+
+  indexFile = format(indexFile)
+  await fs.promises.writeFile(`${outDir}/index.ts`, indexFile)
 }

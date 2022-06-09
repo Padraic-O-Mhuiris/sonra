@@ -29,7 +29,7 @@ export const mkCategoryPaths = ({
   category,
 }: IMkCategoryPaths): CategoryPaths => {
   const file = path.join(categoryDir, `${category}.ts`)
-  const root = relativePath(file, outDir)
+  const root = relativePath(`${outDir}/index.ts`, file)
   const address = relativePath(file, path.join(outDir, 'address.ts'))
   const contracts = relativePath(file, path.join(outDir, 'contracts'))
   return {

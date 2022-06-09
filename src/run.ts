@@ -2,7 +2,7 @@ import { codegen } from './codegen'
 import { AppConfig } from './config'
 import { fetchDataModel } from './dataModel'
 import { createCategoryDirs } from './dir'
-import { logger, normalizeAbsPath } from './utils'
+import { normalizeAbsPath } from './utils'
 import { validateCategories } from './validations/validateCategories'
 import { validateTypechain } from './validations/validateTypechain'
 
@@ -23,13 +23,10 @@ export async function run(appConfig: AppConfig) {
     normalizeAppConfig(appConfig)
 
   if (dryRun) {
-    logger.info('Dry run, fetching and validating data model only')
     validateCategories(schema)
     await fetchDataModel({ schema, fetch })
     return
   }
-
-  logger.info({ typechainPath, contracts }, 'Sonra started!')
 
   const [categories, categoryHierarchy] = validateCategories(schema)
   const categoryContractInfo = validateTypechain(typechainPath, contracts)
@@ -55,6 +52,4 @@ export async function run(appConfig: AppConfig) {
 
   // generateCategoryDescriptions
   // generateCategoryFiles
-
-  logger.info('Sonra finished!')
 }

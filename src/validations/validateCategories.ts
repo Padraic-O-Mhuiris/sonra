@@ -1,6 +1,5 @@
 import { isCategorySchemaValue } from '../schema'
 import { SonraSchema } from '../types'
-import { logger } from '../utils'
 
 const RESERVED_WORDS = [
   'address',
@@ -53,11 +52,7 @@ export function buildCategoryHierarchy(schema: SonraSchema) {
 export function validateCategories(
   schema: SonraSchema,
 ): [string[], CategoryHierarchy] {
-  logger.info(`Validating categories in schema:`)
-
   const categoryHierarchy = buildCategoryHierarchy(schema)
-
-  logger.info(categoryHierarchy, `Schema nested paths:`)
 
   const categories = Object.keys(categoryHierarchy)
   if (
@@ -65,8 +60,6 @@ export function validateCategories(
   ) {
     throw new Error('Specified a category which is invalid')
   }
-
-  logger.info('Categories validated')
 
   return [categories, categoryHierarchy]
 }

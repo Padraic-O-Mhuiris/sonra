@@ -4,7 +4,7 @@ import { AppConfig, SonraConfig, sonraConfigSchema } from './config'
 import { run } from './run'
 import { setupTsEnv } from './setupTsEnv'
 import { SonraSchema } from './types'
-import { isTypescriptFile, logger, normalizeAbsPath } from './utils'
+import { isTypescriptFile, normalizeAbsPath } from './utils'
 import path from 'path'
 
 const importSonraConfig = (configPath: string): SonraConfig<SonraSchema> => {
@@ -12,7 +12,6 @@ const importSonraConfig = (configPath: string): SonraConfig<SonraSchema> => {
   try {
     config = require(configPath).default
   } catch (e) {
-    logger.error(`Could not resolve sonra config from path: ${configPath}`)
     throw e
   }
   const sonraConfig = sonraConfigSchema.safeParse(config)
