@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { CategoryDirectoryPaths } from '../dir'
 import { zx } from '../zodx'
 import { CategoryKindAndData, CFDKind } from './categoryFileDescription'
-import { mkAddressConstant } from './fileContent'
+import { mkAddressConstant, normalize } from './fileContent'
 import { relativePath } from './paths'
 
 // The AddressCategoryImportDef is used for building the relative imports between files
@@ -97,11 +97,11 @@ export function serialize(
                     path: relativePath(
                       path.join(
                         categoryDirectoryPaths[category]!,
-                        `${category}.ts`,
+                        `${normalize(category)}.ts`,
                       ),
                       path.join(
                         categoryDirectoryPaths[importCategory]!,
-                        `${importCategory}.ts`,
+                        `${normalize(importCategory)}.ts`,
                       ),
                     ),
                     addressConstants: [addressConstant],

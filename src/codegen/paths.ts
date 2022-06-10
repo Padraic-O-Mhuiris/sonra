@@ -1,4 +1,5 @@
 import path from 'path'
+import { normalize } from './fileContent'
 
 export interface CategoryPaths {
   file: string // full path to file
@@ -28,6 +29,7 @@ export const mkCategoryPaths = ({
   categoryDir,
   category,
 }: IMkCategoryPaths): CategoryPaths => {
+  category = normalize(category)
   const file = path.join(categoryDir, `${category}.ts`)
   const root = relativePath(`${outDir}/index.ts`, file)
   const address = relativePath(file, path.join(outDir, 'address.ts'))

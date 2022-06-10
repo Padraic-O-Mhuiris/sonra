@@ -19,7 +19,7 @@ export type CategoryFileContent = {
 }
 
 const isUpperCase = (s: string) => /^[A-Z]*$/.test(s)
-const normalize = (s: string) => (isUpperCase(s) ? s.toLowerCase() : s)
+export const normalize = (s: string) => (isUpperCase(s) ? s.toLowerCase() : s)
 
 export const mkAddressTypeBrand = (c: string) =>
   `_${capitalize(normalize(c))}Address_`

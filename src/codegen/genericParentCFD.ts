@@ -11,6 +11,7 @@ import {
   mkContractImportContent,
   mkFileContent,
   mkGuardFnHeaderContent,
+  normalize,
 } from './fileContent'
 import { relativePath } from './paths'
 
@@ -115,7 +116,9 @@ export function codegenGenericParent({
               }`
             : ''
 
-        return `import { ${addressType}, ${addressConstant}, is${addressType}, ${metadataImports} } from './${category}'`
+        return `import { ${addressType}, ${addressConstant}, is${addressType}, ${metadataImports} } from './${normalize(
+          category,
+        )}'`
       },
     )
     .join('\n')
