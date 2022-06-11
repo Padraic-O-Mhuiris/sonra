@@ -189,7 +189,7 @@ export type ${infoRecordType} =  Record<${addressType}, ${metadataType}>
 
 export const ${infoRecordConstant}: ${infoRecordType} = {\n ${recordEntries} \n}
 
-export type ${infoListType} =  (${metadataType} & { address: ${addressType} })[]
+export type ${infoListType} =  WithAddress<${metadataType}, ${addressType}>[]
 
 export const ${infoListConstant}: ${infoListType} = [\n ${listEntries} \n]
 `
@@ -255,4 +255,6 @@ export type _Address_ = {
 export type Address = string & _Address_
 
 export const isAddress = (address: string): address is Address => ethers.utils.isAddress(address)
+
+export type WithAddress<K extends Record<string, any>,T extends Address> = K & { address: T }
 `

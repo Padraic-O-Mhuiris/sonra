@@ -193,13 +193,10 @@ export function codegenGenericParent({
     .join('\n')
 
   const metadataListTypeUnion = metadataCategoryChildInfo
-    .map(({ kind, categoryFileContent: { metadataType, addressType } }) => {
-      if (kind === CFDKind.METADATA_SINGLE) {
-        return `(${metadataType} & { address: ${addressType} })`
-      }
-
-      return metadataType
-    })
+    .map(
+      ({ categoryFileContent: { metadataType, addressType } }) =>
+        `WithAddress<${metadataType}, ${addressType}>`,
+    )
     .join(' | ')
 
   const metadataListContent = metadataCategoryChildInfo
@@ -220,7 +217,7 @@ export function codegenGenericParent({
     )
     .join('\n')
 
-  return `
+  return `import { WithAddress } from '${paths.address}'
 ${importContent}
 ${contractImportContent}
 

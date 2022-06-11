@@ -148,7 +148,7 @@ export function codegenMetadataMultiAddress({
     : ''
 
   return `
-import { Address } from '${paths.address}'
+import { Address, WithAddress } from '${paths.address}'
 ${addressImportContent}
 ${contractImportContent}
 
